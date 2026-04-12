@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ADG Media Player</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#0a0a0f;
+  --bg1:#12121a;
+  --bg2:#1a1a26;
+  --bg3:#22223a;
+  --bg4:#2c2c46;
+  --accent:#6c63ff;
+  --accent2:#a78bfa;
+  --accent3:#38bdf8;
+  --text1:#f0f0ff;
+  --text2:#a0a0c0;
+  --text3:#606080;
+  --border:#ffffff14;
+  --border2:#ffffff22;
+  --red:#f87171;
+  --blue:#60a5fa;
+  --green:#34d399;
+  --yellow:#fbbf24;
+  --pink:#f472b6;
+}
+body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;overflow-x:hidden}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
+
+header{
+  background:var(--bg1);
+  border-bottom:1px solid var(--border);
+  padding:14px 20px;
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(12px);
+}
+.header-inner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent3));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0}
+.logo-text{font-size:18px;font-weight:700;letter-spacing:-0.3px;color:var(--text1)}
+.logo-text span{color:var(--accent2)}
+.platform-pills{display:flex;gap:6px;flex-wrap:wrap}
+.plt-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.plt-btn:hover,.plt-btn.active-plat{background:var(--accent);border-color:var(--accent);color:#fff}
+
+main{display:grid;grid-template-columns:1fr 300px;gap:16px;padding:16px;max-width:1400px;margin:0 auto}
+@media(max-width:1024px){main{grid-template-columns:1fr}}
+
+.player-card{background:var(--bg1);border-radius:16px;border:1px solid var(--border);overflow:hidden;margin-bottom:16px}
+.player-wrap{
+  position:relative;width:100%;background:#000;
+  aspect-ratio:16/9;
+}
+.player-wrap.portrait{aspect-ratio:9/16;max-width:360px;margin:0 auto}
+.player-wrap.square{aspect-ratio:1/1}
+#platformPlayer,#html5Player{width:100%;height:100%;border:none;display:block}
+#html5Player{object-fit:contain}
+
+.player-placeholder{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:radial-gradient(ellipse at center,var(--bg3) 0%,var(--bg0) 70%);
+}
+.placeholder-icon{width:64px;height:64px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--accent2)}
+.placeholder-text{font-size:14px;color:var(--text3)}
+
+.ctrl-bar{
+  padding:12px 16px;background:var(--bg2);border-top:1px solid var(--border);
+}
+.ctrl-row1{display:flex;align-items:center;gap:0;margin-bottom:10px}
+.seek-bar{flex:1;height:4px;background:var(--bg4);border-radius:4px;cursor:pointer;position:relative}
+.seek-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:4px;pointer-events:none;transition:width .1s}
+.seek-bar:hover .seek-dot{opacity:1}
+.seek-dot{width:12px;height:12px;background:#fff;border-radius:50%;position:absolute;top:50%;transform:translateY(-50%);margin-left:-6px;opacity:0;transition:opacity .2s;pointer-events:none}
+.ctrl-row2{display:flex;align-items:center;justify-content:space-between}
+.ctrl-left,.ctrl-right{display:flex;align-items:center;gap:4px}
+.ctrl-btn{width:34px;height:34px;border-radius:8px;border:none;background:transparent;color:var(--text2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.ctrl-btn:hover{background:var(--bg4);color:var(--text1)}
+.ctrl-btn.play-btn{width:40px;height:40px;border-radius:10px;background:var(--accent);color:#fff;font-size:16px}
+.ctrl-btn.play-btn:hover{background:var(--accent2)}
+.time-txt{font-size:12px;color:var(--text3);padding:0 8px;white-space:nowrap}
+.speed-badge{padding:3px 8px;border-radius:6px;background:var(--bg4);color:var(--text2);font-size:11px;border:none;cursor:pointer;transition:all .2s}
+.speed-badge:hover{background:var(--accent);color:#fff}
+.vol-wrap{display:flex;align-items:center;gap:6px}
+.vol-slider{width:64px;accent-color:var(--accent);height:4px}
+
+.info-bar{padding:14px 16px;background:var(--bg1)}
+.video-title{font-size:16px;font-weight:600;color:var(--text1);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.video-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.meta-chip{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3)}
+.plat-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.3px}
+.b-yt{background:#ff000022;color:#f87171}
+.b-vi{background:#1ab7ea22;color:#67d9f8}
+.b-dm{background:#0066dc22;color:#60a5fa}
+.b-fb{background:#1877f222;color:#60a5fa}
+.b-ig{background:#c32aa322;color:#f472b6}
+.b-h5{background:#10b98122;color:#34d399}
+.b-rl{background:#c32aa322;color:#f472b6}
+
+.input-card{background:var(--bg1);border-radius:16px;border:1px solid var(--border);overflow:hidden;margin-bottom:16px}
+.tabs-row{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);padding:0 4px}
+.tabs-row::-webkit-scrollbar{height:0}
+.tab-btn{padding:12px 14px;background:transparent;border:none;color:var(--text3);font-size:12px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:6px}
+.tab-btn:hover{color:var(--text1)}
+.tab-btn.active{color:var(--accent2);border-bottom-color:var(--accent2)}
+.tab-content{padding:16px;display:none}
+.tab-content.active{display:block}
+.inp-field{width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;color:var(--text1);font-size:14px;outline:none;transition:border .2s}
+.inp-field:focus{border-color:var(--accent)}
+.inp-field::placeholder{color:var(--text3)}
+.btn-row{display:flex;gap:8px;margin-top:10px}
+.load-btn{flex:1;padding:10px 16px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.add-btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:14px;transition:all .2s}
+.add-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-yt{background:#ff0000;color:#fff} .btn-yt:hover{background:#cc0000}
+.btn-vi{background:#1ab7ea;color:#fff} .btn-vi:hover{background:#14a0ce}
+.btn-dm{background:#0066dc;color:#fff} .btn-dm:hover{background:#0055b8}
+.btn-fb{background:#1877f2;color:#fff} .btn-fb:hover{background:#1360cc}
+.btn-ig{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff}
+.btn-url{background:var(--green);color:#000} .btn-url:hover{background:#22c77a}
+.btn-local{background:var(--yellow);color:#000} .btn-local:hover{background:#f59e0b}
+.info-tip{font-size:11px;color:var(--text3);margin-top:6px;display:flex;align-items:center;gap:4px}
+
+.sidebar-card{background:var(--bg1);border-radius:16px;border:1px solid var(--border);overflow:hidden;position:sticky;top:76px}
+.sidebar-hdr{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sidebar-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.count-pill{background:var(--bg3);color:var(--text3);font-size:11px;padding:2px 8px;border-radius:10px}
+.sidebar-actions{display:flex;gap:2px}
+.sa-btn{width:30px;height:30px;border-radius:8px;border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:13px;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.sa-btn:hover{background:var(--bg3);color:var(--text1)}
+.playlist-list{overflow-y:auto;max-height:380px}
+.pl-item{padding:10px 14px;cursor:pointer;border-left:3px solid transparent;transition:all .2s;display:flex;align-items:center;gap:10px}
+.pl-item:hover{background:var(--bg2)}
+.pl-item.active{background:var(--bg3);border-left-color:var(--accent2)}
+.pl-icon{width:32px;height:32px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.pl-info{flex:1;min-width:0}
+.pl-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-type{font-size:11px;color:var(--text3);margin-top:2px}
+.pl-empty{padding:32px 16px;text-align:center;color:var(--text3)}
+.pl-empty-icon{font-size:28px;margin-bottom:8px;opacity:.4}
+.pl-empty-txt{font-size:13px}
+
+.mob-fab{display:none;position:fixed;bottom:20px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:20px;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(108,99,255,.4);z-index:90}
+.mob-fab .badge-count{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--red);font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.drawer{position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top-left-radius:20px;border-top-right-radius:20px;border-top:1px solid var(--border);transform:translateY(100%);transition:transform .3s ease;z-index:100;max-height:70vh;display:flex;flex-direction:column}
+.drawer.open{transform:translateY(0)}
+.drawer-handle{width:40px;height:4px;background:var(--bg4);border-radius:4px;margin:12px auto 0}
+.drawer-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.drawer-content{flex:1;overflow-y:auto}
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;display:none}
+.drawer-overlay.visible{display:block}
+
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--bg2);border:1px solid var(--border2);color:var(--text1);padding:10px 16px;border-radius:12px;font-size:13px;display:flex;align-items:center;gap:8px;animation:toastIn .3s ease;pointer-events:none;max-width:280px}
+@keyframes toastIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+.loading-overlay{position:absolute;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:20}
+.loading-overlay.show{display:flex}
+.spinner{width:36px;height:36px;border:3px solid var(--bg4);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-size:13px;color:var(--text2)}
+
+.fb-notice{background:var(--bg3);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border)}
+.fb-notice-txt{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px}
+.fb-open-btn{padding:5px 12px;border-radius:20px;background:var(--blue);color:#fff;font-size:11px;font-weight:600;text-decoration:none;white-space:nowrap}
+
+@media(max-width:1024px){
+  .sidebar-card{display:none}
+  .mob-fab{display:flex}
+}
+@media(max-width:600px){
+  main{padding:10px}
+  .platform-pills{display:none}
+  .logo-text{font-size:16px}
+}
+
+input[type=file]{color:var(--text2);font-size:13px}
+input[type=file]::file-selector-button{padding:6px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text1);cursor:pointer;font-size:12px;margin-right:10px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#">
+      <div class="logo-icon"><i class="fas fa-play"></i></div>
+      <div class="logo-text">ADG <span>Media Player</span></div>
+    </a>
+    <div class="platform-pills">
+      <button class="plt-btn" data-p="youtube"><i class="fab fa-youtube"></i> YouTube</button>
+      <button class="plt-btn" data-p="vimeo"><i class="fab fa-vimeo"></i> Vimeo</button>
+      <button class="plt-btn" data-p="dailymotion"><i class="fas fa-play"></i> Dailymotion</button>
+      <button class="plt-btn" data-p="facebook"><i class="fab fa-facebook"></i> Facebook</button>
+      <button class="plt-btn" data-p="instagram"><i class="fab fa-instagram"></i> Instagram</button>
+      <button class="plt-btn" data-p="url"><i class="fas fa-link"></i> URL</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div>
+    <div class="player-card">
+      <div class="player-wrap" id="playerWrap">
+        <div class="player-placeholder" id="playerPlaceholder">
+          <div class="placeholder-icon"><i class="fas fa-photo-film"></i></div>
+          <div class="placeholder-text">No video loaded</div>
+        </div>
+        <iframe id="platformPlayer" style="display:none;position:absolute;inset:0;width:100%;height:100%;border:none" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" allowfullscreen></iframe>
+        <div id="fbContainer" style="display:none;position:absolute;inset:0;flex-direction:column">
+          <div class="fb-notice">
+            <div class="fb-notice-txt"><i class="fab fa-facebook" style="color:var(--blue)"></i> Facebook Video — may require login to play fully</div>
+            <a href="#" id="fbDirectLink" target="_blank" class="fb-open-btn"><i class="fas fa-external-link-alt"></i> Open</a>
+          </div>
+          <div id="fbIframeWrap" style="flex:1;overflow:hidden"></div>
+        </div>
+        <video id="html5Player" style="display:none;position:absolute;inset:0;width:100%;height:100%;background:#000" playsinline></video>
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="spinner"></div>
+          <div class="loading-txt" id="loadingTxt">Loading…</div>
+        </div>
+      </div>
+
+      <div class="ctrl-bar" id="ctrlBar" style="display:none">
+        <div class="ctrl-row1">
+          <div class="seek-bar" id="seekBar">
+            <div class="seek-fill" id="seekFill" style="width:0%"></div>
+            <div class="seek-dot" id="seekDot" style="left:0%"></div>
+          </div>
+        </div>
+        <div class="ctrl-row2">
+          <div class="ctrl-left">
+            <button class="ctrl-btn" id="prevBtn" title="Previous"><i class="fas fa-backward-step"></i></button>
+            <button class="ctrl-btn play-btn" id="playBtn"><i class="fas fa-play"></i></button>
+            <button class="ctrl-btn" id="nextBtn" title="Next"><i class="fas fa-forward-step"></i></button>
+            <div class="vol-wrap">
+              <button class="ctrl-btn" id="volBtn"><i class="fas fa-volume-high"></i></button>
+              <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="100">
+            </div>
+            <div class="time-txt" id="timeTxt">0:00 / 0:00</div>
+          </div>
+          <div class="ctrl-right">
+            <button class="speed-badge" id="speedBtn">1×</button>
+            <button class="ctrl-btn" id="fsBtn" title="Fullscreen"><i class="fas fa-expand"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-bar">
+        <div class="video-title" id="videoTitle">Load a video to get started</div>
+        <div class="video-meta">
+          <div class="meta-chip" id="metaChannel" style="display:none"><i class="fas fa-circle-user"></i> <span id="metaChannelTxt">—</span></div>
+          <div class="meta-chip" id="metaDur" style="display:none"><i class="fas fa-clock"></i> <span id="metaDurTxt">—</span></div>
+          <div id="platBadge" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-card">
+      <div class="tabs-row" id="tabsRow">
+        <button class="tab-btn active" data-tab="youtube"><i class="fab fa-youtube" style="color:var(--red)"></i> YouTube</button>
+        <button class="tab-btn" data-tab="vimeo"><i class="fab fa-vimeo" style="color:var(--accent3)"></i> Vimeo</button>
+        <button class="tab-btn" data-tab="dailymotion"><i class="fas fa-play" style="color:var(--blue)"></i> Dailymotion</button>
+        <button class="tab-btn" data-tab="facebook"><i class="fab fa-facebook" style="color:var(--blue)"></i> Facebook</button>
+        <button class="tab-btn" data-tab="instagram"><i class="fab fa-instagram" style="color:var(--pink)"></i> Instagram</button>
+        <button class="tab-btn" data-tab="url"><i class="fas fa-link" style="color:var(--green)"></i> URL</button>
+        <button class="tab-btn" data-tab="local"><i class="fas fa-folder-open" style="color:var(--yellow)"></i> Local</button>
+      </div>
+
+      <div class="tab-content active" id="tab-youtube">
+        <input class="inp-field" id="ytInput" placeholder="Paste YouTube URL or video ID…">
+        <div class="btn-row">
+          <button class="load-btn btn-yt" id="ytLoad"><i class="fab fa-youtube"></i> Load</button>
+          <button class="add-btn" id="ytAdd" title="Add to playlist"><i class="fas fa-plus"></i></button>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-vimeo">
+        <input class="inp-field" id="viInput" placeholder="Paste Vimeo URL or video ID…">
+        <div class="btn-row">
+          <button class="load-btn btn-vi" id="viLoad"><i class="fab fa-vimeo"></i> Load</button>
+          <button class="add-btn" id="viAdd"><i class="fas fa-plus"></i></button>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-dailymotion">
+        <input class="inp-field" id="dmInput" placeholder="Paste Dailymotion URL or video ID…">
+        <div class="btn-row">
+          <button class="load-btn btn-dm" id="dmLoad"><i class="fas fa-play"></i> Load</button>
+          <button class="add-btn" id="dmAdd"><i class="fas fa-plus"></i></button>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-facebook">
+        <input class="inp-field" id="fbInput" placeholder="Paste Facebook video or Reel URL…">
+        <div class="info-tip"><i class="fas fa-circle-info"></i> If video is cut, click "Open" in the player to view on Facebook</div>
+        <div class="btn-row">
+          <button class="load-btn btn-fb" id="fbLoad"><i class="fab fa-facebook"></i> Load</button>
+          <button class="add-btn" id="fbAdd"><i class="fas fa-plus"></i></button>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-instagram">
+        <input class="inp-field" id="igInput" placeholder="Paste Instagram post or reel URL…">
+        <div class="info-tip"><i class="fas fa-circle-info"></i> Instagram embeds may require login</div>
+        <div class="btn-row">
+          <button class="load-btn btn-ig" id="igLoad"><i class="fab fa-instagram"></i> Load</button>
+          <button class="add-btn" id="igAdd"><i class="fas fa-plus"></i></button>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-url">
+        <input class="inp-field" id="urlInput" placeholder="Direct video URL (MP4, WebM, HLS…)">
+        <div class="btn-row">
+          <button class="load-btn btn-url" id="urlLoad"><i class="fas fa-link"></i> Load</button>
+          <button class="add-btn" id="urlAdd"><i class="fas fa-plus"></i></button>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-local">
+        <input type="file" class="inp-field" id="localInput" accept="video/*,audio/*" multiple>
+        <div class="btn-row">
+          <button class="load-btn btn-local" id="localLoad" disabled><i class="fas fa-circle-play"></i> Play</button>
+          <button class="add-btn" id="localAdd" disabled><i class="fas fa-plus"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sidebar-card">
+      <div class="sidebar-hdr">
+        <div class="sidebar-title">
+          <i class="fas fa-list-music" style="color:var(--accent2)"></i>
+          Playlist
+          <span class="count-pill" id="countPill">0</span>
+        </div>
+        <div class="sidebar-actions">
+          <button class="sa-btn" id="shuffleBtn" title="Shuffle"><i class="fas fa-shuffle"></i></button>
+          <button class="sa-btn" id="repeatBtn" title="Repeat"><i class="fas fa-repeat"></i></button>
+          <button class="sa-btn" id="clearBtn" title="Clear" style="color:var(--text3)"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+      <div class="playlist-list" id="desktopList"></div>
+    </div>
+  </div>
+</main>
+
+<button class="mob-fab" id="mobFab">
+  <i class="fas fa-list"></i>
+  <div class="badge-count" id="mobBadge" style="display:none">0</div>
+</button>
+
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-handle"></div>
+  <div class="drawer-hdr">
+    <div class="sidebar-title"><i class="fas fa-list-music" style="color:var(--accent2)"></i> Playlist <span class="count-pill" id="mobCountPill">0</span></div>
+    <div class="sidebar-actions">
+      <button class="sa-btn" id="mobShuffleBtn"><i class="fas fa-shuffle"></i></button>
+      <button class="sa-btn" id="mobRepeatBtn"><i class="fas fa-repeat"></i></button>
+      <button class="sa-btn" id="mobClearBtn"><i class="fas fa-trash"></i></button>
+      <button class="sa-btn" id="closeDrawerBtn"><i class="fas fa-xmark"></i></button>
+    </div>
+  </div>
+  <div class="drawer-content"><div class="playlist-list" id="mobileList"></div></div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const state = {
+  type:null, id:null, playing:false, volume:100,
+  speed:1, duration:0, currentTime:0
+};
+let playlist=[], currentIdx=-1, repeatMode='none';
+const platIcon={youtube:'fab fa-youtube',vimeo:'fab fa-vimeo',dailymotion:'fas fa-play',facebook:'fab fa-facebook',reel:'fab fa-facebook',html5:'fas fa-video',instagram:'fab fa-instagram'};
+const platColor={youtube:'var(--red)',vimeo:'var(--accent3)',dailymotion:'var(--blue)',facebook:'var(--blue)',reel:'var(--pink)',html5:'var(--green)',instagram:'var(--pink)'};
+const platBadgeClass={youtube:'b-yt',vimeo:'b-vi',dailymotion:'b-dm',facebook:'b-fb',reel:'b-rl',html5:'b-h5',instagram:'b-ig'};
+const platLabel={youtube:'YouTube',vimeo:'Vimeo',dailymotion:'Dailymotion',facebook:'Facebook',reel:'Reel',html5:'Direct',instagram:'Instagram'};
+
+function toast(msg,type='info'){
+  const el=document.createElement('div');
+  el.className='toast';
+  const colors={success:'var(--green)',error:'var(--red)',warning:'var(--yellow)',info:'var(--accent2)'};
+  const icons={success:'fa-circle-check',error:'fa-circle-xmark',warning:'fa-triangle-exclamation',info:'fa-circle-info'};
+  el.innerHTML=`<i class="fas ${icons[type]}" style="color:${colors[type]};font-size:14px"></i>${msg}`;
+  $('toastWrap').append(el);
+  setTimeout(()=>el.remove(),3000);
+}
+function fmt(s){if(!s||isNaN(s))return'0:00';const m=Math.floor(s/60),sc=Math.floor(s%60);return`${m}:${sc.toString().padStart(2,'0')}`}
+function loading(show,txt='Loading…'){
+  const o=$('loadingOverlay');
+  if(show){o.classList.add('show');$('loadingTxt').textContent=txt;}
+  else o.classList.remove('show');
+}
+function showPlaceholder(show){$('playerPlaceholder').style.display=show?'flex':'none'}
+
+function updateBadge(type){
+  const b=$('platBadge');
+  if(!type){b.style.display='none';return;}
+  b.className='plat-badge '+(platBadgeClass[type]||'b-h5');
+  b.textContent=platLabel[type]||type;
+  b.style.display='';
+}
+function updateCounts(){
+  const n=playlist.length;
+  $('countPill').textContent=n;$('mobCountPill').textContent=n;
+  if(n>0){$('mobBadge').textContent=n;$('mobBadge').style.display='flex';}
+  else $('mobBadge').style.display='none';
+}
+
+function extractYT(u){
+  if(!u)return null;
+  const ps=[/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,/^([a-zA-Z0-9_-]{11})$/];
+  for(const p of ps){const m=u.match(p);if(m)return m[1];}
+  return null;
+}
+function extractVI(u){if(!u)return null;const m=u.match(/vimeo\.com\/(\d+)/);return m?m[1]:(/^\d+$/.test(u)?u:null);}
+function extractDM(u){if(!u)return null;const m=u.match(/(?:dailymotion\.com\/video\/|dai\.ly\/)([a-zA-Z0-9]+)/);return m?m[1]:(/^[a-zA-Z0-9]+$/.test(u)&&u.length<12?u:null);}
+
+function hideAll(){
+  $('platformPlayer').style.display='none';
+  $('html5Player').style.display='none';
+  $('fbContainer').style.display='none';
+  $('ctrlBar').style.display='none';
+}
+function setTitle(t){$('videoTitle').textContent=t||'Untitled';}
+
+function loadYT(id){
+  hideAll();showPlaceholder(false);loading(true,'Loading YouTube…');
+  $('platformPlayer').style.display='block';
+  $('platformPlayer').src=`https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1`;
+  state.type='youtube';state.id=id;
+  setTitle('YouTube Video');updateBadge('youtube');
+  setTimeout(()=>loading(false),1200);
+}
+function loadVI(id){
+  hideAll();showPlaceholder(false);loading(true,'Loading Vimeo…');
+  $('platformPlayer').style.display='block';
+  $('platformPlayer').src=`https://player.vimeo.com/video/${id}?autoplay=1`;
+  state.type='vimeo';state.id=id;
+  setTitle('Vimeo Video');updateBadge('vimeo');
+  setTimeout(()=>loading(false),1200);
+}
+function loadDM(id){
+  hideAll();showPlaceholder(false);loading(true,'Loading Dailymotion…');
+  $('platformPlayer').style.display='block';
+  $('platformPlayer').src=`https://geo.dailymotion.com/player.html?video=${id}&autoplay=1`;
+  state.type='dailymotion';state.id=id;
+  setTitle('Dailymotion Video');updateBadge('dailymotion');
+  setTimeout(()=>loading(false),1200);
+}
+function loadFB(url){
+  hideAll();showPlaceholder(false);loading(true,'Loading Facebook…');
+  const isReel=url.includes('reel');
+  const fc=$('fbContainer');
+  fc.style.display='flex';
+  $('fbDirectLink').href=url;
+  const wrap=$('fbIframeWrap');
+  wrap.innerHTML='';
+  const ifr=document.createElement('iframe');
+  ifr.src=`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true&allowfullscreen=true`;
+  ifr.setAttribute('allow','autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; fullscreen');
+  ifr.allowFullscreen=true;
+  ifr.style.cssText='width:100%;height:100%;border:none;background:#000';
+  wrap.appendChild(ifr);
+  state.type=isReel?'reel':'facebook';state.id=url;
+  setTitle(isReel?'Facebook Reel':'Facebook Video');updateBadge(state.type);
+  setTimeout(()=>loading(false),1500);
+}
+function loadIG(url){
+  hideAll();showPlaceholder(false);loading(true,'Loading Instagram…');
+  $('platformPlayer').style.display='block';
+  const cleaned=url.replace(/\/?$/,'');
+  $('platformPlayer').src=`${cleaned}/embed/`;
+  state.type='instagram';state.id=url;
+  setTitle('Instagram Video');updateBadge('instagram');
+  setTimeout(()=>loading(false),1500);
+}
+function loadHTML5(url,title){
+  hideAll();showPlaceholder(false);loading(true,'Loading video…');
+  const v=$('html5Player');
+  v.style.display='block';
+  $('ctrlBar').style.display='block';
+  v.src=url;v.load();v.play().catch(()=>{});
+  state.type='html5';state.id=url;
+  setTitle(title||url.split('/').pop()||'Video');updateBadge('html5');
+  setTimeout(()=>loading(false),600);
+}
+
+const vid=$('html5Player');
+vid.addEventListener('loadedmetadata',()=>{state.duration=vid.duration;updateTime();});
+vid.addEventListener('timeupdate',()=>{state.currentTime=vid.currentTime;updateProgress();updateTime();});
+vid.addEventListener('play',()=>{state.playing=true;$('playBtn').innerHTML='<i class="fas fa-pause"></i>';});
+vid.addEventListener('pause',()=>{state.playing=false;$('playBtn').innerHTML='<i class="fas fa-play"></i>';});
+vid.addEventListener('ended',()=>onEnded());
+function updateProgress(){
+  if(state.duration){
+    const p=(state.currentTime/state.duration)*100;
+    $('seekFill').style.width=p+'%';
+    $('seekDot').style.left=p+'%';
+  }
+}
+function updateTime(){$('timeTxt').textContent=fmt(state.currentTime)+' / '+fmt(state.duration);}
+
+$('seekBar').addEventListener('click',e=>{
+  if(state.type!=='html5')return;
+  const r=$('seekBar').getBoundingClientRect();
+  vid.currentTime=((e.clientX-r.left)/r.width)*state.duration;
+});
+$('playBtn').addEventListener('click',()=>{
+  if(state.type!=='html5'){toast('Use the player controls for this platform','info');return;}
+  state.playing?vid.pause():vid.play();
+});
+$('volBtn').addEventListener('click',()=>{
+  const newVol=state.volume>0?0:100;
+  state.volume=newVol;vid.volume=newVol/100;$('volSlider').value=newVol;updateVolIcon();
+});
+$('volSlider').addEventListener('input',e=>{
+  state.volume=+e.target.value;vid.volume=state.volume/100;updateVolIcon();
+});
+function updateVolIcon(){
+  const i=$('volBtn').querySelector('i');
+  i.className=state.volume===0?'fas fa-volume-xmark':state.volume<50?'fas fa-volume-low':'fas fa-volume-high';
+}
+$('speedBtn').addEventListener('click',()=>{
+  const speeds=[0.5,0.75,1,1.25,1.5,1.75,2];
+  state.speed=speeds[(speeds.indexOf(state.speed)+1)%speeds.length];
+  vid.playbackRate=state.speed;
+  $('speedBtn').textContent=state.speed+'×';
+});
+$('fsBtn').addEventListener('click',()=>{
+  const c=$('playerWrap');
+  if(c.requestFullscreen)c.requestFullscreen();
+  else if(c.webkitRequestFullscreen)c.webkitRequestFullscreen();
+});
+$('prevBtn').addEventListener('click',()=>{if(currentIdx>0)playItem(currentIdx-1);});
+$('nextBtn').addEventListener('click',()=>{if(currentIdx<playlist.length-1)playItem(currentIdx+1);});
+
+function onEnded(){
+  if(repeatMode==='one'){playItem(currentIdx);}
+  else if(repeatMode==='all'){playItem(currentIdx<playlist.length-1?currentIdx+1:0);}
+  else if(currentIdx<playlist.length-1){playItem(currentIdx+1);}
+}
+
+function addToPlaylist(item){
+  playlist.push({...item,uid:Date.now()+Math.random()});
+  renderLists();updateCounts();toast('Added to playlist','success');
+}
+function playItem(idx){
+  if(idx<0||idx>=playlist.length)return;
+  currentIdx=idx;
+  const it=playlist[idx];
+  if(it.type==='youtube')loadYT(it.videoId);
+  else if(it.type==='vimeo')loadVI(it.videoId);
+  else if(it.type==='dailymotion')loadDM(it.videoId);
+  else if(it.type==='facebook'||it.type==='reel')loadFB(it.url);
+  else if(it.type==='instagram')loadIG(it.url);
+  else if(it.type==='html5')loadHTML5(it.url,it.title);
+  renderLists();
+}
+window.playItem=playItem;
+function renderLists(){renderList('desktopList');renderList('mobileList');}
+function renderList(id){
+  const el=$(id);
+  if(playlist.length===0){
+    el.innerHTML=`<div class="pl-empty"><div class="pl-empty-icon"><i class="fas fa-music-slash"></i></div><div class="pl-empty-txt">Playlist is empty</div></div>`;
+    return;
+  }
+  el.innerHTML=playlist.map((it,i)=>`
+    <div class="pl-item${i===currentIdx?' active':''}" onclick="playItem(${i})">
+      <div class="pl-icon"><i class="${platIcon[it.type]||'fas fa-play'}" style="color:${platColor[it.type]||'var(--accent)'}"></i></div>
+      <div class="pl-info">
+        <div class="pl-title">${it.title||'Untitled'}</div>
+        <div class="pl-type">${platLabel[it.type]||it.type}</div>
+      </div>
+    </div>`).join('');
+}
+
+function shuffle(){
+  for(let i=playlist.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[playlist[i],playlist[j]]=[playlist[j],playlist[i]];}
+  renderLists();toast('Playlist shuffled','success');
+}
+function toggleRepeat(btnId){
+  const modes=['none','one','all'];
+  repeatMode=modes[(modes.indexOf(repeatMode)+1)%modes.length];
+  const btn=$(btnId);const i=btn.querySelector('i');
+  if(repeatMode==='none'){i.className='fas fa-repeat';btn.style.color='';}
+  else if(repeatMode==='one'){i.className='fas fa-repeat-1';btn.style.color='var(--accent2)';}
+  else{i.className='fas fa-repeat';btn.style.color='var(--green)';}
+  toast('Repeat: '+repeatMode,'info');
+}
+function clearList(){
+  if(confirm('Clear entire playlist?')){playlist=[];currentIdx=-1;renderLists();updateCounts();}
+}
+
+$('shuffleBtn').onclick=shuffle;$('repeatBtn').onclick=()=>toggleRepeat('repeatBtn');$('clearBtn').onclick=clearList;
+$('mobShuffleBtn').onclick=shuffle;$('mobRepeatBtn').onclick=()=>toggleRepeat('mobRepeatBtn');$('mobClearBtn').onclick=clearList;
+
+$('tabsRow').querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    $('tabsRow').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    $('tab-'+btn.dataset.tab).classList.add('active');
+  };
+});
+document.querySelectorAll('.plt-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    const t=document.querySelector(`.tab-btn[data-tab="${btn.dataset.p}"]`);
+    if(t)t.click();
+  };
+});
+
+$('ytLoad').onclick=()=>{const id=extractYT($('ytInput').value.trim());id?loadYT(id):toast('Invalid YouTube URL','error');};
+$('ytAdd').onclick=()=>{const id=extractYT($('ytInput').value.trim());if(id)addToPlaylist({type:'youtube',videoId:id,title:'YouTube: '+id});};
+$('viLoad').onclick=()=>{const id=extractVI($('viInput').value.trim());id?loadVI(id):toast('Invalid Vimeo URL','error');};
+$('viAdd').onclick=()=>{const id=extractVI($('viInput').value.trim());if(id)addToPlaylist({type:'vimeo',videoId:id,title:'Vimeo: '+id});};
+$('dmLoad').onclick=()=>{const id=extractDM($('dmInput').value.trim());id?loadDM(id):toast('Invalid Dailymotion URL','error');};
+$('dmAdd').onclick=()=>{const id=extractDM($('dmInput').value.trim());if(id)addToPlaylist({type:'dailymotion',videoId:id,title:'Dailymotion: '+id});};
+$('fbLoad').onclick=()=>{const u=$('fbInput').value.trim();u?loadFB(u):toast('Enter a Facebook URL','error');};
+$('fbAdd').onclick=()=>{const u=$('fbInput').value.trim();if(u)addToPlaylist({type:u.includes('reel')?'reel':'facebook',url:u,title:u.includes('reel')?'Facebook Reel':'Facebook Video'});};
+$('igLoad').onclick=()=>{const u=$('igInput').value.trim();u?loadIG(u):toast('Enter an Instagram URL','error');};
+$('igAdd').onclick=()=>{const u=$('igInput').value.trim();if(u)addToPlaylist({type:'instagram',url:u,title:'Instagram Video'});};
+$('urlLoad').onclick=()=>{const u=$('urlInput').value.trim();u?loadHTML5(u):toast('Enter a URL','error');};
+$('urlAdd').onclick=()=>{const u=$('urlInput').value.trim();if(u)addToPlaylist({type:'html5',url:u,title:u.split('/').pop()||'Video'});};
+$('localInput').addEventListener('change',e=>{
+  const ok=e.target.files.length>0;
+  $('localLoad').disabled=!ok;$('localAdd').disabled=!ok;
+});
+$('localLoad').onclick=()=>{const f=$('localInput').files[0];if(f)loadHTML5(URL.createObjectURL(f),f.name);};
+$('localAdd').onclick=()=>{Array.from($('localInput').files).forEach(f=>addToPlaylist({type:'html5',url:URL.createObjectURL(f),title:f.name}));};
+
+$('mobFab').onclick=()=>{$('drawer').classList.add('open');$('drawerOverlay').classList.add('visible');};
+$('closeDrawerBtn').onclick=()=>{$('drawer').classList.remove('open');$('drawerOverlay').classList.remove('visible');};
+$('drawerOverlay').onclick=()=>{$('drawer').classList.remove('open');$('drawerOverlay').classList.remove('visible');};
+
+renderLists();
+</script>
+</body>
+</html>
