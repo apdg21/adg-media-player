@@ -437,6 +437,40 @@ const COLORS={youtube:'var(--red)',vimeo:'var(--accent3)',dailymotion:'var(--blu
 const BCLASS={youtube:'b-yt',vimeo:'b-vi',dailymotion:'b-dm',facebook:'b-fb',reel:'b-rl',html5:'b-h5',instagram:'b-ig'};
 const LABELS={youtube:'YouTube',vimeo:'Vimeo',dailymotion:'Dailymotion',facebook:'Facebook',reel:'Reel',html5:'Direct',instagram:'Instagram'};
 
+// ===== LOCALSTORAGE FUNCTIONS =====
+function savePlaylist(){
+  localStorage.setItem('adgPlaylist',JSON.stringify(playlist));
+  localStorage.setItem('adgRepeatMode',repeatMode);
+  console.log('Playlist saved to localStorage');
+}
+
+function loadPlaylist(){
+  const saved=localStorage.getItem('adgPlaylist');
+  const savedRepeat=localStorage.getItem('adgRepeatMode');
+  if(saved){
+    try{
+      playlist=JSON.parse(saved);
+      repeatMode=savedRepeat||'none';
+      console.log('Playlist loaded from localStorage:', playlist);
+      renderLists();
+      updateCounts();
+      return true;
+    }catch(e){
+      console.error('Failed to load playlist:',e);
+      return false;
+    }
+  }
+  console.log('No saved playlist found');
+  return false;
+}
+
+function clearPlaylistStorage(){
+  localStorage.removeItem('adgPlaylist');
+  localStorage.removeItem('adgRepeatMode');
+  console.log('Playlist cleared from localStorage');
+}
+// ===== END LOCALSTORAGE FUNCTIONS =====
+
 function toast(msg,type='info'){
   const el=document.createElement('div');
   el.className='toast';
@@ -582,7 +616,9 @@ function onEnded(){
 
 function addToPlaylist(item){
   playlist.push({...item,uid:Date.now()+Math.random()});
-  renderLists();updateCounts();toast('Added to playlist','success');
+  renderLists();updateCounts();
+  savePlaylist();
+  toast('Added to playlist','success');
 }
 function playItem(i){
   if(i<0||i>=playlist.length)return;
@@ -613,7 +649,9 @@ function renderLists(){renderList('deskList');renderList('mobList');}
 
 function shuffle(){
   for(let i=playlist.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[playlist[i],playlist[j]]=[playlist[j],playlist[i]];}
-  renderLists();toast('Shuffled','success');
+  renderLists();
+  savePlaylist();
+  toast('Shuffled','success');
 }
 function toggleRepeat(btnId){
   const modes=['none','one','all'];
@@ -622,9 +660,10 @@ function toggleRepeat(btnId){
   if(repeatMode==='none'){i.className='fas fa-repeat';btn.style.color='';}
   else if(repeatMode==='one'){i.className='fas fa-repeat-1';btn.style.color='var(--accent2)';}
   else{i.className='fas fa-repeat';btn.style.color='var(--green)';}
+  savePlaylist();
   toast('Repeat: '+repeatMode,'info');
 }
-function clearList(){if(confirm('Clear playlist?')){playlist=[];idx=-1;renderLists();updateCounts();}}
+function clearList(){if(confirm('Clear playlist?')){playlist=[];idx=-1;renderLists();updateCounts();clearPlaylistStorage();}}
 
 $('deskShuffle').onclick=shuffle;$('deskRepeat').onclick=()=>toggleRepeat('deskRepeat');$('deskClear').onclick=clearList;
 $('mobShuffle').onclick=shuffle;$('mobRepeat').onclick=()=>toggleRepeat('mobRepeat');$('mobClear').onclick=clearList;
@@ -674,7 +713,10 @@ $('localInp').onchange=e=>{const ok=e.target.files.length>0;$('localLoad').disab
 $('localLoad').onclick=()=>{const f=$('localInp').files[0];if(f)loadH5(URL.createObjectURL(f),f.name);};
 $('localAdd').onclick=()=>{Array.from($('localInp').files).forEach(f=>addToPlaylist({type:'html5',url:URL.createObjectURL(f),title:f.name}));};
 
-renderLists();
+// Load playlist from localStorage on page load
+if(!loadPlaylist()){
+  renderLists();
+}
 </script>
 </body>
 </html>
