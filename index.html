@@ -675,6 +675,36 @@ $('localLoad').onclick=()=>{const f=$('localInp').files[0];if(f)loadH5(URL.creat
 $('localAdd').onclick=()=>{Array.from($('localInp').files).forEach(f=>addToPlaylist({type:'html5',url:URL.createObjectURL(f),title:f.name}));};
 
 renderLists();
+
+<!-- Add these functions in the script section -->
+
+// LocalStorage functions (add after the initial variable declarations)
+function savePlaylist(){
+  localStorage.setItem('adgPlaylist',JSON.stringify(playlist));
+  localStorage.setItem('adgRepeatMode',repeatMode);
+}
+
+function loadPlaylist(){
+  const saved=localStorage.getItem('adgPlaylist');
+  const savedRepeat=localStorage.getItem('adgRepeatMode');
+  if(saved){
+    try{
+      playlist=JSON.parse(saved);
+      repeatMode=savedRepeat||'none';
+      renderLists();updateCounts();
+      return true;
+    }catch(e){
+      console.error('Failed to load playlist:',e);
+      return false;
+    }
+  }
+  return false;
+}
+
+function clearPlaylistStorage(){
+  localStorage.removeItem('adgPlaylist');
+  localStorage.removeItem('adgRepeatMode');
+}
 </script>
 </body>
 </html>
