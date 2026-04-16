@@ -205,8 +205,13 @@ input[type=file]::file-selector-button{
 .pl-info{flex:1;min-width:0}
 .pl-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pl-type{font-size:11px;color:var(--text3);margin-top:1px}
+.pl-del{width:30px;height:30px;border-radius:7px;border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-appearance:none}
+.pl-del:active{background:#f8717122;color:var(--red)}
 .pl-empty{padding:28px 16px;text-align:center;color:var(--text3)}
 .pl-empty-ico{font-size:26px;opacity:.4;margin-bottom:7px}
+
+/* Saved indicator dot */
+.save-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-left:4px;flex-shrink:0}
 
 .toasts{position:fixed;top:calc(70px + var(--safe-top));right:12px;left:12px;z-index:200;display:flex;flex-direction:column;gap:6px;pointer-events:none}
 .toast{
@@ -369,6 +374,7 @@ input[type=file]::file-selector-button{
       </div>
       <div class="tab-pane" id="tab-local">
         <input type="file" class="inp" id="localInp" accept="video/*,audio/*" multiple>
+        <div class="info-tip"><i class="fas fa-circle-info" style="font-size:11px"></i> Local files are not saved between sessions</div>
         <div class="btn-row">
           <button class="lbtn btn-local" id="localLoad" disabled><i class="fas fa-circle-play"></i> Play</button>
           <button class="abtn" id="localAdd" disabled><i class="fas fa-plus"></i></button>
@@ -379,11 +385,16 @@ input[type=file]::file-selector-button{
 
   <div class="sidebar" id="sidebar">
     <div class="drawer-hdr" style="padding:14px">
-      <div class="drawer-title"><i class="fas fa-list-music" style="color:var(--accent2);font-size:14px"></i> Playlist <span class="count-pill" id="deskCount">0</span></div>
+      <div class="drawer-title">
+        <i class="fas fa-list-music" style="color:var(--accent2);font-size:14px"></i>
+        Playlist
+        <span class="count-pill" id="deskCount">0</span>
+        <span class="save-dot" id="deskSaveDot" title="Saved to local storage" style="display:none"></span>
+      </div>
       <div class="drawer-acts">
         <button class="dact" id="deskShuffle" title="Shuffle"><i class="fas fa-shuffle"></i></button>
         <button class="dact" id="deskRepeat" title="Repeat"><i class="fas fa-repeat"></i></button>
-        <button class="dact" id="deskClear" title="Clear"><i class="fas fa-trash"></i></button>
+        <button class="dact" id="deskClear" title="Clear all"><i class="fas fa-trash"></i></button>
       </div>
     </div>
     <div class="playlist-body" id="deskList" style="max-height:400px"></div>
@@ -412,7 +423,12 @@ input[type=file]::file-selector-button{
 <div class="drawer" id="drawer">
   <div class="drawer-handle"></div>
   <div class="drawer-hdr">
-    <div class="drawer-title"><i class="fas fa-list-music" style="color:var(--accent2);font-size:14px"></i> Playlist <span class="count-pill" id="mobCount">0</span></div>
+    <div class="drawer-title">
+      <i class="fas fa-list-music" style="color:var(--accent2);font-size:14px"></i>
+      Playlist
+      <span class="count-pill" id="mobCount">0</span>
+      <span class="save-dot" id="mobSaveDot" title="Saved to local storage" style="display:none"></span>
+    </div>
     <div class="drawer-acts">
       <button class="dact" id="mobShuffle"><i class="fas fa-shuffle"></i></button>
       <button class="dact" id="mobRepeat"><i class="fas fa-repeat"></i></button>
@@ -430,6 +446,8 @@ const $ = id => document.getElementById(id);
 const Q = s => document.querySelector(s);
 const QA = s => document.querySelectorAll(s);
 
+const STORAGE_KEY = 'adg_playlist_v1';
+
 const S = {type:null,id:null,playing:false,vol:100,speed:1,dur:0,cur:0};
 let playlist=[],idx=-1,repeatMode='none';
 const ICONS={youtube:'fab fa-youtube',vimeo:'fab fa-vimeo',dailymotion:'fas fa-play',facebook:'fab fa-facebook',reel:'fab fa-facebook',html5:'fas fa-video',instagram:'fab fa-instagram'};
@@ -437,39 +455,39 @@ const COLORS={youtube:'var(--red)',vimeo:'var(--accent3)',dailymotion:'var(--blu
 const BCLASS={youtube:'b-yt',vimeo:'b-vi',dailymotion:'b-dm',facebook:'b-fb',reel:'b-rl',html5:'b-h5',instagram:'b-ig'};
 const LABELS={youtube:'YouTube',vimeo:'Vimeo',dailymotion:'Dailymotion',facebook:'Facebook',reel:'Reel',html5:'Direct',instagram:'Instagram'};
 
-// ===== LOCALSTORAGE FUNCTIONS =====
+/* ── LocalStorage helpers ── */
 function savePlaylist(){
-  localStorage.setItem('adgPlaylist',JSON.stringify(playlist));
-  localStorage.setItem('adgRepeatMode',repeatMode);
-  console.log('Playlist saved to localStorage');
+  try{
+    // Local files (blob: URLs) can't be restored — exclude them
+    const saveable=playlist.filter(it=>it.type!=='html5'||!it.url.startsWith('blob:'));
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(saveable));
+    updateSaveDot(saveable.length>0);
+  }catch(e){console.warn('Save failed',e);}
 }
-
 function loadPlaylist(){
-  const saved=localStorage.getItem('adgPlaylist');
-  const savedRepeat=localStorage.getItem('adgRepeatMode');
-  if(saved){
-    try{
-      playlist=JSON.parse(saved);
-      repeatMode=savedRepeat||'none';
-      console.log('Playlist loaded from localStorage:', playlist);
-      renderLists();
-      updateCounts();
-      return true;
-    }catch(e){
-      console.error('Failed to load playlist:',e);
-      return false;
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed=JSON.parse(raw);
+      if(Array.isArray(parsed)&&parsed.length>0){
+        playlist=parsed;
+        renderLists();updateCounts();
+        updateSaveDot(true);
+        toast(`Restored ${parsed.length} item${parsed.length>1?'s':''} from saved playlist`,'info');
+      }
     }
-  }
-  console.log('No saved playlist found');
-  return false;
+  }catch(e){console.warn('Load failed',e);}
 }
-
-function clearPlaylistStorage(){
-  localStorage.removeItem('adgPlaylist');
-  localStorage.removeItem('adgRepeatMode');
-  console.log('Playlist cleared from localStorage');
+function updateSaveDot(visible){
+  [$('deskSaveDot'),$('mobSaveDot')].forEach(el=>{if(el)el.style.display=visible?'inline-block':'none';});
 }
-// ===== END LOCALSTORAGE FUNCTIONS =====
+function removeFromPlaylist(i){
+  playlist.splice(i,1);
+  if(idx===i)idx=-1;
+  else if(idx>i)idx--;
+  savePlaylist();renderLists();updateCounts();
+  toast('Removed from playlist','info');
+}
 
 function toast(msg,type='info'){
   const el=document.createElement('div');
@@ -616,8 +634,8 @@ function onEnded(){
 
 function addToPlaylist(item){
   playlist.push({...item,uid:Date.now()+Math.random()});
-  renderLists();updateCounts();
   savePlaylist();
+  renderLists();updateCounts();
   toast('Added to playlist','success');
 }
 function playItem(i){
@@ -632,6 +650,7 @@ function playItem(i){
   renderLists();closeDrawer();
 }
 window.playItem=playItem;
+window.removeFromPlaylist=removeFromPlaylist;
 
 function renderList(elId){
   const el=$(elId);
@@ -642,16 +661,18 @@ function renderList(elId){
   el.innerHTML=playlist.map((it,i)=>`
     <div class="pl-item${i===idx?' now':''}" onclick="playItem(${i})">
       <div class="pl-ico"><i class="${ICONS[it.type]||'fas fa-play'}" style="color:${COLORS[it.type]||'var(--accent)'};font-size:13px"></i></div>
-      <div class="pl-info"><div class="pl-name">${it.title||'Untitled'}</div><div class="pl-type">${LABELS[it.type]||it.type}</div></div>
+      <div class="pl-info">
+        <div class="pl-name">${it.title||'Untitled'}</div>
+        <div class="pl-type">${LABELS[it.type]||it.type}${it.type==='html5'&&it.url&&it.url.startsWith('blob:')?'&nbsp;<span style="color:var(--yellow);font-size:10px">(local)</span>':''}</div>
+      </div>
+      <button class="pl-del" onclick="event.stopPropagation();removeFromPlaylist(${i})" title="Remove"><i class="fas fa-xmark"></i></button>
     </div>`).join('');
 }
 function renderLists(){renderList('deskList');renderList('mobList');}
 
 function shuffle(){
   for(let i=playlist.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[playlist[i],playlist[j]]=[playlist[j],playlist[i]];}
-  renderLists();
-  savePlaylist();
-  toast('Shuffled','success');
+  savePlaylist();renderLists();toast('Shuffled','success');
 }
 function toggleRepeat(btnId){
   const modes=['none','one','all'];
@@ -660,10 +681,18 @@ function toggleRepeat(btnId){
   if(repeatMode==='none'){i.className='fas fa-repeat';btn.style.color='';}
   else if(repeatMode==='one'){i.className='fas fa-repeat-1';btn.style.color='var(--accent2)';}
   else{i.className='fas fa-repeat';btn.style.color='var(--green)';}
-  savePlaylist();
   toast('Repeat: '+repeatMode,'info');
 }
-function clearList(){if(confirm('Clear playlist?')){playlist=[];idx=-1;renderLists();updateCounts();clearPlaylistStorage();}}
+function clearList(){
+  if(playlist.length===0)return;
+  if(confirm('Clear entire playlist?')){
+    playlist=[];idx=-1;
+    localStorage.removeItem(STORAGE_KEY);
+    updateSaveDot(false);
+    renderLists();updateCounts();
+    toast('Playlist cleared','info');
+  }
+}
 
 $('deskShuffle').onclick=shuffle;$('deskRepeat').onclick=()=>toggleRepeat('deskRepeat');$('deskClear').onclick=clearList;
 $('mobShuffle').onclick=shuffle;$('mobRepeat').onclick=()=>toggleRepeat('mobRepeat');$('mobClear').onclick=clearList;
@@ -698,25 +727,23 @@ $('pltScroll').querySelectorAll('.plt-btn').forEach(btn=>{
 });
 
 $('ytLoad').onclick=()=>{const id=extractYT($('ytInp').value.trim());id?loadYT(id):toast('Invalid YouTube URL','error');};
-$('ytAdd').onclick=()=>{const id=extractYT($('ytInp').value.trim());if(id)addToPlaylist({type:'youtube',videoId:id,title:'YouTube: '+id});};
+$('ytAdd').onclick=()=>{const id=extractYT($('ytInp').value.trim());if(id)addToPlaylist({type:'youtube',videoId:id,title:'YouTube: '+id});else toast('Invalid YouTube URL','error');};
 $('viLoad').onclick=()=>{const id=extractVI($('viInp').value.trim());id?loadVI(id):toast('Invalid Vimeo URL','error');};
-$('viAdd').onclick=()=>{const id=extractVI($('viInp').value.trim());if(id)addToPlaylist({type:'vimeo',videoId:id,title:'Vimeo: '+id});};
+$('viAdd').onclick=()=>{const id=extractVI($('viInp').value.trim());if(id)addToPlaylist({type:'vimeo',videoId:id,title:'Vimeo: '+id});else toast('Invalid Vimeo URL','error');};
 $('dmLoad').onclick=()=>{const id=extractDM($('dmInp').value.trim());id?loadDM(id):toast('Invalid Dailymotion URL','error');};
-$('dmAdd').onclick=()=>{const id=extractDM($('dmInp').value.trim());if(id)addToPlaylist({type:'dailymotion',videoId:id,title:'Dailymotion: '+id});};
+$('dmAdd').onclick=()=>{const id=extractDM($('dmInp').value.trim());if(id)addToPlaylist({type:'dailymotion',videoId:id,title:'Dailymotion: '+id});else toast('Invalid Dailymotion URL','error');};
 $('fbLoad').onclick=()=>{const u=$('fbInp').value.trim();u?loadFB(u):toast('Enter a Facebook URL','error');};
-$('fbAdd').onclick=()=>{const u=$('fbInp').value.trim();if(u)addToPlaylist({type:u.toLowerCase().includes('reel')?'reel':'facebook',url:u,title:u.toLowerCase().includes('reel')?'Facebook Reel':'Facebook Video'});};
+$('fbAdd').onclick=()=>{const u=$('fbInp').value.trim();if(u)addToPlaylist({type:u.toLowerCase().includes('reel')?'reel':'facebook',url:u,title:u.toLowerCase().includes('reel')?'Facebook Reel':'Facebook Video'});else toast('Enter a Facebook URL','error');};
 $('igLoad').onclick=()=>{const u=$('igInp').value.trim();u?loadIG(u):toast('Enter an Instagram URL','error');};
-$('igAdd').onclick=()=>{const u=$('igInp').value.trim();if(u)addToPlaylist({type:'instagram',url:u,title:'Instagram Video'});};
+$('igAdd').onclick=()=>{const u=$('igInp').value.trim();if(u)addToPlaylist({type:'instagram',url:u,title:'Instagram Video'});else toast('Enter an Instagram URL','error');};
 $('urlLoad').onclick=()=>{const u=$('urlInp').value.trim();u?loadH5(u):toast('Enter a URL','error');};
-$('urlAdd').onclick=()=>{const u=$('urlInp').value.trim();if(u)addToPlaylist({type:'html5',url:u,title:u.split('/').pop()||'Video'});};
+$('urlAdd').onclick=()=>{const u=$('urlInp').value.trim();if(u)addToPlaylist({type:'html5',url:u,title:u.split('/').pop()||'Video'});else toast('Enter a URL','error');};
 $('localInp').onchange=e=>{const ok=e.target.files.length>0;$('localLoad').disabled=!ok;$('localAdd').disabled=!ok;};
 $('localLoad').onclick=()=>{const f=$('localInp').files[0];if(f)loadH5(URL.createObjectURL(f),f.name);};
 $('localAdd').onclick=()=>{Array.from($('localInp').files).forEach(f=>addToPlaylist({type:'html5',url:URL.createObjectURL(f),title:f.name}));};
 
-// Load playlist from localStorage on page load
-if(!loadPlaylist()){
-  renderLists();
-}
+/* ── Init: restore playlist from localStorage ── */
+loadPlaylist();
 </script>
 </body>
 </html>
