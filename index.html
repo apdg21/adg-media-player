@@ -698,32 +698,35 @@ function loadRadio(station){
   currentRadio=station;
   destroyHls();
 
-  // Build URL candidates: prefer url_resolved, fallback to url,
-  // and if http:// force upgrade to https:// to avoid mixed-content blocks
-  const rawResolved = station.url_resolved||'';
-  const rawUrl = station.url||'';
-  function upgradeUrl(u){
-    if(!u)return'';
-    // Upgrade http to https so browser doesn't block mixed content
-    return u.replace(/^http:/,'https:');
-  }
+  // Build stream URL candidates in priority order:
+  // 1. url_resolved (already followed redirects) as https
+  // 2. url as https
+  // 3. via corsproxy.io (handles CORS + SHOUTcast ICY protocol issues)
+  // 4. original http versions as last resort
+  function upgrade(u){return u?u.replace(/^http:/,'https:'):'';}
+  const res=station.url_resolved||'';
+  const raw=station.url||'';
+  const resHttps=upgrade(res);
+  const rawHttps=upgrade(raw);
+  const PROXY='https://corsproxy.io/?';
+
   const candidates=[
-    upgradeUrl(rawResolved),
-    upgradeUrl(rawUrl),
-    rawResolved, // original http as last resort (works in Electron)
-    rawUrl
-  ].filter((u,i,a)=>u&&a.indexOf(u)===i); // deduplicate
+    resHttps,
+    rawHttps,
+    resHttps?PROXY+encodeURIComponent(resHttps):'',
+    rawHttps?PROXY+encodeURIComponent(rawHttps):'',
+    res, // original http fallback (works in Electron / non-strict browsers)
+    raw,
+  ].filter((u,i,a)=>u&&a.indexOf(u)===i);
 
   // Show radio visual UI
   $('radioDisplay').style.display='flex';
   $('playerWrap').className='player-wrap radio-mode';
 
   const art=$('radioArt');
-  if(station.favicon){
-    art.innerHTML=`<img src="${escHtml(station.favicon)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-radio\\'></i>'">`;
-  } else {
-    art.innerHTML='<i class="fas fa-radio"></i>';
-  }
+  art.innerHTML=station.favicon
+    ?`<img src="${escHtml(station.favicon)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-radio\\'></i>'">`
+    :'<i class="fas fa-radio"></i>';
   art.classList.add('pulse');
 
   $('radioName').textContent=station.name||'Unknown Station';
@@ -749,56 +752,49 @@ function loadRadio(station){
 }
 window.loadRadio=loadRadio;
 
-function tryRadioStream(candidates,idx){
-  if(idx>=candidates.length){
+function tryRadioStream(candidates,attemptIdx){
+  if(attemptIdx>=candidates.length){
     loading(false);
-    toast('Could not connect to this station — try another','error');
+    toast('Could not connect — try another station','error');
     $('playBtn').innerHTML='<i class="fas fa-play"></i>';
     S.playing=false;
     return;
   }
 
-  const url=candidates[idx];
+  const url=candidates[attemptIdx];
   const v=$('html5Player');
   destroyHls();
 
-  const isHls=url.includes('.m3u8')||url.includes('/hls/')||url.includes('playlist');
+  const isHls=url.includes('.m3u8')||url.includes('/hls/')||(/playlist/i.test(url)&&!url.includes('facebook'));
+
+  function onSuccess(){loading(false);}
+  function onFail(){tryRadioStream(candidates,attemptIdx+1);}
 
   if(isHls&&typeof Hls!=='undefined'&&Hls.isSupported()){
-    // Use HLS.js for m3u8 streams
-    hlsInstance=new Hls({enableWorker:true,lowLatencyMode:true});
+    hlsInstance=new Hls({enableWorker:true,lowLatencyMode:true,xhrSetup:(xhr)=>{xhr.withCredentials=false;}});
     hlsInstance.loadSource(url);
     hlsInstance.attachMedia(v);
-    hlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>{
-      v.play().catch(()=>{});
-      loading(false);
-    });
-    hlsInstance.on(Hls.Events.ERROR,(_,data)=>{
-      if(data.fatal){
-        destroyHls();
-        tryRadioStream(candidates,idx+1);
-      }
-    });
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>{v.play().catch(()=>{});onSuccess();});
+    hlsInstance.on(Hls.Events.ERROR,(_,data)=>{if(data.fatal){destroyHls();onFail();}});
+    setTimeout(()=>{if(hlsInstance&&v.readyState<1){destroyHls();onFail();}},8000);
   } else if(isHls&&v.canPlayType('application/vnd.apple.mpegurl')){
-    // Safari native HLS
     v.src=url;v.load();
-    v.play().then(()=>loading(false)).catch(()=>tryRadioStream(candidates,idx+1));
+    v.play().then(onSuccess).catch(onFail);
   } else {
-    // Regular MP3/AAC/OGG stream
     v.src=url;v.load();
-    const onCanPlay=()=>{v.removeEventListener('canplay',onCanPlay);v.removeEventListener('error',onErr);loading(false);};
-    const onErr=()=>{v.removeEventListener('canplay',onCanPlay);v.removeEventListener('error',onErr);tryRadioStream(candidates,idx+1);};
-    v.addEventListener('canplay',onCanPlay);
-    v.addEventListener('error',onErr);
-    v.play().catch(()=>{}); // autoplay may be blocked — that's ok, user can press play
-    // Timeout: if no canplay in 8s, try next
-    setTimeout(()=>{
-      if(S.type==='radio'&&S.playing&&v.readyState<2&&v.src===url){
-        v.removeEventListener('canplay',onCanPlay);
-        v.removeEventListener('error',onErr);
-        tryRadioStream(candidates,idx+1);
-      }
-    },8000);
+    let settled=false;
+    const done=(ok)=>{
+      if(settled)return;settled=true;
+      v.removeEventListener('canplay',onCan);
+      v.removeEventListener('error',onErr);
+      ok?onSuccess():onFail();
+    };
+    const onCan=()=>done(true);
+    const onErr=()=>done(false);
+    v.addEventListener('canplay',onCan,{once:true});
+    v.addEventListener('error',onErr,{once:true});
+    v.play().catch(()=>{}); // autoplay policy — user can press play
+    setTimeout(()=>done(false),9000); // hard timeout
   }
 }
 
@@ -840,22 +836,35 @@ function renderRadioList(){
     el.innerHTML='<div class="radio-status"><i class="fas fa-search"></i> No stations found</div>';
     return;
   }
-  el.innerHTML=radioStations.map((s,i)=>{
+  // Sort MP3 first (most browser-compatible), then AAC, then others
+  const codecOrder={MP3:0,AAC:1,OGG:2,OPUS:3};
+  const sorted=[...radioStations].sort((a,b)=>{
+    const ca=codecOrder[(a.codec||'').toUpperCase()]??9;
+    const cb=codecOrder[(b.codec||'').toUpperCase()]??9;
+    return ca-cb;
+  });
+  el.innerHTML=sorted.map((s)=>{
+    const origIdx=radioStations.indexOf(s);
     const isPlaying=currentRadio&&currentRadio.stationuuid===s.stationuuid;
     const favicon=s.favicon
       ?`<img src="${escHtml(s.favicon)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-radio\\'></i>'">`
       :'<i class="fas fa-radio"></i>';
     const country=s.country||'';
-    const bitrate=s.bitrate?`${s.bitrate}kbps`:'';
+    const bitrate=s.bitrate?`${s.bitrate}k`:'';
     const tag=s.tags?s.tags.split(',')[0]:'';
-    const meta=[country,bitrate,tag].filter(Boolean).join(' · ');
-    return `<div class="radio-item${isPlaying?' playing':''}" onclick="loadRadio(radioStations[${i}])">
+    const meta=[country,tag].filter(Boolean).join(' · ');
+    const codec=(s.codec||'').toUpperCase();
+    const codecColor=codec==='MP3'?'var(--green)':codec==='AAC'?'var(--accent3)':'var(--text3)';
+    return `<div class="radio-item${isPlaying?' playing':''}" onclick="loadRadio(radioStations[${origIdx}])">
       <div class="radio-favicon">${favicon}</div>
       <div class="radio-info">
         <div class="radio-name">${escHtml(s.name)}</div>
         ${meta?`<div class="radio-meta">${escHtml(meta)}</div>`:''}
       </div>
-      ${s.bitrate?`<div class="radio-bitrate">${s.bitrate}k</div>`:''}
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
+        ${bitrate?`<div class="radio-bitrate">${bitrate}</div>`:''}
+        ${codec?`<div class="radio-bitrate" style="color:${codecColor}">${codec}</div>`:''}
+      </div>
       ${isPlaying?'<i class="fas fa-volume-high radio-playing-icon"></i>':''}
     </div>`;
   }).join('');
