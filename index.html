@@ -54,6 +54,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .player-card{background:var(--bg1);border-radius:14px;border:1px solid var(--border);overflow:hidden}
 .player-wrap{position:relative;width:100%;background:#000;aspect-ratio:16/9}
 .player-wrap.portrait{aspect-ratio:9/16;max-width:min(320px,100%);margin:0 auto}
+.player-wrap.radio-mode{aspect-ratio:unset;height:160px;background:linear-gradient(135deg,var(--bg2),var(--bg3))}
 
 .player-placeholder{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
@@ -66,6 +67,26 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 #fbContainer{position:absolute;inset:0;display:none;flex-direction:column}
 #fbIframeWrap{flex:1;overflow:hidden}
 #fbIframeWrap iframe{width:100%;height:100%;border:none}
+
+/* Radio player display */
+#radioDisplay{
+  position:absolute;inset:0;display:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  padding:16px;
+}
+.radio-art{
+  width:72px;height:72px;border-radius:16px;background:var(--bg4);
+  border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;
+  font-size:28px;color:var(--green);flex-shrink:0;overflow:hidden;
+}
+.radio-art img{width:100%;height:100%;object-fit:cover;border-radius:16px}
+.radio-art.pulse i{animation:radio-pulse 1.5s ease-in-out infinite}
+@keyframes radio-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.8}}
+.radio-station-name{font-size:15px;font-weight:700;color:var(--text1);text-align:center;line-height:1.3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.radio-station-meta{font-size:11px;color:var(--text3);text-align:center}
+.radio-live-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;background:#f8717122;color:var(--red);font-size:10px;font-weight:700;margin-top:2px}
+.radio-live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
 .fb-notice{background:var(--bg3);padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border)}
 .fb-notice-txt{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -89,6 +110,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .cb:active{background:var(--bg4)}
 .cb.play{width:44px;height:44px;border-radius:10px;background:var(--accent);color:#fff;font-size:18px}
 .cb.play:active{background:var(--accent2)}
+.cb.play.radio-play{background:var(--green)}
 .time-txt{font-size:11px;color:var(--text3);padding:0 4px;white-space:nowrap}
 .speed-btn{padding:4px 8px;border-radius:6px;background:var(--bg4);color:var(--text2);font-size:11px;border:none;cursor:pointer;-webkit-appearance:none}
 .speed-btn:active{background:var(--accent);color:#fff}
@@ -108,6 +130,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .b-rl{background:#c32aa322;color:#f472b6}
 .b-h5{background:#10b98122;color:#34d399}
 .b-ig{background:#c32aa322;color:#f472b6}
+.b-rd{background:#34d39922;color:#34d399}
 
 .input-card{background:var(--bg1);border-radius:14px;border:1px solid var(--border);overflow:hidden}
 .tabs-bar{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);scrollbar-width:none}
@@ -144,7 +167,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .btn-yt{background:#ff0000;color:#fff}.btn-vi{background:#1ab7ea;color:#fff}
 .btn-dm{background:#0066dc;color:#fff}.btn-fb{background:#1877f2;color:#fff}
 .btn-ig{background:#c32aa3;color:#fff}.btn-url{background:#34d399;color:#000}
-.btn-local{background:#fbbf24;color:#000}
+.btn-local{background:#fbbf24;color:#000}.btn-radio{background:#34d399;color:#000}
 .info-tip{font-size:11px;color:var(--text3);margin-top:6px;display:flex;align-items:center;gap:4px}
 input[type=file]{color:var(--text2);font-size:13px;width:100%}
 input[type=file]::file-selector-button{
@@ -152,6 +175,43 @@ input[type=file]::file-selector-button{
   background:var(--bg3);color:var(--text1);cursor:pointer;font-size:12px;
   margin-right:10px;-webkit-appearance:none;
 }
+
+/* ── Radio Tab Styles ── */
+.radio-search-row{display:flex;gap:8px;margin-bottom:10px}
+.radio-search-row .inp{flex:1}
+.radio-search-btn{
+  padding:11px 14px;border-radius:10px;background:var(--green);color:#000;
+  border:none;cursor:pointer;font-size:14px;font-weight:600;-webkit-appearance:none;
+  min-height:44px;white-space:nowrap;display:flex;align-items:center;gap:6px;
+}
+.radio-search-btn:active{opacity:.85}
+.radio-genre-scroll{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none;padding-bottom:2px}
+.radio-genre-scroll::-webkit-scrollbar{display:none}
+.genre-chip{
+  padding:5px 12px;border-radius:16px;border:1px solid var(--border2);background:var(--bg3);
+  color:var(--text3);font-size:11px;cursor:pointer;white-space:nowrap;flex-shrink:0;-webkit-appearance:none;
+}
+.genre-chip.active{background:var(--green);border-color:var(--green);color:#000;font-weight:600}
+.genre-chip:active{opacity:.8}
+.radio-list{display:flex;flex-direction:column;gap:1px;max-height:340px;overflow-y:auto;border-radius:10px;border:1px solid var(--border)}
+.radio-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  transition:background .15s;
+}
+.radio-item:last-child{border-bottom:none}
+.radio-item:active,.radio-item:hover{background:var(--bg3)}
+.radio-item.playing{background:var(--bg3);border-left:3px solid var(--green)}
+.radio-favicon{width:36px;height:36px;border-radius:9px;background:var(--bg4);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--green);flex-shrink:0;overflow:hidden}
+.radio-favicon img{width:100%;height:100%;object-fit:cover;border-radius:9px}
+.radio-info{flex:1;min-width:0}
+.radio-name{font-size:13px;font-weight:600;color:var(--text1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.radio-meta{font-size:11px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.radio-bitrate{padding:2px 6px;border-radius:8px;background:var(--bg4);color:var(--text3);font-size:10px;flex-shrink:0}
+.radio-playing-icon{color:var(--green);font-size:12px;flex-shrink:0;animation:radio-eq .6s ease-in-out infinite alternate}
+@keyframes radio-eq{from{transform:scaleY(1)}to{transform:scaleY(1.4)}}
+.radio-status{padding:20px;text-align:center;color:var(--text3);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.radio-status i{font-size:22px;opacity:.5}
 
 .bottom-nav{
   position:fixed;bottom:0;left:0;right:0;
@@ -162,8 +222,8 @@ input[type=file]::file-selector-button{
 }
 .bnav-btn{
   display:flex;flex-direction:column;align-items:center;gap:3px;
-  padding:4px 16px;background:transparent;border:none;color:var(--text3);
-  cursor:pointer;font-size:10px;-webkit-appearance:none;min-width:64px;
+  padding:4px 12px;background:transparent;border:none;color:var(--text3);
+  cursor:pointer;font-size:10px;-webkit-appearance:none;min-width:56px;
 }
 .bnav-btn i{font-size:18px}
 .bnav-btn.active{color:var(--accent2)}
@@ -210,7 +270,6 @@ input[type=file]::file-selector-button{
 .pl-empty{padding:28px 16px;text-align:center;color:var(--text3)}
 .pl-empty-ico{font-size:26px;opacity:.4;margin-bottom:7px}
 
-/* Saved indicator dot */
 .save-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-left:4px;flex-shrink:0}
 
 .toasts{position:fixed;top:calc(70px + var(--safe-top));right:12px;left:12px;z-index:200;display:flex;flex-direction:column;gap:6px;pointer-events:none}
@@ -258,6 +317,7 @@ input[type=file]::file-selector-button{
   <button class="plt-btn" data-p="instagram"><i class="fab fa-instagram" style="color:var(--pink)"></i> Instagram</button>
   <button class="plt-btn" data-p="url"><i class="fas fa-link" style="color:var(--green)"></i> URL</button>
   <button class="plt-btn" data-p="local"><i class="fas fa-folder" style="color:var(--yellow)"></i> Local</button>
+  <button class="plt-btn" data-p="radio"><i class="fas fa-radio" style="color:var(--green)"></i> Radio</button>
 </div>
 
 <div class="page">
@@ -277,6 +337,15 @@ input[type=file]::file-selector-button{
           <div id="fbIframeWrap"></div>
         </div>
         <video id="html5Player" style="display:none;background:#000" playsinline webkit-playsinline></video>
+
+        <!-- Radio visual display -->
+        <div id="radioDisplay">
+          <div class="radio-art" id="radioArt"><i class="fas fa-radio"></i></div>
+          <div class="radio-station-name" id="radioName">No station selected</div>
+          <div class="radio-station-meta" id="radioMeta"></div>
+          <div class="radio-live-chip"><span class="radio-live-dot"></span> LIVE</div>
+        </div>
+
         <div class="load-overlay" id="loadOverlay">
           <div class="spinner"></div>
           <div class="load-txt" id="loadTxt">Loading…</div>
@@ -284,7 +353,7 @@ input[type=file]::file-selector-button{
       </div>
 
       <div class="ctrl-wrap" id="ctrlWrap" style="display:none">
-        <div class="seek-row">
+        <div class="seek-row" id="seekRow">
           <div class="seek-track" id="seekTrack">
             <div class="seek-fill" id="seekFill" style="width:0%"></div>
             <div class="seek-thumb" id="seekThumb" style="left:0%"></div>
@@ -326,6 +395,7 @@ input[type=file]::file-selector-button{
         <button class="tab-btn" data-tab="instagram"><i class="fab fa-instagram" style="color:var(--pink);font-size:13px"></i> IG</button>
         <button class="tab-btn" data-tab="url"><i class="fas fa-link" style="color:var(--green);font-size:13px"></i> URL</button>
         <button class="tab-btn" data-tab="local"><i class="fas fa-folder" style="color:var(--yellow);font-size:13px"></i> Local</button>
+        <button class="tab-btn" data-tab="radio"><i class="fas fa-radio" style="color:var(--green);font-size:13px"></i> Radio</button>
       </div>
 
       <div class="tab-pane active" id="tab-youtube">
@@ -380,6 +450,31 @@ input[type=file]::file-selector-button{
           <button class="abtn" id="localAdd" disabled><i class="fas fa-plus"></i></button>
         </div>
       </div>
+
+      <!-- Radio Tab -->
+      <div class="tab-pane" id="tab-radio">
+        <div class="radio-search-row">
+          <input class="inp" id="radioSearchInp" placeholder="Search stations…" autocomplete="off">
+          <button class="radio-search-btn" id="radioSearchBtn"><i class="fas fa-search"></i> Search</button>
+        </div>
+        <div class="radio-genre-scroll" id="genreScroll">
+          <button class="genre-chip active" data-genre="">🔥 Top</button>
+          <button class="genre-chip" data-genre="pop">🎵 Pop</button>
+          <button class="genre-chip" data-genre="rock">🎸 Rock</button>
+          <button class="genre-chip" data-genre="jazz">🎷 Jazz</button>
+          <button class="genre-chip" data-genre="classical">🎻 Classical</button>
+          <button class="genre-chip" data-genre="hiphop">🎤 Hip-Hop</button>
+          <button class="genre-chip" data-genre="electronic">⚡ Electronic</button>
+          <button class="genre-chip" data-genre="country">🤠 Country</button>
+          <button class="genre-chip" data-genre="news">📰 News</button>
+          <button class="genre-chip" data-genre="sports">⚽ Sports</button>
+          <button class="genre-chip" data-genre="christian">✝ Christian</button>
+          <button class="genre-chip" data-genre="rnb">🎙 R&B</button>
+        </div>
+        <div class="radio-list" id="radioList">
+          <div class="radio-status"><i class="fas fa-radio"></i> Loading stations…</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -408,7 +503,11 @@ input[type=file]::file-selector-button{
   </button>
   <button class="bnav-btn" id="bnInput">
     <i class="fas fa-plus-circle"></i>
-    <span>Add Video</span>
+    <span>Add</span>
+  </button>
+  <button class="bnav-btn" id="bnRadio">
+    <i class="fas fa-radio"></i>
+    <span>Radio</span>
   </button>
   <button class="bnav-btn" id="bnPlaylist">
     <div class="bnav-icon-wrap">
@@ -450,19 +549,20 @@ const STORAGE_KEY = 'adg_playlist_v1';
 
 const S = {type:null,id:null,playing:false,vol:100,speed:1,dur:0,cur:0};
 let playlist=[],idx=-1,repeatMode='none';
-const ICONS={youtube:'fab fa-youtube',vimeo:'fab fa-vimeo',dailymotion:'fas fa-play',facebook:'fab fa-facebook',reel:'fab fa-facebook',html5:'fas fa-video',instagram:'fab fa-instagram'};
-const COLORS={youtube:'var(--red)',vimeo:'var(--accent3)',dailymotion:'var(--blue)',facebook:'var(--blue)',reel:'var(--pink)',html5:'var(--green)',instagram:'var(--pink)'};
-const BCLASS={youtube:'b-yt',vimeo:'b-vi',dailymotion:'b-dm',facebook:'b-fb',reel:'b-rl',html5:'b-h5',instagram:'b-ig'};
-const LABELS={youtube:'YouTube',vimeo:'Vimeo',dailymotion:'Dailymotion',facebook:'Facebook',reel:'Reel',html5:'Direct',instagram:'Instagram'};
+let radioStations=[],currentRadio=null;
 
-/* ── LocalStorage helpers ── */
+const ICONS={youtube:'fab fa-youtube',vimeo:'fab fa-vimeo',dailymotion:'fas fa-play',facebook:'fab fa-facebook',reel:'fab fa-facebook',html5:'fas fa-video',instagram:'fab fa-instagram',radio:'fas fa-radio'};
+const COLORS={youtube:'var(--red)',vimeo:'var(--accent3)',dailymotion:'var(--blue)',facebook:'var(--blue)',reel:'var(--pink)',html5:'var(--green)',instagram:'var(--pink)',radio:'var(--green)'};
+const BCLASS={youtube:'b-yt',vimeo:'b-vi',dailymotion:'b-dm',facebook:'b-fb',reel:'b-rl',html5:'b-h5',instagram:'b-ig',radio:'b-rd'};
+const LABELS={youtube:'YouTube',vimeo:'Vimeo',dailymotion:'Dailymotion',facebook:'Facebook',reel:'Reel',html5:'Direct',instagram:'Instagram',radio:'Radio'};
+
+/* ── LocalStorage ── */
 function savePlaylist(){
   try{
-    // Local files (blob: URLs) can't be restored — exclude them
     const saveable=playlist.filter(it=>it.type!=='html5'||!it.url.startsWith('blob:'));
     localStorage.setItem(STORAGE_KEY,JSON.stringify(saveable));
     updateSaveDot(saveable.length>0);
-  }catch(e){console.warn('Save failed',e);}
+  }catch(e){}
 }
 function loadPlaylist(){
   try{
@@ -470,28 +570,24 @@ function loadPlaylist(){
     if(raw){
       const parsed=JSON.parse(raw);
       if(Array.isArray(parsed)&&parsed.length>0){
-        playlist=parsed;
-        renderLists();updateCounts();
-        updateSaveDot(true);
+        playlist=parsed;renderLists();updateCounts();updateSaveDot(true);
         toast(`Restored ${parsed.length} item${parsed.length>1?'s':''} from saved playlist`,'info');
       }
     }
-  }catch(e){console.warn('Load failed',e);}
+  }catch(e){}
 }
 function updateSaveDot(visible){
   [$('deskSaveDot'),$('mobSaveDot')].forEach(el=>{if(el)el.style.display=visible?'inline-block':'none';});
 }
 function removeFromPlaylist(i){
   playlist.splice(i,1);
-  if(idx===i)idx=-1;
-  else if(idx>i)idx--;
+  if(idx===i)idx=-1;else if(idx>i)idx--;
   savePlaylist();renderLists();updateCounts();
   toast('Removed from playlist','info');
 }
 
 function toast(msg,type='info'){
-  const el=document.createElement('div');
-  el.className='toast';
+  const el=document.createElement('div');el.className='toast';
   const ic={success:'fa-circle-check',error:'fa-circle-xmark',warning:'fa-triangle-exclamation',info:'fa-circle-info'};
   const cl={success:'var(--green)',error:'var(--red)',warning:'var(--yellow)',info:'var(--accent2)'};
   el.innerHTML=`<i class="fas ${ic[type]||ic.info}" style="color:${cl[type]||cl.info};font-size:14px;flex-shrink:0"></i><span>${msg}</span>`;
@@ -501,6 +597,7 @@ function fmt(s){if(!s||isNaN(s))return'0:00';const m=Math.floor(s/60),sc=Math.fl
 function loading(show,txt='Loading…'){const o=$('loadOverlay');show?o.classList.add('show'):o.classList.remove('show');if(show)$('loadTxt').textContent=txt;}
 function hidePlaceholder(){$('placeholder').style.display='none'}
 function showPlaceholder(){$('placeholder').style.display='flex'}
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
 function setBadge(type){
   const b=$('platBadge');
@@ -527,10 +624,16 @@ function hideAll(){
   $('platformPlayer').style.display='none';
   $('html5Player').style.display='none';
   $('fbContainer').style.display='none';
+  $('radioDisplay').style.display='none';
   $('ctrlWrap').style.display='none';
+  $('seekRow').style.display='';
+  $('playBtn').classList.remove('radio-play');
+  $('playerWrap').className='player-wrap';
+  $('metaDur').style.display='none';
 }
 function setTitle(t){$('vidTitle').textContent=t||'Untitled'}
 
+/* ── Video loaders ── */
 function loadYT(id){
   hideAll();hidePlaceholder();loading(true,'Loading YouTube…');
   const p=$('platformPlayer');p.style.display='block';
@@ -580,18 +683,157 @@ function loadH5(url,title){
   hideAll();hidePlaceholder();loading(true,'Loading…');
   const v=$('html5Player');v.style.display='block';
   $('ctrlWrap').style.display='block';
-  $('playerWrap').className='player-wrap';
   v.src=url;v.load();v.play().catch(()=>{});
   S.type='html5';S.id=url;setTitle(title||url.split('/').pop()||'Video');setBadge('html5');
   setTimeout(()=>loading(false),600);
 }
 
+/* ── Radio loader ── */
+function loadRadio(station){
+  hideAll();hidePlaceholder();
+  currentRadio=station;
+  const streamUrl=station.url_resolved||station.url;
+
+  // Show radio visual
+  const rd=$('radioDisplay');
+  rd.style.display='flex';
+  $('playerWrap').className='player-wrap radio-mode';
+
+  // Set station art
+  const art=$('radioArt');
+  if(station.favicon){
+    art.innerHTML=`<img src="${escHtml(station.favicon)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-radio\\'></i>'">`;
+  } else {
+    art.innerHTML='<i class="fas fa-radio"></i>';
+  }
+  art.classList.add('pulse');
+
+  $('radioName').textContent=station.name||'Unknown Station';
+  const tags=station.tags?station.tags.split(',').slice(0,2).join(' · '):'';
+  const country=station.country||'';
+  const bitrate=station.bitrate?`${station.bitrate}kbps`:'';
+  $('radioMeta').textContent=[country,bitrate,tags].filter(Boolean).join(' · ');
+
+  // Play via html5 audio
+  const v=$('html5Player');
+  v.style.display='none'; // hidden — radio mode uses custom display
+  v.src=streamUrl;v.load();
+  v.play().catch(()=>{toast('Stream may require a direct URL','warning');});
+
+  S.type='radio';S.id=streamUrl;
+  setTitle(station.name||'Radio Station');
+  setBadge('radio');
+
+  // Show controls (vol + play only, hide seek)
+  $('ctrlWrap').style.display='block';
+  $('seekRow').style.display='none';
+  $('timeTxt').textContent='LIVE';
+  $('playBtn').classList.add('radio-play');
+  $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
+  S.playing=true;
+
+  renderRadioList();
+}
+window.loadRadio=loadRadio;
+
+/* ── Radio fetching ── */
+async function fetchRadio(query='',genre=''){
+  $('radioList').innerHTML='<div class="radio-status"><div class="spinner" style="width:24px;height:24px;border-width:2px"></div> Loading stations…</div>';
+  try{
+    let url;
+    if(query){
+      url=`https://de1.api.radio-browser.info/json/stations/search?name=${encodeURIComponent(query)}&limit=50&hidebroken=true&order=clickcount&reverse=true`;
+    } else if(genre){
+      url=`https://de1.api.radio-browser.info/json/stations/search?tag=${encodeURIComponent(genre)}&limit=50&hidebroken=true&order=clickcount&reverse=true`;
+    } else {
+      url=`https://de1.api.radio-browser.info/json/stations/topclick/50?hidebroken=true`;
+    }
+    const r=await fetch(url);
+    if(!r.ok)throw new Error('API error');
+    radioStations=await r.json();
+    renderRadioList();
+  } catch(e){
+    $('radioList').innerHTML='<div class="radio-status"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i> Could not load stations. Check your connection.</div>';
+  }
+}
+
+function renderRadioList(){
+  const el=$('radioList');
+  if(!radioStations.length){
+    el.innerHTML='<div class="radio-status"><i class="fas fa-search"></i> No stations found</div>';
+    return;
+  }
+  el.innerHTML=radioStations.map((s,i)=>{
+    const isPlaying=currentRadio&&currentRadio.stationuuid===s.stationuuid;
+    const favicon=s.favicon
+      ?`<img src="${escHtml(s.favicon)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-radio\\'></i>'">`
+      :'<i class="fas fa-radio"></i>';
+    const country=s.country||'';
+    const bitrate=s.bitrate?`${s.bitrate}kbps`:'';
+    const tag=s.tags?s.tags.split(',')[0]:'';
+    const meta=[country,bitrate,tag].filter(Boolean).join(' · ');
+    return `<div class="radio-item${isPlaying?' playing':''}" onclick="loadRadio(radioStations[${i}])">
+      <div class="radio-favicon">${favicon}</div>
+      <div class="radio-info">
+        <div class="radio-name">${escHtml(s.name)}</div>
+        ${meta?`<div class="radio-meta">${escHtml(meta)}</div>`:''}
+      </div>
+      ${s.bitrate?`<div class="radio-bitrate">${s.bitrate}k</div>`:''}
+      ${isPlaying?'<i class="fas fa-volume-high radio-playing-icon"></i>':''}
+    </div>`;
+  }).join('');
+}
+
+/* ── Genre chips ── */
+$('genreScroll').querySelectorAll('.genre-chip').forEach(chip=>{
+  chip.onclick=()=>{
+    QA('.genre-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    $('radioSearchInp').value='';
+    fetchRadio('',chip.dataset.genre);
+  };
+});
+$('radioSearchBtn').onclick=()=>{
+  const q=$('radioSearchInp').value.trim();
+  if(q){
+    QA('.genre-chip').forEach(c=>c.classList.remove('active'));
+    fetchRadio(q);
+  } else {
+    fetchRadio('');
+  }
+};
+$('radioSearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('radioSearchBtn').click();});
+
+/* ── HTML5 / Radio audio events ── */
 const vid=$('html5Player');
-vid.addEventListener('loadedmetadata',()=>{S.dur=vid.duration;$('metaDur').style.display='flex';$('durTxt').textContent=fmt(vid.duration);updateTime();});
-vid.addEventListener('timeupdate',()=>{S.cur=vid.currentTime;updateProg();updateTime();});
-vid.addEventListener('play',()=>{S.playing=true;$('playBtn').innerHTML='<i class="fas fa-pause"></i>';});
-vid.addEventListener('pause',()=>{S.playing=false;$('playBtn').innerHTML='<i class="fas fa-play"></i>';});
+vid.addEventListener('loadedmetadata',()=>{
+  if(S.type==='radio')return;
+  S.dur=vid.duration;$('metaDur').style.display='flex';$('durTxt').textContent=fmt(vid.duration);updateTime();
+});
+vid.addEventListener('timeupdate',()=>{
+  if(S.type==='radio')return;
+  S.cur=vid.currentTime;updateProg();updateTime();
+});
+vid.addEventListener('play',()=>{
+  S.playing=true;
+  $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
+});
+vid.addEventListener('pause',()=>{
+  S.playing=false;
+  $('playBtn').innerHTML='<i class="fas fa-play"></i>';
+});
 vid.addEventListener('ended',()=>onEnded());
+vid.addEventListener('error',()=>{
+  if(S.type==='radio'){
+    loading(false);
+    // Try fallback URL
+    if(currentRadio&&currentRadio.url&&vid.src!==currentRadio.url){
+      vid.src=currentRadio.url;vid.load();vid.play().catch(()=>{});
+    } else {
+      toast('Could not load stream','error');
+    }
+  }
+});
 function updateProg(){
   if(S.dur){const p=(S.cur/S.dur)*100;$('seekFill').style.width=p+'%';$('seekThumb').style.left=p+'%';}
 }
@@ -607,8 +849,11 @@ $('seekTrack').addEventListener('click',seek);
 $('seekTrack').addEventListener('touchstart',seek,{passive:true});
 
 $('playBtn').onclick=()=>{
-  if(S.type!=='html5'){toast('Use player controls for this platform','info');return;}
-  S.playing?vid.pause():vid.play();
+  if(S.type==='radio'||S.type==='html5'){
+    S.playing?vid.pause():vid.play();
+    return;
+  }
+  toast('Use player controls for this platform','info');
 };
 $('volBtn').onclick=()=>{$('volWrap').classList.toggle('open');};
 $('volSlider').addEventListener('input',e=>{
@@ -617,6 +862,7 @@ $('volSlider').addEventListener('input',e=>{
   i.className=S.vol===0?'fas fa-volume-xmark':S.vol<50?'fas fa-volume-low':'fas fa-volume-high';
 });
 $('speedBtn').onclick=()=>{
+  if(S.type==='radio')return;
   const speeds=[0.5,0.75,1,1.25,1.5,2];
   S.speed=speeds[(speeds.indexOf(S.speed)+1)%speeds.length];
   vid.playbackRate=S.speed;$('speedBtn').textContent=S.speed+'×';
@@ -627,15 +873,16 @@ $('prevBtn').onclick=()=>{if(idx>0)playItem(idx-1);};
 $('nextBtn').onclick=()=>{if(idx<playlist.length-1)playItem(idx+1);};
 
 function onEnded(){
+  if(S.type==='radio')return;
   if(repeatMode==='one')playItem(idx);
   else if(repeatMode==='all')playItem(idx<playlist.length-1?idx+1:0);
   else if(idx<playlist.length-1)playItem(idx+1);
 }
 
+/* ── Playlist ── */
 function addToPlaylist(item){
   playlist.push({...item,uid:Date.now()+Math.random()});
-  savePlaylist();
-  renderLists();updateCounts();
+  savePlaylist();renderLists();updateCounts();
   toast('Added to playlist','success');
 }
 function playItem(i){
@@ -647,6 +894,7 @@ function playItem(i){
   else if(it.type==='facebook'||it.type==='reel')loadFB(it.url);
   else if(it.type==='instagram')loadIG(it.url);
   else if(it.type==='html5')loadH5(it.url,it.title);
+  else if(it.type==='radio'&&it.station)loadRadio(it.station);
   renderLists();closeDrawer();
 }
 window.playItem=playItem;
@@ -662,7 +910,7 @@ function renderList(elId){
     <div class="pl-item${i===idx?' now':''}" onclick="playItem(${i})">
       <div class="pl-ico"><i class="${ICONS[it.type]||'fas fa-play'}" style="color:${COLORS[it.type]||'var(--accent)'};font-size:13px"></i></div>
       <div class="pl-info">
-        <div class="pl-name">${it.title||'Untitled'}</div>
+        <div class="pl-name">${escHtml(it.title||'Untitled')}</div>
         <div class="pl-type">${LABELS[it.type]||it.type}${it.type==='html5'&&it.url&&it.url.startsWith('blob:')?'&nbsp;<span style="color:var(--yellow);font-size:10px">(local)</span>':''}</div>
       </div>
       <button class="pl-del" onclick="event.stopPropagation();removeFromPlaylist(${i})" title="Remove"><i class="fas fa-xmark"></i></button>
@@ -701,6 +949,7 @@ function openDrawer(){$('drawer').classList.add('open');$('drawerOverlay').class
 function closeDrawer(){$('drawer').classList.remove('open');$('drawerOverlay').classList.remove('open');}
 $('closeDrawer').onclick=closeDrawer;$('drawerOverlay').onclick=closeDrawer;
 
+/* ── Bottom nav ── */
 $('bnPlaylist').onclick=openDrawer;
 $('bnPlayer').onclick=()=>{
   QA('.bnav-btn').forEach(b=>b.classList.remove('active'));$('bnPlayer').classList.add('active');
@@ -709,8 +958,15 @@ $('bnPlayer').onclick=()=>{
 $('bnInput').onclick=()=>{
   QA('.bnav-btn').forEach(b=>b.classList.remove('active'));$('bnInput').classList.add('active');
   document.querySelector('.input-card').scrollIntoView({behavior:'smooth',block:'start'});
+  Q('.tab-btn[data-tab="youtube"]').click();
+};
+$('bnRadio').onclick=()=>{
+  QA('.bnav-btn').forEach(b=>b.classList.remove('active'));$('bnRadio').classList.add('active');
+  document.querySelector('.input-card').scrollIntoView({behavior:'smooth',block:'start'});
+  Q('.tab-btn[data-tab="radio"]').click();
 };
 
+/* ── Tab switching ── */
 $('tabsBar').querySelectorAll('.tab-btn').forEach(btn=>{
   btn.onclick=()=>{
     QA('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
@@ -726,6 +982,7 @@ $('pltScroll').querySelectorAll('.plt-btn').forEach(btn=>{
   };
 });
 
+/* ── Load buttons ── */
 $('ytLoad').onclick=()=>{const id=extractYT($('ytInp').value.trim());id?loadYT(id):toast('Invalid YouTube URL','error');};
 $('ytAdd').onclick=()=>{const id=extractYT($('ytInp').value.trim());if(id)addToPlaylist({type:'youtube',videoId:id,title:'YouTube: '+id});else toast('Invalid YouTube URL','error');};
 $('viLoad').onclick=()=>{const id=extractVI($('viInp').value.trim());id?loadVI(id):toast('Invalid Vimeo URL','error');};
@@ -742,8 +999,9 @@ $('localInp').onchange=e=>{const ok=e.target.files.length>0;$('localLoad').disab
 $('localLoad').onclick=()=>{const f=$('localInp').files[0];if(f)loadH5(URL.createObjectURL(f),f.name);};
 $('localAdd').onclick=()=>{Array.from($('localInp').files).forEach(f=>addToPlaylist({type:'html5',url:URL.createObjectURL(f),title:f.name}));};
 
-/* ── Init: restore playlist from localStorage ── */
+/* ── Init ── */
 loadPlaylist();
+fetchRadio(); // preload top stations in background
 </script>
 </body>
 </html>
