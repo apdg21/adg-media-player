@@ -695,42 +695,29 @@ function loadH5(url,title){
   setTimeout(()=>loading(false),600);
 }
 
-/* ── Radio loader ── */
-/* ── Radio: srcdoc iframe engine ──────────────────────────────────(streamUrl){
-  // This entire HTML string runs inside the iframe with null origin
-  // so no Origin header is sent when the <audio> loads the stream
-  const escaped=streamUrl.replace(/'/g,"\\'").replace(/\\/g,'\\\\');
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-<script>
-var aud=new Audio();
-aud.preload='none';
-var vol=1,muted=false,currentSrc='';
-
-function tryLoad(src){
-  currentSrc=src;
-  aud.src=src;
-  aud.load();
-  aud.play().catch(function(){});
-}
-tryLoad('${escaped}');
-
-aud.addEventListener('playing',function(){parent.postMessage({evt:'playing'},'*');});
-aud.addEventListener('pause',function(){parent.postMessage({evt:'paused'},'*');});
-aud.addEventListener('error',function(){parent.postMessage({evt:'error',src:currentSrc},'*');});
-aud.addEventListener('stalled',function(){parent.postMessage({evt:'stalled'},'*');});
-aud.addEventListener('waiting',function(){parent.postMessage({evt:'waiting'},'*');});
-
-window.addEventListener('message',function(e){
-  var d=e.data;
-  if(!d||!d.cmd)return;
-  if(d.cmd==='play'){aud.play().catch(function(){});}
-  else if(d.cmd==='pause'){aud.pause();}
-  else if(d.cmd==='vol'){aud.volume=d.val;muted=false;}
-  else if(d.cmd==='mute'){aud.muted=d.val;}
-  else if(d.cmd==='src'){tryLoad(d.url);}
-  else if(d.cmd==='ping'){parent.postMessage({evt:'pong'},'*');}
-});
-<\/script></head><body style="margin:0;background:#000"></body></html>`;
+/* ── Radio: srcdoc iframe engine ── */
+// A srcdoc iframe has null origin → browser sends NO Origin header when
+// its <audio> fetches the stream — same behaviour as Electron webSecurity:false.
+// Parent ↔ iframe communicate via postMessage.
+function buildRadioIframeSrc(streamUrl){
+  const escaped=streamUrl.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><script>'
+    +'var aud=new Audio();aud.preload="none";var currentSrc="";'
+    +'function tryLoad(s){currentSrc=s;aud.src=s;aud.load();aud.play().catch(function(){});}'
+    +'tryLoad(\''+escaped+'\');'
+    +'aud.addEventListener("playing",function(){parent.postMessage({evt:"playing"},"*");});'
+    +'aud.addEventListener("pause",function(){parent.postMessage({evt:"paused"},"*");});'
+    +'aud.addEventListener("error",function(){parent.postMessage({evt:"error"},"*");});'
+    +'aud.addEventListener("stalled",function(){parent.postMessage({evt:"stalled"},"*");});'
+    +'window.addEventListener("message",function(e){'
+    +'var d=e.data;if(!d||!d.cmd)return;'
+    +'if(d.cmd==="play")aud.play().catch(function(){});'
+    +'else if(d.cmd==="pause")aud.pause();'
+    +'else if(d.cmd==="vol")aud.volume=d.val;'
+    +'else if(d.cmd==="mute")aud.muted=d.val;'
+    +'else if(d.cmd==="src")tryLoad(d.url);'
+    +'});'
+    +'<\/script><\/head><body style="margin:0"><\/body><\/html>';
 }
 
 function sendToRadioFrame(msg){
