@@ -551,8 +551,10 @@ const STORAGE_KEY = 'adg_playlist_v1';
 const S = {type:null,id:null,playing:false,vol:100,speed:1,dur:0,cur:0};
 let playlist=[],idx=-1,repeatMode='none';
 let radioStations=[],currentRadio=null;
-let hlsInstance=null; // HLS.js instance for m3u8 streams
-function destroyHls(){if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}}
+let hlsInstance=null;
+function destroyHls(){if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}} // kept for html5 HLS streams
+// Radio iframe engine variables — declared early so hideAll can reference them
+let radioFrame=null,radioFrameReady=false,radioAttemptUrls=[],radioAttemptIdx=0,radioConnectTimer=null;
 
 const ICONS={youtube:'fab fa-youtube',vimeo:'fab fa-vimeo',dailymotion:'fas fa-play',facebook:'fab fa-facebook',reel:'fab fa-facebook',html5:'fas fa-video',instagram:'fab fa-instagram',radio:'fas fa-radio'};
 const COLORS={youtube:'var(--red)',vimeo:'var(--accent3)',dailymotion:'var(--blue)',facebook:'var(--blue)',reel:'var(--pink)',html5:'var(--green)',instagram:'var(--pink)',radio:'var(--green)'};
@@ -624,7 +626,8 @@ function extractVI(u){if(!u)return null;const m=u.match(/vimeo\.com\/(\d+)/);ret
 function extractDM(u){if(!u)return null;const m=u.match(/(?:dailymotion\.com\/video\/|dai\.ly\/)([a-zA-Z0-9]+)/);return m?m[1]:(/^[a-zA-Z0-9]+$/.test(u)&&u.length<12?u:null);}
 
 function hideAll(){
-  destroyHls();
+  destroyRadioFrame();
+  clearTimeout(radioConnectTimer);
   $('platformPlayer').style.display='none';
   $('html5Player').style.display='none';
   $('fbContainer').style.display='none';
@@ -693,33 +696,130 @@ function loadH5(url,title){
 }
 
 /* ── Radio loader ── */
+/* ── Radio: srcdoc iframe engine ──────────────────────────────────(streamUrl){
+  // This entire HTML string runs inside the iframe with null origin
+  // so no Origin header is sent when the <audio> loads the stream
+  const escaped=streamUrl.replace(/'/g,"\\'").replace(/\\/g,'\\\\');
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<script>
+var aud=new Audio();
+aud.preload='none';
+var vol=1,muted=false,currentSrc='';
+
+function tryLoad(src){
+  currentSrc=src;
+  aud.src=src;
+  aud.load();
+  aud.play().catch(function(){});
+}
+tryLoad('${escaped}');
+
+aud.addEventListener('playing',function(){parent.postMessage({evt:'playing'},'*');});
+aud.addEventListener('pause',function(){parent.postMessage({evt:'paused'},'*');});
+aud.addEventListener('error',function(){parent.postMessage({evt:'error',src:currentSrc},'*');});
+aud.addEventListener('stalled',function(){parent.postMessage({evt:'stalled'},'*');});
+aud.addEventListener('waiting',function(){parent.postMessage({evt:'waiting'},'*');});
+
+window.addEventListener('message',function(e){
+  var d=e.data;
+  if(!d||!d.cmd)return;
+  if(d.cmd==='play'){aud.play().catch(function(){});}
+  else if(d.cmd==='pause'){aud.pause();}
+  else if(d.cmd==='vol'){aud.volume=d.val;muted=false;}
+  else if(d.cmd==='mute'){aud.muted=d.val;}
+  else if(d.cmd==='src'){tryLoad(d.url);}
+  else if(d.cmd==='ping'){parent.postMessage({evt:'pong'},'*');}
+});
+<\/script></head><body style="margin:0;background:#000"></body></html>`;
+}
+
+function sendToRadioFrame(msg){
+  if(radioFrame&&radioFrame.contentWindow){
+    try{radioFrame.contentWindow.postMessage(msg,'*');}catch(e){}
+  }
+}
+
+function destroyRadioFrame(){
+  window.removeEventListener('message',radioMessageHandler);
+  if(radioFrame){
+    radioFrame.remove();
+    radioFrame=null;
+    radioFrameReady=false;
+  }
+}
+
+function radioMessageHandler(e){
+  if(!e.data||!e.data.evt)return;
+  const ev=e.data.evt;
+  if(ev==='playing'){
+    clearTimeout(radioConnectTimer);
+    loading(false);
+    $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
+    S.playing=true;
+  } else if(ev==='paused'){
+    $('playBtn').innerHTML='<i class="fas fa-play"></i>';
+    S.playing=false;
+  } else if(ev==='error'||ev==='stalled'){
+    clearTimeout(radioConnectTimer);
+    radioAttemptIdx++;
+    tryNextRadioUrl();
+  }
+}
+
+function tryNextRadioUrl(){
+  if(radioAttemptIdx>=radioAttemptUrls.length){
+    loading(false);
+    toast('Could not connect — try another station','error');
+    $('playBtn').innerHTML='<i class="fas fa-play"></i>';
+    S.playing=false;
+    return;
+  }
+  const url=radioAttemptUrls[radioAttemptIdx];
+  if(radioFrame&&radioFrame.contentWindow){
+    sendToRadioFrame({cmd:'src',url});
+  } else {
+    // Rebuild iframe with new URL
+    launchRadioFrame(url);
+  }
+  // If no 'playing' event in 8s, try next
+  clearTimeout(radioConnectTimer);
+  radioConnectTimer=setTimeout(()=>{
+    radioAttemptIdx++;
+    tryNextRadioUrl();
+  },8000);
+}
+
+function launchRadioFrame(streamUrl){
+  destroyRadioFrame();
+  window.addEventListener('message',radioMessageHandler);
+  radioFrame=document.createElement('iframe');
+  radioFrame.style.cssText='position:absolute;width:0;height:0;border:none;opacity:0;pointer-events:none';
+  radioFrame.sandbox='allow-scripts allow-same-origin';
+  radioFrame.srcdoc=buildRadioIframeSrc(streamUrl);
+  document.body.appendChild(radioFrame);
+  // Timeout for initial frame load
+  clearTimeout(radioConnectTimer);
+  radioConnectTimer=setTimeout(()=>{
+    radioAttemptIdx++;
+    tryNextRadioUrl();
+  },8000);
+}
+
 function loadRadio(station){
   hideAll();hidePlaceholder();
+  destroyRadioFrame();
   currentRadio=station;
-  destroyHls();
 
-  // Build stream URL candidates in priority order:
-  // 1. url_resolved (already followed redirects) as https
-  // 2. url as https
-  // 3. via corsproxy.io (handles CORS + SHOUTcast ICY protocol issues)
-  // 4. original http versions as last resort
-  function upgrade(u){return u?u.replace(/^http:/,'https:'):'';}
+  // Build candidate URL list
+  function toHttps(u){return u?u.replace(/^http:/,'https:'):'';}
   const res=station.url_resolved||'';
   const raw=station.url||'';
-  const resHttps=upgrade(res);
-  const rawHttps=upgrade(raw);
-  const PROXY='https://corsproxy.io/?';
-
-  const candidates=[
-    resHttps,
-    rawHttps,
-    resHttps?PROXY+encodeURIComponent(resHttps):'',
-    rawHttps?PROXY+encodeURIComponent(rawHttps):'',
-    res, // original http fallback (works in Electron / non-strict browsers)
-    raw,
+  radioAttemptUrls=[
+    toHttps(res),toHttps(raw),res,raw
   ].filter((u,i,a)=>u&&a.indexOf(u)===i);
+  radioAttemptIdx=0;
 
-  // Show radio visual UI
+  // Show radio visual
   $('radioDisplay').style.display='flex';
   $('playerWrap').className='player-wrap radio-mode';
 
@@ -735,7 +835,7 @@ function loadRadio(station){
   const bitrate=station.bitrate?`${station.bitrate}kbps`:'';
   $('radioMeta').textContent=[country,bitrate,tags].filter(Boolean).join(' · ');
 
-  S.type='radio';S.id=candidates[0]||'';
+  S.type='radio';S.id=radioAttemptUrls[0]||'';
   setTitle(station.name||'Radio Station');
   setBadge('radio');
 
@@ -747,56 +847,10 @@ function loadRadio(station){
   S.playing=true;
 
   loading(true,'Connecting…');
-  tryRadioStream(candidates,0);
+  launchRadioFrame(radioAttemptUrls[0]);
   renderRadioList();
 }
 window.loadRadio=loadRadio;
-
-function tryRadioStream(candidates,attemptIdx){
-  if(attemptIdx>=candidates.length){
-    loading(false);
-    toast('Could not connect — try another station','error');
-    $('playBtn').innerHTML='<i class="fas fa-play"></i>';
-    S.playing=false;
-    return;
-  }
-
-  const url=candidates[attemptIdx];
-  const v=$('html5Player');
-  destroyHls();
-
-  const isHls=url.includes('.m3u8')||url.includes('/hls/')||(/playlist/i.test(url)&&!url.includes('facebook'));
-
-  function onSuccess(){loading(false);}
-  function onFail(){tryRadioStream(candidates,attemptIdx+1);}
-
-  if(isHls&&typeof Hls!=='undefined'&&Hls.isSupported()){
-    hlsInstance=new Hls({enableWorker:true,lowLatencyMode:true,xhrSetup:(xhr)=>{xhr.withCredentials=false;}});
-    hlsInstance.loadSource(url);
-    hlsInstance.attachMedia(v);
-    hlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>{v.play().catch(()=>{});onSuccess();});
-    hlsInstance.on(Hls.Events.ERROR,(_,data)=>{if(data.fatal){destroyHls();onFail();}});
-    setTimeout(()=>{if(hlsInstance&&v.readyState<1){destroyHls();onFail();}},8000);
-  } else if(isHls&&v.canPlayType('application/vnd.apple.mpegurl')){
-    v.src=url;v.load();
-    v.play().then(onSuccess).catch(onFail);
-  } else {
-    v.src=url;v.load();
-    let settled=false;
-    const done=(ok)=>{
-      if(settled)return;settled=true;
-      v.removeEventListener('canplay',onCan);
-      v.removeEventListener('error',onErr);
-      ok?onSuccess():onFail();
-    };
-    const onCan=()=>done(true);
-    const onErr=()=>done(false);
-    v.addEventListener('canplay',onCan,{once:true});
-    v.addEventListener('error',onErr,{once:true});
-    v.play().catch(()=>{}); // autoplay policy — user can press play
-    setTimeout(()=>done(false),9000); // hard timeout
-  }
-}
 
 /* ── Radio fetching with mirror fallback ── */
 const RADIO_MIRRORS=['de1.api.radio-browser.info','nl1.api.radio-browser.info','at1.api.radio-browser.info'];
@@ -928,15 +982,20 @@ $('seekTrack').addEventListener('click',seek);
 $('seekTrack').addEventListener('touchstart',seek,{passive:true});
 
 $('playBtn').onclick=()=>{
-  if(S.type==='radio'||S.type==='html5'){
-    S.playing?vid.pause():vid.play();
+  if(S.type==='radio'){
+    if(S.playing){sendToRadioFrame({cmd:'pause'});}
+    else{sendToRadioFrame({cmd:'play'});}
     return;
   }
+  if(S.type==='html5'){S.playing?vid.pause():vid.play();return;}
   toast('Use player controls for this platform','info');
 };
 $('volBtn').onclick=()=>{$('volWrap').classList.toggle('open');};
 $('volSlider').addEventListener('input',e=>{
-  S.vol=+e.target.value;vid.volume=S.vol/100;
+  S.vol=+e.target.value;
+  const level=S.vol/100;
+  if(S.type==='radio'){sendToRadioFrame({cmd:'vol',val:level});}
+  else{vid.volume=level;}
   const i=$('volBtn').querySelector('i');
   i.className=S.vol===0?'fas fa-volume-xmark':S.vol<50?'fas fa-volume-low':'fas fa-volume-high';
 });
