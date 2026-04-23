@@ -14,6 +14,7 @@
   --text1:#f0f0ff;--text2:#a0a0c0;--text3:#606080;
   --border:#ffffff14;--border2:#ffffff22;
   --red:#f87171;--blue:#60a5fa;--green:#34d399;--yellow:#fbbf24;--pink:#f472b6;
+  --tv:#ff6b35;--tv2:#ff8c5a;
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -56,6 +57,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .player-wrap{position:relative;width:100%;background:#000;aspect-ratio:16/9}
 .player-wrap.portrait{aspect-ratio:9/16;max-width:min(320px,100%);margin:0 auto}
 .player-wrap.radio-mode{aspect-ratio:unset;height:160px;background:linear-gradient(135deg,var(--bg2),var(--bg3))}
+.player-wrap.tv-mode{aspect-ratio:16/9;background:#000}
 
 .player-placeholder{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
@@ -69,7 +71,6 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 #fbIframeWrap{flex:1;overflow:hidden}
 #fbIframeWrap iframe{width:100%;height:100%;border:none}
 
-/* Radio player display */
 #radioDisplay{
   position:absolute;inset:0;display:none;
   flex-direction:column;align-items:center;justify-content:center;gap:10px;
@@ -89,6 +90,30 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .radio-live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
+/* TV Overlay display (shown when no stream yet) */
+#tvDisplay{
+  position:absolute;inset:0;display:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  padding:20px;background:linear-gradient(135deg,#0a0a0f,#12121a);
+}
+.tv-logo-wrap{width:80px;height:80px;border-radius:18px;background:var(--bg3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.tv-logo-wrap img{width:100%;height:100%;object-fit:contain;border-radius:18px}
+.tv-channel-name{font-size:16px;font-weight:700;color:var(--text1);text-align:center;line-height:1.3}
+.tv-channel-meta{font-size:11px;color:var(--text3);text-align:center}
+.tv-live-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:#ff6b3522;color:var(--tv);font-size:10px;font-weight:700}
+.tv-live-dot{width:6px;height:6px;border-radius:50%;background:var(--tv);animation:blink 1s ease-in-out infinite}
+/* TV Info overlay on video */
+.tv-info-overlay{
+  position:absolute;bottom:0;left:0;right:0;padding:10px 12px;
+  background:linear-gradient(to top,rgba(0,0,0,.85),transparent);
+  display:none;align-items:center;gap:8px;pointer-events:none;
+}
+.tv-info-overlay.show{display:flex}
+.tv-overlay-logo{width:28px;height:28px;border-radius:6px;background:var(--bg3);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--tv)}
+.tv-overlay-logo img{width:100%;height:100%;object-fit:contain}
+.tv-overlay-name{font-size:12px;font-weight:600;color:#fff;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-overlay-live{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--tv);font-weight:700}
+
 .fb-notice{background:var(--bg3);padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border)}
 .fb-notice-txt{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .fb-open{padding:5px 11px;border-radius:16px;background:var(--blue);color:#fff;font-size:11px;font-weight:600;text-decoration:none;white-space:nowrap;flex-shrink:0}
@@ -96,6 +121,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .load-overlay{position:absolute;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;z-index:20}
 .load-overlay.show{display:flex}
 .spinner{width:32px;height:32px;border:3px solid var(--bg4);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+.spinner.tv-spin{border-top-color:var(--tv)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .load-txt{font-size:12px;color:var(--text2)}
 
@@ -112,6 +138,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .cb.play{width:44px;height:44px;border-radius:10px;background:var(--accent);color:#fff;font-size:18px}
 .cb.play:active{background:var(--accent2)}
 .cb.play.radio-play{background:var(--green)}
+.cb.play.tv-play{background:var(--tv)}
 .time-txt{font-size:11px;color:var(--text3);padding:0 4px;white-space:nowrap}
 .speed-btn{padding:4px 8px;border-radius:6px;background:var(--bg4);color:var(--text2);font-size:11px;border:none;cursor:pointer;-webkit-appearance:none}
 .speed-btn:active{background:var(--accent);color:#fff}
@@ -132,6 +159,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .b-h5{background:#10b98122;color:#34d399}
 .b-ig{background:#c32aa322;color:#f472b6}
 .b-rd{background:#34d39922;color:#34d399}
+.b-tv{background:#ff6b3522;color:#ff6b35}
 
 .input-card{background:var(--bg1);border-radius:14px;border:1px solid var(--border);overflow:hidden}
 .tabs-bar{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);scrollbar-width:none}
@@ -169,6 +197,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .btn-dm{background:#0066dc;color:#fff}.btn-fb{background:#1877f2;color:#fff}
 .btn-ig{background:#c32aa3;color:#fff}.btn-url{background:#34d399;color:#000}
 .btn-local{background:#fbbf24;color:#000}.btn-radio{background:#34d399;color:#000}
+.btn-tv{background:var(--tv);color:#fff}
 .info-tip{font-size:11px;color:var(--text3);margin-top:6px;display:flex;align-items:center;gap:4px}
 input[type=file]{color:var(--text2);font-size:13px;width:100%}
 input[type=file]::file-selector-button{
@@ -177,7 +206,7 @@ input[type=file]::file-selector-button{
   margin-right:10px;-webkit-appearance:none;
 }
 
-/* ── Radio Tab Styles ── */
+/* Radio styles */
 .radio-search-row{display:flex;gap:8px;margin-bottom:10px}
 .radio-search-row .inp{flex:1}
 .radio-search-btn{
@@ -214,6 +243,50 @@ input[type=file]::file-selector-button{
 .radio-status{padding:20px;text-align:center;color:var(--text3);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:8px}
 .radio-status i{font-size:22px;opacity:.5}
 
+/* ── TV Tab Styles ── */
+.tv-toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.tv-search-row{display:flex;gap:8px;flex:1;min-width:200px}
+.tv-search-row .inp{flex:1}
+.tv-search-btn{
+  padding:11px 14px;border-radius:10px;background:var(--tv);color:#fff;
+  border:none;cursor:pointer;font-size:14px;font-weight:600;-webkit-appearance:none;
+  min-height:44px;white-space:nowrap;display:flex;align-items:center;gap:6px;
+  flex-shrink:0;
+}
+.tv-search-btn:active{opacity:.85}
+.tv-filter-row{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none;padding-bottom:2px}
+.tv-filter-row::-webkit-scrollbar{display:none}
+.tv-chip{
+  padding:5px 12px;border-radius:16px;border:1px solid var(--border2);background:var(--bg3);
+  color:var(--text3);font-size:11px;cursor:pointer;white-space:nowrap;flex-shrink:0;-webkit-appearance:none;
+}
+.tv-chip.active{background:var(--tv);border-color:var(--tv);color:#fff;font-weight:600}
+.tv-chip:active{opacity:.8}
+.tv-category-scroll{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none;padding-bottom:2px}
+.tv-category-scroll::-webkit-scrollbar{display:none}
+.tv-list{display:flex;flex-direction:column;gap:1px;max-height:380px;overflow-y:auto;border-radius:10px;border:1px solid var(--border)}
+.tv-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  transition:background .15s;
+}
+.tv-item:last-child{border-bottom:none}
+.tv-item:active,.tv-item:hover{background:var(--bg3)}
+.tv-item.playing{background:var(--bg3);border-left:3px solid var(--tv)}
+.tv-logo{width:40px;height:30px;border-radius:6px;background:var(--bg4);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--tv);flex-shrink:0;overflow:hidden}
+.tv-logo img{width:100%;height:100%;object-fit:contain;border-radius:6px}
+.tv-info{flex:1;min-width:0}
+.tv-name{font-size:13px;font-weight:600;color:var(--text1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-meta{font-size:11px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-badge{padding:2px 6px;border-radius:6px;background:var(--bg4);color:var(--text3);font-size:10px;flex-shrink:0;text-transform:uppercase}
+.tv-playing-icon{color:var(--tv);font-size:12px;flex-shrink:0;animation:radio-eq .6s ease-in-out infinite alternate}
+.tv-status{padding:20px;text-align:center;color:var(--text3);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.tv-status i{font-size:22px;opacity:.5}
+.tv-notice{
+  padding:8px 12px;background:#ff6b3514;border:1px solid #ff6b3530;border-radius:8px;
+  font-size:11px;color:var(--tv2);display:flex;align-items:flex-start;gap:6px;margin-bottom:10px;line-height:1.5;
+}
+
 .bottom-nav{
   position:fixed;bottom:0;left:0;right:0;
   background:var(--bg1);border-top:1px solid var(--border);
@@ -224,7 +297,7 @@ input[type=file]::file-selector-button{
 .bnav-btn{
   display:flex;flex-direction:column;align-items:center;gap:3px;
   padding:4px 12px;background:transparent;border:none;color:var(--text3);
-  cursor:pointer;font-size:10px;-webkit-appearance:none;min-width:56px;
+  cursor:pointer;font-size:10px;-webkit-appearance:none;min-width:48px;
 }
 .bnav-btn i{font-size:18px}
 .bnav-btn.active{color:var(--accent2)}
@@ -319,6 +392,7 @@ input[type=file]::file-selector-button{
   <button class="plt-btn" data-p="url"><i class="fas fa-link" style="color:var(--green)"></i> URL</button>
   <button class="plt-btn" data-p="local"><i class="fas fa-folder" style="color:var(--yellow)"></i> Local</button>
   <button class="plt-btn" data-p="radio"><i class="fas fa-radio" style="color:var(--green)"></i> Radio</button>
+  <button class="plt-btn" data-p="tv"><i class="fas fa-tv" style="color:var(--tv)"></i> TV</button>
 </div>
 
 <div class="page">
@@ -347,8 +421,23 @@ input[type=file]::file-selector-button{
           <div class="radio-live-chip"><span class="radio-live-dot"></span> LIVE</div>
         </div>
 
+        <!-- TV channel display (shown briefly before stream starts) -->
+        <div id="tvDisplay">
+          <div class="tv-logo-wrap" id="tvLogoWrap"><i class="fas fa-tv" style="font-size:22px;color:var(--tv)"></i></div>
+          <div class="tv-channel-name" id="tvChannelName">Select a channel</div>
+          <div class="tv-channel-meta" id="tvChannelMeta"></div>
+          <div class="tv-live-chip"><span class="tv-live-dot"></span> LIVE TV</div>
+        </div>
+
+        <!-- TV info overlay on playing video -->
+        <div class="tv-info-overlay" id="tvInfoOverlay">
+          <div class="tv-overlay-logo" id="tvOverlayLogo"><i class="fas fa-tv"></i></div>
+          <div class="tv-overlay-name" id="tvOverlayName"></div>
+          <div class="tv-overlay-live"><span class="tv-live-dot" style="background:var(--tv)"></span> LIVE</div>
+        </div>
+
         <div class="load-overlay" id="loadOverlay">
-          <div class="spinner"></div>
+          <div class="spinner" id="loadSpinner"></div>
           <div class="load-txt" id="loadTxt">Loading…</div>
         </div>
       </div>
@@ -397,6 +486,7 @@ input[type=file]::file-selector-button{
         <button class="tab-btn" data-tab="url"><i class="fas fa-link" style="color:var(--green);font-size:13px"></i> URL</button>
         <button class="tab-btn" data-tab="local"><i class="fas fa-folder" style="color:var(--yellow);font-size:13px"></i> Local</button>
         <button class="tab-btn" data-tab="radio"><i class="fas fa-radio" style="color:var(--green);font-size:13px"></i> Radio</button>
+        <button class="tab-btn" data-tab="tv"><i class="fas fa-tv" style="color:var(--tv);font-size:13px"></i> TV</button>
       </div>
 
       <div class="tab-pane active" id="tab-youtube">
@@ -476,6 +566,79 @@ input[type=file]::file-selector-button{
           <div class="radio-status"><i class="fas fa-radio"></i> Loading stations…</div>
         </div>
       </div>
+
+      <!-- TV Tab -->
+      <div class="tab-pane" id="tab-tv">
+        <div class="tv-notice">
+          <i class="fas fa-circle-info" style="font-size:12px;margin-top:1px;flex-shrink:0"></i>
+          <span>Free live TV powered by <strong>IPTV-org</strong> — thousands of legal, public broadcast channels worldwide. Some channels may be geo-restricted or temporarily offline.</span>
+        </div>
+        <div class="tv-toolbar">
+          <div class="tv-search-row">
+            <input class="inp" id="tvSearchInp" placeholder="Search channels…" autocomplete="off">
+            <button class="tv-search-btn" id="tvSearchBtn"><i class="fas fa-search"></i></button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px">
+            <i class="fas fa-globe" style="color:var(--tv)"></i> Country
+          </div>
+          <div style="font-size:11px;color:var(--tv)" id="tvCountLabel"></div>
+        </div>
+        <div class="tv-filter-row" id="tvCountryScroll">
+          <button class="tv-chip active" data-country="">🌍 All</button>
+          <button class="tv-chip" data-country="PH">🇵🇭 Philippines</button>
+          <button class="tv-chip" data-country="US">🇺🇸 USA</button>
+          <button class="tv-chip" data-country="GB">🇬🇧 UK</button>
+          <button class="tv-chip" data-country="JP">🇯🇵 Japan</button>
+          <button class="tv-chip" data-country="KR">🇰🇷 Korea</button>
+          <button class="tv-chip" data-country="IN">🇮🇳 India</button>
+          <button class="tv-chip" data-country="AU">🇦🇺 Australia</button>
+          <button class="tv-chip" data-country="CA">🇨🇦 Canada</button>
+          <button class="tv-chip" data-country="DE">🇩🇪 Germany</button>
+          <button class="tv-chip" data-country="FR">🇫🇷 France</button>
+          <button class="tv-chip" data-country="IT">🇮🇹 Italy</button>
+          <button class="tv-chip" data-country="ES">🇪🇸 Spain</button>
+          <button class="tv-chip" data-country="BR">🇧🇷 Brazil</button>
+          <button class="tv-chip" data-country="MX">🇲🇽 Mexico</button>
+          <button class="tv-chip" data-country="SG">🇸🇬 Singapore</button>
+          <button class="tv-chip" data-country="MY">🇲🇾 Malaysia</button>
+          <button class="tv-chip" data-country="ID">🇮🇩 Indonesia</button>
+          <button class="tv-chip" data-country="TH">🇹🇭 Thailand</button>
+          <button class="tv-chip" data-country="RU">🇷🇺 Russia</button>
+          <button class="tv-chip" data-country="TR">🇹🇷 Turkey</button>
+          <button class="tv-chip" data-country="SA">🇸🇦 Saudi Arabia</button>
+          <button class="tv-chip" data-country="AE">🇦🇪 UAE</button>
+          <button class="tv-chip" data-country="EG">🇪🇬 Egypt</button>
+          <button class="tv-chip" data-country="NG">🇳🇬 Nigeria</button>
+          <button class="tv-chip" data-country="ZA">🇿🇦 South Africa</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px">
+            <i class="fas fa-tag" style="color:var(--tv)"></i> Category
+          </div>
+          <div style="font-size:11px;color:var(--text3)" id="tvResultCount"></div>
+        </div>
+        <div class="tv-filter-row" id="tvCategoryScroll">
+          <button class="tv-chip active" data-category="">📺 All</button>
+          <button class="tv-chip" data-category="news">📰 News</button>
+          <button class="tv-chip" data-category="sports">⚽ Sports</button>
+          <button class="tv-chip" data-category="entertainment">🎬 Entertainment</button>
+          <button class="tv-chip" data-category="kids">🧒 Kids</button>
+          <button class="tv-chip" data-category="music">🎵 Music</button>
+          <button class="tv-chip" data-category="movies">🎥 Movies</button>
+          <button class="tv-chip" data-category="documentary">🌿 Documentary</button>
+          <button class="tv-chip" data-category="cooking">🍳 Cooking</button>
+          <button class="tv-chip" data-category="travel">✈️ Travel</button>
+          <button class="tv-chip" data-category="science">🔬 Science</button>
+          <button class="tv-chip" data-category="religious">✝ Religious</button>
+          <button class="tv-chip" data-category="business">💼 Business</button>
+          <button class="tv-chip" data-category="weather">🌤 Weather</button>
+        </div>
+        <div class="tv-list" id="tvList">
+          <div class="tv-status"><div class="spinner tv-spin" style="width:24px;height:24px;border-width:2px"></div> Loading channels…</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -509,6 +672,10 @@ input[type=file]::file-selector-button{
   <button class="bnav-btn" id="bnRadio">
     <i class="fas fa-radio"></i>
     <span>Radio</span>
+  </button>
+  <button class="bnav-btn" id="bnTV">
+    <i class="fas fa-tv"></i>
+    <span>TV</span>
   </button>
   <button class="bnav-btn" id="bnPlaylist">
     <div class="bnav-icon-wrap">
@@ -552,14 +719,19 @@ const S = {type:null,id:null,playing:false,vol:100,speed:1,dur:0,cur:0};
 let playlist=[],idx=-1,repeatMode='none';
 let radioStations=[],currentRadio=null;
 let hlsInstance=null;
-function destroyHls(){if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}} // kept for html5 HLS streams
-// Radio iframe engine variables — declared early so hideAll can reference them
+
+// Radio iframe engine
 let radioFrame=null,radioFrameReady=false,radioAttemptUrls=[],radioAttemptIdx=0,radioConnectTimer=null;
 
-const ICONS={youtube:'fab fa-youtube',vimeo:'fab fa-vimeo',dailymotion:'fas fa-play',facebook:'fab fa-facebook',reel:'fab fa-facebook',html5:'fas fa-video',instagram:'fab fa-instagram',radio:'fas fa-radio'};
-const COLORS={youtube:'var(--red)',vimeo:'var(--accent3)',dailymotion:'var(--blue)',facebook:'var(--blue)',reel:'var(--pink)',html5:'var(--green)',instagram:'var(--pink)',radio:'var(--green)'};
-const BCLASS={youtube:'b-yt',vimeo:'b-vi',dailymotion:'b-dm',facebook:'b-fb',reel:'b-rl',html5:'b-h5',instagram:'b-ig',radio:'b-rd'};
-const LABELS={youtube:'YouTube',vimeo:'Vimeo',dailymotion:'Dailymotion',facebook:'Facebook',reel:'Reel',html5:'Direct',instagram:'Instagram',radio:'Radio'};
+// TV state
+let tvChannels=[],tvFiltered=[],currentTV=null,tvHlsInstance=null;
+let tvCountryFilter='',tvCategoryFilter='',tvSearchQuery='';
+let tvOverlayTimer=null;
+
+const ICONS={youtube:'fab fa-youtube',vimeo:'fab fa-vimeo',dailymotion:'fas fa-play',facebook:'fab fa-facebook',reel:'fab fa-facebook',html5:'fas fa-video',instagram:'fab fa-instagram',radio:'fas fa-radio',tv:'fas fa-tv'};
+const COLORS={youtube:'var(--red)',vimeo:'var(--accent3)',dailymotion:'var(--blue)',facebook:'var(--blue)',reel:'var(--pink)',html5:'var(--green)',instagram:'var(--pink)',radio:'var(--green)',tv:'var(--tv)'};
+const BCLASS={youtube:'b-yt',vimeo:'b-vi',dailymotion:'b-dm',facebook:'b-fb',reel:'b-rl',html5:'b-h5',instagram:'b-ig',radio:'b-rd',tv:'b-tv'};
+const LABELS={youtube:'YouTube',vimeo:'Vimeo',dailymotion:'Dailymotion',facebook:'Facebook',reel:'Reel',html5:'Direct',instagram:'Instagram',radio:'Radio',tv:'Live TV'};
 
 /* ── LocalStorage ── */
 function savePlaylist(){
@@ -599,7 +771,13 @@ function toast(msg,type='info'){
   $('toasts').append(el);setTimeout(()=>el.remove(),3000);
 }
 function fmt(s){if(!s||isNaN(s))return'0:00';const m=Math.floor(s/60),sc=Math.floor(s%60);return`${m}:${sc.toString().padStart(2,'0')}`}
-function loading(show,txt='Loading…'){const o=$('loadOverlay');show?o.classList.add('show'):o.classList.remove('show');if(show)$('loadTxt').textContent=txt;}
+function loading(show,txt='Loading…',isTv=false){
+  const o=$('loadOverlay');show?o.classList.add('show'):o.classList.remove('show');
+  if(show){
+    $('loadTxt').textContent=txt;
+    $('loadSpinner').className='spinner'+(isTv?' tv-spin':'');
+  }
+}
 function hidePlaceholder(){$('placeholder').style.display='none'}
 function showPlaceholder(){$('placeholder').style.display='flex'}
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -625,16 +803,25 @@ function extractYT(u){
 function extractVI(u){if(!u)return null;const m=u.match(/vimeo\.com\/(\d+)/);return m?m[1]:(/^\d+$/.test(u)?u:null);}
 function extractDM(u){if(!u)return null;const m=u.match(/(?:dailymotion\.com\/video\/|dai\.ly\/)([a-zA-Z0-9]+)/);return m?m[1]:(/^[a-zA-Z0-9]+$/.test(u)&&u.length<12?u:null);}
 
+function destroyTvHls(){
+  if(tvHlsInstance){tvHlsInstance.destroy();tvHlsInstance=null;}
+}
+function destroyHls(){if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}}
+
 function hideAll(){
   destroyRadioFrame();
+  destroyTvHls();
   clearTimeout(radioConnectTimer);
+  clearTimeout(tvOverlayTimer);
   $('platformPlayer').style.display='none';
   $('html5Player').style.display='none';
   $('fbContainer').style.display='none';
   $('radioDisplay').style.display='none';
+  $('tvDisplay').style.display='none';
+  $('tvInfoOverlay').classList.remove('show');
   $('ctrlWrap').style.display='none';
   $('seekRow').style.display='';
-  $('playBtn').classList.remove('radio-play');
+  $('playBtn').classList.remove('radio-play','tv-play');
   $('playerWrap').className='player-wrap';
   $('metaDur').style.display='none';
 }
@@ -690,15 +877,294 @@ function loadH5(url,title){
   hideAll();hidePlaceholder();loading(true,'Loading…');
   const v=$('html5Player');v.style.display='block';
   $('ctrlWrap').style.display='block';
-  v.src=url;v.load();v.play().catch(()=>{});
   S.type='html5';S.id=url;setTitle(title||url.split('/').pop()||'Video');setBadge('html5');
-  setTimeout(()=>loading(false),600);
+
+  const isHLS=url.includes('.m3u8')||url.includes('/hls/');
+  if(isHLS&&Hls.isSupported()){
+    destroyHls();
+    hlsInstance=new Hls({enableWorker:false,backBufferLength:30});
+    hlsInstance.loadSource(url);
+    hlsInstance.attachMedia(v);
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>{loading(false);v.play().catch(()=>{});});
+    hlsInstance.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal){loading(false);toast('Stream error','error');}});
+    // Treat as live if it's a stream
+    $('seekRow').style.display='none';
+    $('timeTxt').textContent='LIVE';
+  } else {
+    destroyHls();
+    v.src=url;v.load();
+    v.play().catch(()=>{});
+    setTimeout(()=>loading(false),600);
+  }
 }
 
+/* ── TV: IPTV-org channel loader ── */
+// Uses the IPTV-org GitHub CDN for channel data and streams
+// Channel index: https://iptv-org.github.io/api/channels.json (metadata)
+// Streams:       https://iptv-org.github.io/api/streams.json  (stream URLs)
+
+const IPTV_CHANNELS_URL='https://iptv-org.github.io/api/channels.json';
+const IPTV_STREAMS_URL='https://iptv-org.github.io/api/streams.json';
+
+let tvChannelMap={};     // id -> channel metadata
+let tvStreamMap={};      // channel id -> array of stream urls (for retry)
+let tvDataLoaded=false;
+let tvDataLoading=false;
+let tvRetryMap={};       // channel id -> current retry index
+
+async function loadTVData(){
+  if(tvDataLoaded||tvDataLoading)return;
+  tvDataLoading=true;
+  $('tvList').innerHTML='<div class="tv-status"><div class="spinner tv-spin" style="width:24px;height:24px;border-width:2px"></div> Fetching channel index…</div>';
+  try{
+    // Load channels and streams in parallel
+    const [chRes,stRes]=await Promise.all([
+      fetch(IPTV_CHANNELS_URL),
+      fetch(IPTV_STREAMS_URL)
+    ]);
+    const channels=await chRes.json();
+    const streams=await stRes.json();
+
+    // Build channel map
+    channels.forEach(ch=>{tvChannelMap[ch.id]=ch;});
+
+    // Build stream map: channel_id -> array of stream urls
+    streams.forEach(st=>{
+      if(st.channel&&st.url){
+        if(!tvStreamMap[st.channel])tvStreamMap[st.channel]=[];
+        if(tvStreamMap[st.channel].length<5) // keep up to 5 fallbacks
+          tvStreamMap[st.channel].push(st.url);
+      }
+    });
+
+    // Merge: only keep channels that have at least one stream
+    tvChannels=channels.filter(ch=>tvStreamMap[ch.id]&&tvStreamMap[ch.id].length>0&&ch.id);
+    tvDataLoaded=true;
+    tvDataLoading=false;
+    applyTVFilters();
+    // Update count label
+    updateTVCount();
+  }catch(e){
+    tvDataLoading=false;
+    $('tvList').innerHTML='<div class="tv-status"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i> Could not load channels. Check your connection.<br><br><button onclick="tvDataLoading=false;loadTVData()" style="padding:8px 16px;border-radius:8px;background:var(--tv);color:#fff;border:none;cursor:pointer;font-size:12px;margin-top:6px"><i class="fas fa-rotate-right"></i> Retry</button></div>';
+  }
+}
+
+function updateTVCount(){
+  const el=$('tvCountLabel');
+  if(el&&tvDataLoaded)el.textContent=`${tvChannels.length.toLocaleString()} channels`;
+}
+
+function applyTVFilters(){
+  const q=tvSearchQuery.trim().toLowerCase();
+  tvFiltered=tvChannels.filter(ch=>{
+    if(tvCountryFilter&&(!ch.country||ch.country.toUpperCase()!==tvCountryFilter.toUpperCase()))return false;
+    if(tvCategoryFilter){
+      const cats=(ch.categories||[]).map(c=>c.toLowerCase());
+      if(!cats.some(c=>c.includes(tvCategoryFilter.toLowerCase())))return false;
+    }
+    if(q){
+      const name=(ch.name||'').toLowerCase();
+      const altNames=(ch.alt_names||[]).join(' ').toLowerCase();
+      if(!name.includes(q)&&!altNames.includes(q))return false;
+    }
+    return true;
+  });
+  updateTVCount();
+  renderTVList();
+}
+
+function renderTVList(){
+  const el=$('tvList');
+  if(!tvDataLoaded&&!tvDataLoading){
+    loadTVData();return;
+  }
+  if(tvFiltered.length===0){
+    el.innerHTML='<div class="tv-status"><i class="fas fa-search"></i> No channels found</div>';
+    return;
+  }
+  const show=tvFiltered.slice(0,200);
+  // update results count
+  const rc=$('tvResultCount');
+  if(rc)rc.textContent=tvFiltered.length>200?`Showing 200 of ${tvFiltered.length.toLocaleString()}`:tvFiltered.length.toLocaleString()+' channels';
+  el.innerHTML=show.map((ch,i)=>{
+    const isPlaying=currentTV&&currentTV.id===ch.id;
+    const logo=ch.logo
+      ?`<img src="${escHtml(ch.logo)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-tv\\'></i>'">`
+      :'<i class="fas fa-tv"></i>';
+    const country=ch.country||'';
+    const cats=(ch.categories||[]).slice(0,2).join(', ');
+    const langs=(ch.languages||[]).map(l=>l.name||l.code||l).slice(0,1).join('');
+    const meta=[country,cats,langs].filter(Boolean).join(' · ');
+    const streamCount=(tvStreamMap[ch.id]||[]).length;
+    return `<div class="tv-item${isPlaying?' playing':''}" onclick="playTVChannel(tvFiltered[${i}])">
+      <div class="tv-logo">${logo}</div>
+      <div class="tv-info">
+        <div class="tv-name">${escHtml(ch.name||'Unknown')}</div>
+        ${meta?`<div class="tv-meta">${escHtml(meta)}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        ${streamCount>1?`<div class="radio-bitrate" style="color:var(--green)">${streamCount} src</div>`:''}
+        ${isPlaying
+          ?`<i class="fas fa-signal-stream tv-playing-icon"></i>`
+          :`<button class="pl-del" style="color:var(--tv)" title="Add to playlist" onclick="event.stopPropagation();addTVToPlaylist(tvFiltered[${i}])"><i class="fas fa-plus"></i></button>`}
+      </div>
+    </div>`;
+  }).join('')+(tvFiltered.length>200?`<div class="tv-status" style="font-size:11px"><i class="fas fa-info-circle"></i> Showing 200 of ${tvFiltered.length.toLocaleString()} — refine your search to see more</div>`:'');
+}
+
+function addTVToPlaylist(ch){
+  if(!ch)return;
+  addToPlaylist({type:'tv',channel:ch,title:(ch.name||'TV Channel')+' · LIVE'});
+}
+window.addTVToPlaylist=addTVToPlaylist;
+
+function playTVChannel(ch){
+  if(!ch)return;
+  const streams=tvStreamMap[ch.id]||[];
+  if(!streams.length){toast('No stream available for this channel','error');return;}
+
+  hideAll();hidePlaceholder();
+  currentTV=ch;
+  tvRetryMap[ch.id]=0; // reset retry index
+
+  showTVPreview(ch);
+
+  S.type='tv';S.id=ch.id;
+  setTitle((ch.name||'TV Channel')+' · LIVE');
+  setBadge('tv');
+
+  $('ctrlWrap').style.display='block';
+  $('seekRow').style.display='none';
+  $('timeTxt').textContent='LIVE';
+  $('playBtn').classList.add('tv-play');
+  $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
+  S.playing=true;
+
+  loading(true,'Tuning in…',true);
+  tryTVStream(ch,0);
+  renderTVList();
+}
+window.playTVChannel=playTVChannel;
+
+function showTVPreview(ch){
+  $('tvDisplay').style.display='flex';
+  $('playerWrap').className='player-wrap tv-mode';
+  const logoWrap=$('tvLogoWrap');
+  logoWrap.innerHTML=ch.logo
+    ?`<img src="${escHtml(ch.logo)}" onerror="this.innerHTML='<i class=\\'fas fa-tv\\' style=\\'font-size:22px;color:var(--tv)\\'></i>'">`
+    :'<i class="fas fa-tv" style="font-size:22px;color:var(--tv)"></i>';
+  $('tvChannelName').textContent=ch.name||'Unknown Channel';
+  const cats=(ch.categories||[]).slice(0,2).join(' · ');
+  const country=ch.country||'';
+  $('tvChannelMeta').textContent=[country,cats].filter(Boolean).join(' · ');
+}
+
+function tryTVStream(ch,streamIdx){
+  const streams=tvStreamMap[ch.id]||[];
+  if(streamIdx>=streams.length){
+    loading(false);
+    $('html5Player').style.display='none';
+    showTVPreview(ch);
+    toast(`${ch.name||'Channel'} — all streams offline. Try again later.`,'error');
+    $('playBtn').innerHTML='<i class="fas fa-play"></i>';
+    S.playing=false;
+    return;
+  }
+  const streamUrl=streams[streamIdx];
+  if(streamIdx>0) toast(`Trying alternate stream ${streamIdx+1}/${streams.length}…`,'warning');
+
+  const v=$('html5Player');
+  destroyTvHls();
+
+  function onStreamReady(){
+    loading(false);
+    $('tvDisplay').style.display='none';
+    v.style.display='block';
+    v.play().catch(()=>{});
+    showTVOverlay(ch);
+    renderTVList();
+  }
+
+  function onStreamError(){
+    // Try next stream
+    tryTVStream(ch,streamIdx+1);
+  }
+
+  const isHLS=streamUrl.includes('.m3u8')||streamUrl.includes('/hls/')||streamUrl.includes('m3u8');
+
+  if(Hls.isSupported()&&isHLS){
+    tvHlsInstance=new Hls({
+      enableWorker:false,
+      lowLatencyMode:true,
+      backBufferLength:30,
+      maxBufferLength:20,
+    });
+    tvHlsInstance.loadSource(streamUrl);
+    tvHlsInstance.attachMedia(v);
+    tvHlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>onStreamReady());
+    tvHlsInstance.on(Hls.Events.ERROR,(e,data)=>{
+      if(data.fatal){
+        destroyTvHls();
+        onStreamError();
+      }
+    });
+    // Timeout: if no manifest in 10s, try next
+    const t=setTimeout(()=>{destroyTvHls();onStreamError();},10000);
+    tvHlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>clearTimeout(t));
+  } else if(v.canPlayType('application/vnd.apple.mpegurl')){
+    // Native HLS (Safari/iOS)
+    v.src=streamUrl;v.load();
+    const onCp=()=>{v.removeEventListener('error',onErr);onStreamReady();};
+    const onErr=()=>{v.removeEventListener('canplay',onCp);onStreamError();};
+    v.addEventListener('canplay',onCp,{once:true});
+    v.addEventListener('error',onErr,{once:true});
+  } else {
+    // Direct video attempt
+    v.src=streamUrl;v.load();
+    const onCp=()=>{v.removeEventListener('error',onErr);onStreamReady();};
+    const onErr=()=>{v.removeEventListener('canplay',onCp);onStreamError();};
+    v.addEventListener('canplay',onCp,{once:true});
+    v.addEventListener('error',onErr,{once:true});
+  }
+}
+
+function showTVOverlay(ch){
+  const overlay=$('tvInfoOverlay');
+  const oLogo=$('tvOverlayLogo');
+  oLogo.innerHTML=ch.logo
+    ?`<img src="${escHtml(ch.logo)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-tv\\'></i>'" style="width:100%;height:100%;object-fit:contain">`
+    :'<i class="fas fa-tv"></i>';
+  $('tvOverlayName').textContent=ch.name||'Live TV';
+  overlay.classList.add('show');
+  clearTimeout(tvOverlayTimer);
+  tvOverlayTimer=setTimeout(()=>overlay.classList.remove('show'),5000);
+}
+
+/* ── TV filters ── */
+$('tvCountryScroll').querySelectorAll('.tv-chip').forEach(chip=>{
+  chip.onclick=()=>{
+    $('tvCountryScroll').querySelectorAll('.tv-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    tvCountryFilter=chip.dataset.country||'';
+    if(tvDataLoaded)applyTVFilters();else loadTVData();
+  };
+});
+$('tvCategoryScroll').querySelectorAll('.tv-chip').forEach(chip=>{
+  chip.onclick=()=>{
+    $('tvCategoryScroll').querySelectorAll('.tv-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    tvCategoryFilter=chip.dataset.category||'';
+    if(tvDataLoaded)applyTVFilters();else loadTVData();
+  };
+});
+$('tvSearchBtn').onclick=()=>{
+  tvSearchQuery=$('tvSearchInp').value;
+  if(tvDataLoaded)applyTVFilters();else loadTVData();
+};
+$('tvSearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('tvSearchBtn').click();});
+
 /* ── Radio: srcdoc iframe engine ── */
-// A srcdoc iframe has null origin → browser sends NO Origin header when
-// its <audio> fetches the stream — same behaviour as Electron webSecurity:false.
-// Parent ↔ iframe communicate via postMessage.
 function buildRadioIframeSrc(streamUrl){
   const escaped=streamUrl.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
   return '<!DOCTYPE html><html><head><meta charset="UTF-8"><script>'
@@ -719,63 +1185,36 @@ function buildRadioIframeSrc(streamUrl){
     +'});'
     +'<\/script><\/head><body style="margin:0"><\/body><\/html>';
 }
-
 function sendToRadioFrame(msg){
-  if(radioFrame&&radioFrame.contentWindow){
-    try{radioFrame.contentWindow.postMessage(msg,'*');}catch(e){}
-  }
+  if(radioFrame&&radioFrame.contentWindow){try{radioFrame.contentWindow.postMessage(msg,'*');}catch(e){}}
 }
-
 function destroyRadioFrame(){
   window.removeEventListener('message',radioMessageHandler);
-  if(radioFrame){
-    radioFrame.remove();
-    radioFrame=null;
-    radioFrameReady=false;
-  }
+  if(radioFrame){radioFrame.remove();radioFrame=null;radioFrameReady=false;}
 }
-
 function radioMessageHandler(e){
   if(!e.data||!e.data.evt)return;
   const ev=e.data.evt;
   if(ev==='playing'){
-    clearTimeout(radioConnectTimer);
-    loading(false);
-    $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
-    S.playing=true;
-  } else if(ev==='paused'){
-    $('playBtn').innerHTML='<i class="fas fa-play"></i>';
-    S.playing=false;
-  } else if(ev==='error'||ev==='stalled'){
-    clearTimeout(radioConnectTimer);
-    radioAttemptIdx++;
-    tryNextRadioUrl();
+    clearTimeout(radioConnectTimer);loading(false);
+    $('playBtn').innerHTML='<i class="fas fa-pause"></i>';S.playing=true;
+  }else if(ev==='paused'){
+    $('playBtn').innerHTML='<i class="fas fa-play"></i>';S.playing=false;
+  }else if(ev==='error'||ev==='stalled'){
+    clearTimeout(radioConnectTimer);radioAttemptIdx++;tryNextRadioUrl();
   }
 }
-
 function tryNextRadioUrl(){
   if(radioAttemptIdx>=radioAttemptUrls.length){
-    loading(false);
-    toast('Could not connect — try another station','error');
-    $('playBtn').innerHTML='<i class="fas fa-play"></i>';
-    S.playing=false;
-    return;
+    loading(false);toast('Could not connect — try another station','error');
+    $('playBtn').innerHTML='<i class="fas fa-play"></i>';S.playing=false;return;
   }
   const url=radioAttemptUrls[radioAttemptIdx];
-  if(radioFrame&&radioFrame.contentWindow){
-    sendToRadioFrame({cmd:'src',url});
-  } else {
-    // Rebuild iframe with new URL
-    launchRadioFrame(url);
-  }
-  // If no 'playing' event in 8s, try next
+  if(radioFrame&&radioFrame.contentWindow){sendToRadioFrame({cmd:'src',url});}
+  else{launchRadioFrame(url);}
   clearTimeout(radioConnectTimer);
-  radioConnectTimer=setTimeout(()=>{
-    radioAttemptIdx++;
-    tryNextRadioUrl();
-  },8000);
+  radioConnectTimer=setTimeout(()=>{radioAttemptIdx++;tryNextRadioUrl();},8000);
 }
-
 function launchRadioFrame(streamUrl){
   destroyRadioFrame();
   window.addEventListener('message',radioMessageHandler);
@@ -784,124 +1223,74 @@ function launchRadioFrame(streamUrl){
   radioFrame.sandbox='allow-scripts allow-same-origin';
   radioFrame.srcdoc=buildRadioIframeSrc(streamUrl);
   document.body.appendChild(radioFrame);
-  // Timeout for initial frame load
   clearTimeout(radioConnectTimer);
-  radioConnectTimer=setTimeout(()=>{
-    radioAttemptIdx++;
-    tryNextRadioUrl();
-  },8000);
+  radioConnectTimer=setTimeout(()=>{radioAttemptIdx++;tryNextRadioUrl();},8000);
 }
-
 function loadRadio(station){
   hideAll();hidePlaceholder();
   destroyRadioFrame();
   currentRadio=station;
-
-  // Build candidate URL list
   function toHttps(u){return u?u.replace(/^http:/,'https:'):'';}
-  const res=station.url_resolved||'';
-  const raw=station.url||'';
-  radioAttemptUrls=[
-    toHttps(res),toHttps(raw),res,raw
-  ].filter((u,i,a)=>u&&a.indexOf(u)===i);
+  const res=station.url_resolved||'';const raw=station.url||'';
+  radioAttemptUrls=[toHttps(res),toHttps(raw),res,raw].filter((u,i,a)=>u&&a.indexOf(u)===i);
   radioAttemptIdx=0;
-
-  // Show radio visual
   $('radioDisplay').style.display='flex';
   $('playerWrap').className='player-wrap radio-mode';
-
   const art=$('radioArt');
-  art.innerHTML=station.favicon
-    ?`<img src="${escHtml(station.favicon)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-radio\\'></i>'">`
-    :'<i class="fas fa-radio"></i>';
+  art.innerHTML=station.favicon?`<img src="${escHtml(station.favicon)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-radio\\'></i>'">` :'<i class="fas fa-radio"></i>';
   art.classList.add('pulse');
-
   $('radioName').textContent=station.name||'Unknown Station';
   const tags=station.tags?station.tags.split(',').slice(0,2).join(' · '):'';
-  const country=station.country||'';
-  const bitrate=station.bitrate?`${station.bitrate}kbps`:'';
+  const country=station.country||'';const bitrate=station.bitrate?`${station.bitrate}kbps`:'';
   $('radioMeta').textContent=[country,bitrate,tags].filter(Boolean).join(' · ');
-
   S.type='radio';S.id=radioAttemptUrls[0]||'';
-  setTitle(station.name||'Radio Station');
-  setBadge('radio');
-
-  $('ctrlWrap').style.display='block';
-  $('seekRow').style.display='none';
-  $('timeTxt').textContent='LIVE';
-  $('playBtn').classList.add('radio-play');
-  $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
-  S.playing=true;
-
+  setTitle(station.name||'Radio Station');setBadge('radio');
+  $('ctrlWrap').style.display='block';$('seekRow').style.display='none';
+  $('timeTxt').textContent='LIVE';$('playBtn').classList.add('radio-play');
+  $('playBtn').innerHTML='<i class="fas fa-pause"></i>';S.playing=true;
   loading(true,'Connecting…');
   launchRadioFrame(radioAttemptUrls[0]);
   renderRadioList();
 }
 window.loadRadio=loadRadio;
 
-/* ── Radio fetching with mirror fallback ── */
+/* ── Radio fetching ── */
 const RADIO_MIRRORS=['de1.api.radio-browser.info','nl1.api.radio-browser.info','at1.api.radio-browser.info'];
 let radioMirror=RADIO_MIRRORS[0];
-
 async function fetchRadioFromMirror(path){
   for(const mirror of RADIO_MIRRORS){
-    try{
-      const r=await fetch(`https://${mirror}/json/${path}`,{headers:{'User-Agent':'ADGPlayer/1.0'}});
-      if(r.ok){radioMirror=mirror;return await r.json();}
-    }catch(e){continue;}
-  }
-  throw new Error('All mirrors failed');
+    try{const r=await fetch(`https://${mirror}/json/${path}`,{headers:{'User-Agent':'ADGPlayer/1.0'}});if(r.ok){radioMirror=mirror;return await r.json();}}catch(e){continue;}
+  }throw new Error('All mirrors failed');
 }
-
 async function fetchRadio(query='',genre=''){
   $('radioList').innerHTML='<div class="radio-status"><div class="spinner" style="width:24px;height:24px;border-width:2px"></div> Loading stations…</div>';
   try{
     let path;
-    if(query){
-      path=`stations/search?name=${encodeURIComponent(query)}&limit=50&hidebroken=true&order=clickcount&reverse=true`;
-    } else if(genre){
-      path=`stations/search?tag=${encodeURIComponent(genre)}&limit=50&hidebroken=true&order=clickcount&reverse=true`;
-    } else {
-      path=`stations/topclick/50?hidebroken=true`;
-    }
+    if(query)path=`stations/search?name=${encodeURIComponent(query)}&limit=50&hidebroken=true&order=clickcount&reverse=true`;
+    else if(genre)path=`stations/search?tag=${encodeURIComponent(genre)}&limit=50&hidebroken=true&order=clickcount&reverse=true`;
+    else path=`stations/topclick/50?hidebroken=true`;
     radioStations=await fetchRadioFromMirror(path);
     renderRadioList();
-  } catch(e){
+  }catch(e){
     $('radioList').innerHTML='<div class="radio-status"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i> Could not load stations. Check your connection.</div>';
   }
 }
-
 function renderRadioList(){
   const el=$('radioList');
-  if(!radioStations.length){
-    el.innerHTML='<div class="radio-status"><i class="fas fa-search"></i> No stations found</div>';
-    return;
-  }
-  // Sort MP3 first (most browser-compatible), then AAC, then others
+  if(!radioStations.length){el.innerHTML='<div class="radio-status"><i class="fas fa-search"></i> No stations found</div>';return;}
   const codecOrder={MP3:0,AAC:1,OGG:2,OPUS:3};
-  const sorted=[...radioStations].sort((a,b)=>{
-    const ca=codecOrder[(a.codec||'').toUpperCase()]??9;
-    const cb=codecOrder[(b.codec||'').toUpperCase()]??9;
-    return ca-cb;
-  });
+  const sorted=[...radioStations].sort((a,b)=>{const ca=codecOrder[(a.codec||'').toUpperCase()]??9,cb=codecOrder[(b.codec||'').toUpperCase()]??9;return ca-cb;});
   el.innerHTML=sorted.map((s)=>{
     const origIdx=radioStations.indexOf(s);
     const isPlaying=currentRadio&&currentRadio.stationuuid===s.stationuuid;
-    const favicon=s.favicon
-      ?`<img src="${escHtml(s.favicon)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-radio\\'></i>'">`
-      :'<i class="fas fa-radio"></i>';
-    const country=s.country||'';
-    const bitrate=s.bitrate?`${s.bitrate}k`:'';
-    const tag=s.tags?s.tags.split(',')[0]:'';
+    const favicon=s.favicon?`<img src="${escHtml(s.favicon)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-radio\\'></i>'">`:'<i class="fas fa-radio"></i>';
+    const country=s.country||'',bitrate=s.bitrate?`${s.bitrate}k`:'',tag=s.tags?s.tags.split(',')[0]:'';
     const meta=[country,tag].filter(Boolean).join(' · ');
     const codec=(s.codec||'').toUpperCase();
     const codecColor=codec==='MP3'?'var(--green)':codec==='AAC'?'var(--accent3)':'var(--text3)';
     return `<div class="radio-item${isPlaying?' playing':''}" onclick="loadRadio(radioStations[${origIdx}])">
       <div class="radio-favicon">${favicon}</div>
-      <div class="radio-info">
-        <div class="radio-name">${escHtml(s.name)}</div>
-        ${meta?`<div class="radio-meta">${escHtml(meta)}</div>`:''}
-      </div>
+      <div class="radio-info"><div class="radio-name">${escHtml(s.name)}</div>${meta?`<div class="radio-meta">${escHtml(meta)}</div>`:''}</div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
         ${bitrate?`<div class="radio-bitrate">${bitrate}</div>`:''}
         ${codec?`<div class="radio-bitrate" style="color:${codecColor}">${codec}</div>`:''}
@@ -913,50 +1302,26 @@ function renderRadioList(){
 
 /* ── Genre chips ── */
 $('genreScroll').querySelectorAll('.genre-chip').forEach(chip=>{
-  chip.onclick=()=>{
-    QA('.genre-chip').forEach(c=>c.classList.remove('active'));
-    chip.classList.add('active');
-    $('radioSearchInp').value='';
-    fetchRadio('',chip.dataset.genre);
-  };
+  chip.onclick=()=>{QA('.genre-chip').forEach(c=>c.classList.remove('active'));chip.classList.add('active');$('radioSearchInp').value='';fetchRadio('',chip.dataset.genre);};
 });
-$('radioSearchBtn').onclick=()=>{
-  const q=$('radioSearchInp').value.trim();
-  if(q){
-    QA('.genre-chip').forEach(c=>c.classList.remove('active'));
-    fetchRadio(q);
-  } else {
-    fetchRadio('');
-  }
-};
+$('radioSearchBtn').onclick=()=>{const q=$('radioSearchInp').value.trim();if(q){QA('.genre-chip').forEach(c=>c.classList.remove('active'));fetchRadio(q);}else fetchRadio('');};
 $('radioSearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('radioSearchBtn').click();});
 
-/* ── HTML5 / Radio audio events ── */
+/* ── HTML5 video events ── */
 const vid=$('html5Player');
 vid.addEventListener('loadedmetadata',()=>{
-  if(S.type==='radio')return;
+  if(S.type==='radio'||S.type==='tv')return;
   S.dur=vid.duration;$('metaDur').style.display='flex';$('durTxt').textContent=fmt(vid.duration);updateTime();
 });
 vid.addEventListener('timeupdate',()=>{
-  if(S.type==='radio')return;
+  if(S.type==='radio'||S.type==='tv')return;
   S.cur=vid.currentTime;updateProg();updateTime();
 });
-vid.addEventListener('play',()=>{
-  S.playing=true;
-  $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
-});
-vid.addEventListener('pause',()=>{
-  S.playing=false;
-  $('playBtn').innerHTML='<i class="fas fa-play"></i>';
-});
+vid.addEventListener('play',()=>{S.playing=true;$('playBtn').innerHTML='<i class="fas fa-pause"></i>';});
+vid.addEventListener('pause',()=>{S.playing=false;$('playBtn').innerHTML='<i class="fas fa-play"></i>';});
 vid.addEventListener('ended',()=>onEnded());
-vid.addEventListener('error',()=>{
-  // For html5 (non-radio) only — radio errors are handled in tryRadioStream
-  if(S.type==='html5') toast('Could not load media','error');
-});
-function updateProg(){
-  if(S.dur){const p=(S.cur/S.dur)*100;$('seekFill').style.width=p+'%';$('seekThumb').style.left=p+'%';}
-}
+vid.addEventListener('error',()=>{if(S.type==='html5')toast('Could not load media','error');});
+function updateProg(){if(S.dur){const p=(S.cur/S.dur)*100;$('seekFill').style.width=p+'%';$('seekThumb').style.left=p+'%';}}
 function updateTime(){$('timeTxt').textContent=fmt(S.cur)+' / '+fmt(S.dur);}
 
 function seek(e){
@@ -969,25 +1334,19 @@ $('seekTrack').addEventListener('click',seek);
 $('seekTrack').addEventListener('touchstart',seek,{passive:true});
 
 $('playBtn').onclick=()=>{
-  if(S.type==='radio'){
-    if(S.playing){sendToRadioFrame({cmd:'pause'});}
-    else{sendToRadioFrame({cmd:'play'});}
-    return;
-  }
-  if(S.type==='html5'){S.playing?vid.pause():vid.play();return;}
+  if(S.type==='radio'){if(S.playing)sendToRadioFrame({cmd:'pause'});else sendToRadioFrame({cmd:'play'});return;}
+  if(S.type==='tv'||S.type==='html5'){S.playing?vid.pause():vid.play();return;}
   toast('Use player controls for this platform','info');
 };
 $('volBtn').onclick=()=>{$('volWrap').classList.toggle('open');};
 $('volSlider').addEventListener('input',e=>{
-  S.vol=+e.target.value;
-  const level=S.vol/100;
-  if(S.type==='radio'){sendToRadioFrame({cmd:'vol',val:level});}
-  else{vid.volume=level;}
+  S.vol=+e.target.value;const level=S.vol/100;
+  if(S.type==='radio')sendToRadioFrame({cmd:'vol',val:level});else vid.volume=level;
   const i=$('volBtn').querySelector('i');
   i.className=S.vol===0?'fas fa-volume-xmark':S.vol<50?'fas fa-volume-low':'fas fa-volume-high';
 });
 $('speedBtn').onclick=()=>{
-  if(S.type==='radio')return;
+  if(S.type==='radio'||S.type==='tv')return;
   const speeds=[0.5,0.75,1,1.25,1.5,2];
   S.speed=speeds[(speeds.indexOf(S.speed)+1)%speeds.length];
   vid.playbackRate=S.speed;$('speedBtn').textContent=S.speed+'×';
@@ -998,7 +1357,7 @@ $('prevBtn').onclick=()=>{if(idx>0)playItem(idx-1);};
 $('nextBtn').onclick=()=>{if(idx<playlist.length-1)playItem(idx+1);};
 
 function onEnded(){
-  if(S.type==='radio')return;
+  if(S.type==='radio'||S.type==='tv')return;
   if(repeatMode==='one')playItem(idx);
   else if(repeatMode==='all')playItem(idx<playlist.length-1?idx+1:0);
   else if(idx<playlist.length-1)playItem(idx+1);
@@ -1020,6 +1379,7 @@ function playItem(i){
   else if(it.type==='instagram')loadIG(it.url);
   else if(it.type==='html5')loadH5(it.url,it.title);
   else if(it.type==='radio'&&it.station)loadRadio(it.station);
+  else if(it.type==='tv'&&it.channel)playTVChannel(it.channel);
   renderLists();closeDrawer();
 }
 window.playItem=playItem;
@@ -1059,11 +1419,8 @@ function toggleRepeat(btnId){
 function clearList(){
   if(playlist.length===0)return;
   if(confirm('Clear entire playlist?')){
-    playlist=[];idx=-1;
-    localStorage.removeItem(STORAGE_KEY);
-    updateSaveDot(false);
-    renderLists();updateCounts();
-    toast('Playlist cleared','info');
+    playlist=[];idx=-1;localStorage.removeItem(STORAGE_KEY);
+    updateSaveDot(false);renderLists();updateCounts();toast('Playlist cleared','info');
   }
 }
 
@@ -1090,6 +1447,11 @@ $('bnRadio').onclick=()=>{
   document.querySelector('.input-card').scrollIntoView({behavior:'smooth',block:'start'});
   Q('.tab-btn[data-tab="radio"]').click();
 };
+$('bnTV').onclick=()=>{
+  QA('.bnav-btn').forEach(b=>b.classList.remove('active'));$('bnTV').classList.add('active');
+  document.querySelector('.input-card').scrollIntoView({behavior:'smooth',block:'start'});
+  Q('.tab-btn[data-tab="tv"]').click();
+};
 
 /* ── Tab switching ── */
 $('tabsBar').querySelectorAll('.tab-btn').forEach(btn=>{
@@ -1097,6 +1459,8 @@ $('tabsBar').querySelectorAll('.tab-btn').forEach(btn=>{
     QA('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
     QA('.tab-pane').forEach(p=>p.classList.remove('active'));
     $('tab-'+btn.dataset.tab).classList.add('active');
+    // Lazy-load TV data when tab opens
+    if(btn.dataset.tab==='tv'&&!tvDataLoaded&&!tvDataLoading)loadTVData();
   };
 });
 $('pltScroll').querySelectorAll('.plt-btn').forEach(btn=>{
