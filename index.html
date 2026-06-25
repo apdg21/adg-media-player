@@ -659,40 +659,47 @@ input[type=file]::file-selector-button{
       <div class="tab-pane" id="tab-soundcloud">
         <div class="sc-notice">
           <i class="fab fa-soundcloud" style="font-size:13px;margin-top:1px;flex-shrink:0;color:var(--sc)"></i>
-          <span>Search millions of tracks on SoundCloud. <strong>Works with screen off</strong> — audio continues playing even when you lock your phone.</span>
-        </div>
-        <div class="sc-search-row">
-          <input class="inp" id="scSearchInp" placeholder="Search songs, artists, remixes…" autocomplete="off">
-          <button class="sc-search-btn" id="scSearchBtn"><i class="fas fa-search"></i> Search</button>
-        </div>
-        <div class="sc-genre-scroll" id="scGenreScroll">
-          <button class="sc-chip active" data-q="trending music">🔥 Trending</button>
-          <button class="sc-chip" data-q="opm">🇵🇭 OPM</button>
-          <button class="sc-chip" data-q="pop hits 2024">🎵 Pop</button>
-          <button class="sc-chip" data-q="hip hop rap">🎤 Hip-Hop</button>
-          <button class="sc-chip" data-q="rnb soul">🎙 R&B</button>
-          <button class="sc-chip" data-q="electronic dance music">⚡ EDM</button>
-          <button class="sc-chip" data-q="rock">🎸 Rock</button>
-          <button class="sc-chip" data-q="lofi chill">☕ Chill</button>
-          <button class="sc-chip" data-q="classical instrumental">🎻 Classical</button>
-          <button class="sc-chip" data-q="kpop">🇰🇷 K-Pop</button>
-          <button class="sc-chip" data-q="reggae">🌴 Reggae</button>
-          <button class="sc-chip" data-q="podcast">🎙 Podcast</button>
+          <span>Paste any SoundCloud track, playlist, or artist URL — or tap a curated genre below. <strong>Works with screen off.</strong></span>
         </div>
 
-        <!-- SC embed player — loads directly, no API needed -->
+        <!-- URL paste input -->
+        <div class="sc-search-row">
+          <input class="inp" id="scUrlInp" placeholder="soundcloud.com/artist/track-name…" inputmode="url" autocomplete="off">
+          <button class="sc-search-btn" id="scUrlLoad"><i class="fas fa-play"></i> Load</button>
+        </div>
+
+        <!-- Curated genre playlists (real SC playlist/artist URLs) -->
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px;display:flex;align-items:center;gap:5px">
+          <i class="fas fa-layer-group" style="color:var(--sc)"></i> Curated Playlists
+        </div>
+        <div class="sc-genre-scroll" id="scGenreScroll">
+          <button class="sc-chip active" data-url="https://soundcloud.com/soundcloud-shine/sets/soundcloud-top-50">🔥 Top 50</button>
+          <button class="sc-chip" data-url="https://soundcloud.com/pinoytunesofficial">🇵🇭 OPM</button>
+          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/fresh-pressed-1">🎵 Fresh Pop</button>
+          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/hip-hop-central-1">🎤 Hip-Hop</button>
+          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/rb-soul">🎙 R&amp;B</button>
+          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/edm-fire">⚡ EDM</button>
+          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/rock-out">🎸 Rock</button>
+          <button class="sc-chip" data-url="https://soundcloud.com/chillhopmusic">☕ Chill</button>
+          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/k-pop-playlist">🇰🇷 K-Pop</button>
+          <button class="sc-chip" data-url="https://soundcloud.com/reggae-music-charts">🌴 Reggae</button>
+          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/jazz">🎷 Jazz</button>
+          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/classical-music">🎻 Classical</button>
+        </div>
+
+        <!-- SC embed player -->
         <div class="sc-widget-wrap" id="scWidgetWrap">
           <iframe id="scWidgetIframe"
-            src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/search/sounds%3Fq%3Dtrending%2520music&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=true&visual=false"
+            src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/soundcloud-shine/sets/soundcloud-top-50&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=true&visual=false"
             scrolling="no"
             allow="autoplay"
-            style="height:166px;width:100%;border:none;display:block;border-radius:10px">
+            style="height:300px;width:100%;border:none;display:block;border-radius:10px">
           </iframe>
         </div>
 
         <div class="sc-bg-tip">
           <i class="fas fa-moon" style="flex-shrink:0"></i>
-          <span><strong>Screen off:</strong> Hit play in the player above, then lock your screen. Audio keeps going — control it from your notification bar.</span>
+          <span><strong>Screen off tip:</strong> Press play above, then lock your screen. Audio keeps going — control it from your notification bar.</span>
         </div>
       </div>
 
@@ -1025,49 +1032,50 @@ function loadH5(url,title){
 }
 
 /* ══ SoundCloud Integration ══ */
-// Simple approach: update the SC embed iframe src directly.
-// No external Widget API JS needed — avoids all CORS/mixed-content errors.
-// The SC embed iframe handles its own playback + background audio natively.
+// SC embed widget only works with real track/playlist/artist URLs — not search URLs.
+// We embed curated SC playlists per genre, or any user-pasted SC URL.
 
 function destroySCWidget(){
   const iframe=$('scWidgetIframe');
   if(iframe) iframe.src='about:blank';
 }
 
-function scLoadQuery(query){
-  if(!query)return;
-  scCurrentQuery=query;
-  const encodedQuery=encodeURIComponent(query);
-  const scSearchUrl='https://soundcloud.com/search/sounds?q='+encodedQuery;
+function scLoadUrl(scPageUrl){
+  if(!scPageUrl)return;
+  let url=scPageUrl.trim();
+  if(!url.startsWith('http')) url='https://soundcloud.com/'+url.replace(/^\/+/,'');
+  scCurrentQuery=url;
   const embedUrl='https://w.soundcloud.com/player/?url='
-    +encodeURIComponent(scSearchUrl)
-    +'&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false'
+    +encodeURIComponent(url)
+    +'&color=%23ff5500&auto_play=true&hide_related=false&show_comments=false'
     +'&show_user=true&show_reposts=false&show_teaser=true&visual=false';
   $('scWidgetIframe').src=embedUrl;
-  // Update info bar title
-  setTitle('SoundCloud — '+query);
+  setTitle('SoundCloud');
   setBadge('soundcloud');
   S.type='soundcloud';
 }
-window.scLoadQuery=scLoadQuery;
+window.scLoadUrl=scLoadUrl;
 
-// SC Genre chips
+// Curated genre chips
 $('scGenreScroll').querySelectorAll('.sc-chip').forEach(chip=>{
   chip.onclick=()=>{
     QA('.sc-chip').forEach(c=>c.classList.remove('active'));
     chip.classList.add('active');
-    $('scSearchInp').value='';
-    scLoadQuery(chip.dataset.q);
+    $('scUrlInp').value='';
+    scLoadUrl(chip.dataset.url);
   };
 });
 
-$('scSearchBtn').onclick=()=>{
-  const q=$('scSearchInp').value.trim();
-  if(!q){toast('Enter a search term','warning');return;}
+// URL paste load
+$('scUrlLoad').onclick=()=>{
+  const u=$('scUrlInp').value.trim();
+  if(!u){toast('Paste a SoundCloud URL first','warning');return;}
   QA('.sc-chip').forEach(c=>c.classList.remove('active'));
-  scLoadQuery(q);
+  scLoadUrl(u);
 };
-$('scSearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('scSearchBtn').click();});
+$('scUrlInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('scUrlLoad').click();});
+
+
 
 /* ── TV: IPTV-org ── */
 const IPTV_CHANNELS_URL='https://iptv-org.github.io/api/channels.json';
@@ -1411,7 +1419,7 @@ function playItem(i){
   else if(it.type==='html5')loadH5(it.url,it.title);
   else if(it.type==='radio'&&it.station)loadRadio(it.station);
   else if(it.type==='tv'&&it.channel)playTVChannel(it.channel);
-  else if(it.type==='soundcloud'&&it.scUrl)scLoadQuery(it.scUrl);
+  else if(it.type==='soundcloud'&&it.scUrl)scLoadUrl(it.scUrl);
   renderLists();closeDrawer();
 }
 window.playItem=playItem;
