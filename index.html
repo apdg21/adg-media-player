@@ -659,7 +659,7 @@ input[type=file]::file-selector-button{
       <div class="tab-pane" id="tab-soundcloud">
         <div class="sc-notice">
           <i class="fab fa-soundcloud" style="font-size:13px;margin-top:1px;flex-shrink:0;color:var(--sc)"></i>
-          <span>Search millions of tracks on SoundCloud. <strong>Works with screen off</strong> — audio keeps playing even when you lock your phone. Great for music, remixes, and podcasts.</span>
+          <span>Search millions of tracks on SoundCloud. <strong>Works with screen off</strong> — audio continues playing even when you lock your phone.</span>
         </div>
         <div class="sc-search-row">
           <input class="inp" id="scSearchInp" placeholder="Search songs, artists, remixes…" autocomplete="off">
@@ -667,37 +667,32 @@ input[type=file]::file-selector-button{
         </div>
         <div class="sc-genre-scroll" id="scGenreScroll">
           <button class="sc-chip active" data-q="trending music">🔥 Trending</button>
-          <button class="sc-chip" data-q="opm music">🇵🇭 OPM</button>
-          <button class="sc-chip" data-q="pop hits">🎵 Pop</button>
+          <button class="sc-chip" data-q="opm">🇵🇭 OPM</button>
+          <button class="sc-chip" data-q="pop hits 2024">🎵 Pop</button>
           <button class="sc-chip" data-q="hip hop rap">🎤 Hip-Hop</button>
           <button class="sc-chip" data-q="rnb soul">🎙 R&B</button>
-          <button class="sc-chip" data-q="electronic dance">⚡ EDM</button>
+          <button class="sc-chip" data-q="electronic dance music">⚡ EDM</button>
           <button class="sc-chip" data-q="rock">🎸 Rock</button>
-          <button class="sc-chip" data-q="jazz lofi chill">☕ Chill</button>
+          <button class="sc-chip" data-q="lofi chill">☕ Chill</button>
           <button class="sc-chip" data-q="classical instrumental">🎻 Classical</button>
           <button class="sc-chip" data-q="kpop">🇰🇷 K-Pop</button>
           <button class="sc-chip" data-q="reggae">🌴 Reggae</button>
           <button class="sc-chip" data-q="podcast">🎙 Podcast</button>
         </div>
 
-        <!-- SC Widget Player (shows when track selected) -->
-        <div class="sc-widget-wrap" id="scWidgetWrap" style="display:none">
-          <iframe id="scWidgetIframe" scrolling="no" allow="autoplay" style="height:166px"></iframe>
+        <!-- SC embed player — loads directly, no API needed -->
+        <div class="sc-widget-wrap" id="scWidgetWrap">
+          <iframe id="scWidgetIframe"
+            src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/search/sounds%3Fq%3Dtrending%2520music&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=true&visual=false"
+            scrolling="no"
+            allow="autoplay"
+            style="height:166px;width:100%;border:none;display:block;border-radius:10px">
+          </iframe>
         </div>
 
-        <div class="sc-bg-tip" id="scBgTip" style="display:none">
+        <div class="sc-bg-tip">
           <i class="fas fa-moon" style="flex-shrink:0"></i>
-          <span><strong>Screen off tip:</strong> Start playing, then lock your screen. Audio continues in the notification bar — tap play/pause there to control it.</span>
-        </div>
-
-        <!-- Track search results list -->
-        <div id="scTrackList" class="sc-track-list" style="display:none"></div>
-
-        <!-- Empty state -->
-        <div class="sc-empty" id="scEmpty">
-          <i class="fab fa-soundcloud" style="color:var(--sc)"></i>
-          <div class="sc-empty-txt">Find music to play</div>
-          <div class="sc-empty-sub">Search above or tap a genre chip</div>
+          <span><strong>Screen off:</strong> Hit play in the player above, then lock your screen. Audio keeps going — control it from your notification bar.</span>
         </div>
       </div>
 
@@ -842,7 +837,6 @@ input[type=file]::file-selector-button{
 
 <div class="toasts" id="toasts"></div>
 
-<script src="https://w.soundcloud.com/player/api.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const Q = s => document.querySelector(s);
@@ -864,9 +858,6 @@ let tvCountryFilter='',tvCategoryFilter='',tvSearchQuery='';
 let tvOverlayTimer=null;
 
 // SoundCloud state
-let scWidget=null;
-let scTracks=[];
-let currentScTrack=null;
 let scCurrentQuery='trending music';
 
 const ICONS={youtube:'fab fa-youtube',vimeo:'fab fa-vimeo',dailymotion:'fas fa-play',facebook:'fab fa-facebook',reel:'fab fa-facebook',html5:'fas fa-video',instagram:'fab fa-instagram',radio:'fas fa-radio',tv:'fas fa-tv',soundcloud:'fab fa-soundcloud'};
@@ -1034,275 +1025,31 @@ function loadH5(url,title){
 }
 
 /* ══ SoundCloud Integration ══ */
-
-// SC Widget API reference: https://developers.soundcloud.com/docs/api/html5-widget
-// Uses SoundCloud's official embed player — no API key needed
-// The widget handles playback natively as HTML5 audio = works with screen off
+// Simple approach: update the SC embed iframe src directly.
+// No external Widget API JS needed — avoids all CORS/mixed-content errors.
+// The SC embed iframe handles its own playback + background audio natively.
 
 function destroySCWidget(){
-  if(scWidget){
-    try{scWidget.pause();}catch(e){}
-    scWidget=null;
-  }
-  const wrap=$('scWidgetWrap');
-  wrap.style.display='none';
-  // Reset iframe src to kill audio
   const iframe=$('scWidgetIframe');
-  iframe.src='about:blank';
-  currentScTrack=null;
+  if(iframe) iframe.src='about:blank';
 }
 
-function loadSCTrack(track){
-  if(!track||!track.permalink_url)return;
-  currentScTrack=track;
-
-  hideAll();hidePlaceholder();
-  $('playerWrap').className='player-wrap sc-mode';
-  $('scDisplay').style.display='flex';
-
-  // Update display
-  const art=$('scArt');
-  const artwork=track.artwork_url||(track.user&&track.user.avatar_url)||'';
-  art.innerHTML=artwork
-    ?`<img src="${escHtml(artwork.replace('-large','-t300x300'))}" onerror="this.parentNode.innerHTML='<i class=\\'fab fa-soundcloud\\'></i>'">`
-    :'<i class="fab fa-soundcloud"></i>';
-  art.classList.add('pulse');
-  $('scTrackName').textContent=track.title||'Unknown Track';
-  $('scArtistName').textContent=(track.user&&track.user.username)||'';
-
-  S.type='soundcloud';S.id=track.permalink_url;
-  setTitle((track.title||'Track')+' — '+(track.user&&track.user.username||''));
-  setBadge('soundcloud');
-
-  // Controls
-  $('ctrlWrap').style.display='block';
-  $('seekRow').style.display='none';
-  $('timeTxt').textContent='♫';
-  $('playBtn').classList.add('sc-play');
-  $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
-  S.playing=true;
-
-  loading(true,'Loading from SoundCloud…');
-
-  // Build SC Widget embed URL
-  const embedUrl='https://w.soundcloud.com/player/?url='
-    +encodeURIComponent(track.permalink_url)
-    +'&color=%23ff5500&auto_play=true&hide_related=false&show_comments=false'
-    +'&show_user=true&show_reposts=false&show_teaser=false&visual=false';
-
-  // Show widget in input card (hidden player that drives audio)
-  const wrap=$('scWidgetWrap');
-  const iframe=$('scWidgetIframe');
-  iframe.src=embedUrl;
-  wrap.style.display='block';
-  $('scBgTip').style.display='flex';
-
-  // Bind SC Widget API events
-  setTimeout(()=>{
-    try{
-      scWidget=SC.Widget(iframe);
-      scWidget.bind(SC.Widget.Events.READY,()=>{
-        loading(false);
-        scWidget.play();
-        scWidget.setVolume(S.vol);
-      });
-      scWidget.bind(SC.Widget.Events.PLAY,()=>{
-        S.playing=true;
-        $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
-      });
-      scWidget.bind(SC.Widget.Events.PAUSE,()=>{
-        S.playing=false;
-        $('playBtn').innerHTML='<i class="fas fa-play"></i>';
-      });
-      scWidget.bind(SC.Widget.Events.FINISH,()=>{
-        $('playBtn').innerHTML='<i class="fas fa-play"></i>';
-        S.playing=false;
-        onEnded();
-      });
-      scWidget.bind(SC.Widget.Events.ERROR,()=>{
-        loading(false);
-        toast('Track not available for streaming','error');
-      });
-    }catch(e){
-      loading(false);
-      toast('Could not load SoundCloud player','error');
-    }
-  },800);
-
-  renderSCList();
-}
-window.loadSCTrack=loadSCTrack;
-
-// Search SoundCloud via oEmbed approach — uses SC's widget search URL
-// SC doesn't have a public search API without key, so we use the widget
-// with a search URL which loads the search results playlist
-
-function scSearch(query){
+function scLoadQuery(query){
   if(!query)return;
   scCurrentQuery=query;
-  $('scEmpty').style.display='none';
-  $('scTrackList').style.display='none';
-  $('scTrackList').innerHTML='<div class="sc-loading"><div class="spinner" style="border-top-color:var(--sc);width:24px;height:24px;border-width:2px"></div><span>Searching SoundCloud…</span></div>';
-  $('scTrackList').style.display='flex';
-  $('scTrackList').style.flexDirection='column';
-
-  // Use SC's public search endpoint (returns embed page we can parse)
-  // Better: use the SC /search widget URL — it streams directly
-  // We load a search-playlist embed in the widget area
-  const searchWidgetUrl='https://w.soundcloud.com/player/?url='
-    +encodeURIComponent('https://soundcloud.com/search/sounds?q='+encodeURIComponent(query))
+  const encodedQuery=encodeURIComponent(query);
+  const scSearchUrl='https://soundcloud.com/search/sounds?q='+encodedQuery;
+  const embedUrl='https://w.soundcloud.com/player/?url='
+    +encodeURIComponent(scSearchUrl)
     +'&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false'
-    +'&show_user=true&show_reposts=false&show_teaser=false&visual=false';
-
-  // We also fetch track metadata from SC's resolve endpoint via embed
-  // Using noembed.com which proxies SC oEmbed for track info
-  // For the track list we use SC's public API via a known client_id approach
-  // OR we simply show the SC search widget directly
-  scTracks=[];
-
-  // Show search widget immediately — it has its own search results
-  const wrap=$('scWidgetWrap');
-  const iframe=$('scWidgetIframe');
-  iframe.src=searchWidgetUrl;
-  wrap.style.display='block';
-  $('scBgTip').style.display='flex';
-
-  // Bind widget to get track info
-  setTimeout(()=>{
-    try{
-      scWidget=SC.Widget(iframe);
-      scWidget.bind(SC.Widget.Events.READY,()=>{
-        $('scTrackList').style.display='none';
-        $('scEmpty').style.display='none';
-        loading(false);
-        // Get current track info from widget
-        scWidget.getCurrentSound(sound=>{
-          if(sound){
-            $('scTrackList').innerHTML='';
-            scTracks=[sound];
-          }
-        });
-        // Get all sounds in the playlist
-        scWidget.getSounds(sounds=>{
-          if(sounds&&sounds.length){
-            scTracks=sounds;
-            renderSCList();
-          }
-        });
-      });
-      scWidget.bind(SC.Widget.Events.PLAY,()=>{
-        S.playing=true;
-        $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
-        // Get current playing track info
-        scWidget.getCurrentSound(sound=>{
-          if(sound){
-            currentScTrack=sound;
-            updateSCDisplay(sound);
-          }
-        });
-      });
-      scWidget.bind(SC.Widget.Events.PAUSE,()=>{
-        S.playing=false;
-        $('playBtn').innerHTML='<i class="fas fa-play"></i>';
-      });
-      scWidget.bind(SC.Widget.Events.FINISH,()=>{
-        S.playing=false;
-        $('playBtn').innerHTML='<i class="fas fa-play"></i>';
-      });
-    }catch(e){
-      $('scTrackList').innerHTML='';
-      $('scEmpty').style.display='flex';
-      toast('SoundCloud search unavailable','error');
-    }
-  },1000);
-
-  // Update player display to show SC search is active
-  if(S.type!=='soundcloud'){
-    hideAll();hidePlaceholder();
-    $('playerWrap').className='player-wrap sc-mode';
-    $('scDisplay').style.display='flex';
-    $('scArt').innerHTML='<i class="fab fa-soundcloud"></i>';
-    $('scTrackName').textContent='Searching: '+query;
-    $('scArtistName').textContent='SoundCloud';
-    S.type='soundcloud';setBadge('soundcloud');
-    setTitle('SoundCloud — '+query);
-    $('ctrlWrap').style.display='block';
-    $('seekRow').style.display='none';
-    $('timeTxt').textContent='♫';
-    $('playBtn').classList.add('sc-play');
-    $('playBtn').innerHTML='<i class="fas fa-play"></i>';
-  }
+    +'&show_user=true&show_reposts=false&show_teaser=true&visual=false';
+  $('scWidgetIframe').src=embedUrl;
+  // Update info bar title
+  setTitle('SoundCloud — '+query);
+  setBadge('soundcloud');
+  S.type='soundcloud';
 }
-window.scSearch=scSearch;
-
-function updateSCDisplay(sound){
-  if(!sound)return;
-  const artwork=sound.artwork_url||(sound.user&&sound.user.avatar_url)||'';
-  const art=$('scArt');
-  art.innerHTML=artwork
-    ?`<img src="${escHtml(artwork.replace('-large','-t300x300'))}" onerror="this.parentNode.innerHTML='<i class=\\'fab fa-soundcloud\\'></i>'">`
-    :'<i class="fab fa-soundcloud"></i>';
-  $('scTrackName').textContent=sound.title||'Playing…';
-  $('scArtistName').textContent=(sound.user&&sound.user.username)||'';
-  setTitle((sound.title||'Track')+' — '+(sound.user&&sound.user.username||''));
-  renderSCList();
-}
-
-function renderSCList(){
-  const el=$('scTrackList');
-  if(!scTracks.length){
-    el.style.display='none';
-    return;
-  }
-  el.style.display='flex';
-  el.style.flexDirection='column';
-  el.innerHTML=scTracks.map((t,i)=>{
-    const isPlaying=currentScTrack&&(currentScTrack.id===t.id||currentScTrack.title===t.title);
-    const artwork=t.artwork_url||(t.user&&t.user.avatar_url)||'';
-    const thumb=artwork
-      ?`<img src="${escHtml(artwork.replace('-large','-t67x67'))}" onerror="this.parentNode.innerHTML='<i class=\\'fab fa-soundcloud\\'></i>'">`
-      :'<i class="fab fa-soundcloud"></i>';
-    const dur=t.duration?fmt(t.duration/1000):'';
-    const artist=(t.user&&t.user.username)||'';
-    return `<div class="sc-track-item${isPlaying?' playing':''}" onclick="scPlayAtIndex(${i})">
-      <div class="sc-thumb">${thumb}</div>
-      <div class="sc-track-info">
-        <div class="sc-track-title">${escHtml(t.title||'Unknown')}</div>
-        ${artist?`<div class="sc-track-artist">${escHtml(artist)}</div>`:''}
-      </div>
-      ${dur?`<div class="sc-dur">${dur}</div>`:''}
-      ${isPlaying?`<i class="fas fa-volume-high sc-playing-eq"></i>`:''}
-    </div>`;
-  }).join('');
-}
-
-function scPlayAtIndex(i){
-  if(!scWidget)return;
-  try{
-    scWidget.skip(i);
-    scWidget.play();
-    if(scTracks[i]){
-      currentScTrack=scTracks[i];
-      updateSCDisplay(scTracks[i]);
-    }
-    // Make sure player is showing
-    if(S.type!=='soundcloud'||$('scDisplay').style.display==='none'){
-      hideAll();hidePlaceholder();
-      $('playerWrap').className='player-wrap sc-mode';
-      $('scDisplay').style.display='flex';
-      S.type='soundcloud';setBadge('soundcloud');
-      $('ctrlWrap').style.display='block';
-      $('seekRow').style.display='none';
-      $('timeTxt').textContent='♫';
-      $('playBtn').classList.add('sc-play');
-    }
-    $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
-    S.playing=true;
-  }catch(e){
-    toast('Could not skip to track','error');
-  }
-}
-window.scPlayAtIndex=scPlayAtIndex;
+window.scLoadQuery=scLoadQuery;
 
 // SC Genre chips
 $('scGenreScroll').querySelectorAll('.sc-chip').forEach(chip=>{
@@ -1310,7 +1057,7 @@ $('scGenreScroll').querySelectorAll('.sc-chip').forEach(chip=>{
     QA('.sc-chip').forEach(c=>c.classList.remove('active'));
     chip.classList.add('active');
     $('scSearchInp').value='';
-    scSearch(chip.dataset.q);
+    scLoadQuery(chip.dataset.q);
   };
 });
 
@@ -1318,7 +1065,7 @@ $('scSearchBtn').onclick=()=>{
   const q=$('scSearchInp').value.trim();
   if(!q){toast('Enter a search term','warning');return;}
   QA('.sc-chip').forEach(c=>c.classList.remove('active'));
-  scSearch(q);
+  scLoadQuery(q);
 };
 $('scSearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('scSearchBtn').click();});
 
@@ -1609,7 +1356,7 @@ $('seekTrack').addEventListener('touchstart',seek,{passive:true});
 $('playBtn').onclick=()=>{
   if(S.type==='radio'){if(S.playing)sendToRadioFrame({cmd:'pause'});else sendToRadioFrame({cmd:'play'});return;}
   if(S.type==='soundcloud'){
-    if(scWidget){try{S.playing?scWidget.pause():scWidget.play();}catch(e){}}
+    toast('Use the SoundCloud player controls to play/pause','info');
     return;
   }
   if(S.type==='tv'||S.type==='html5'){S.playing?vid.pause():vid.play();return;}
@@ -1619,7 +1366,7 @@ $('volBtn').onclick=()=>{$('volWrap').classList.toggle('open');};
 $('volSlider').addEventListener('input',e=>{
   S.vol=+e.target.value;const level=S.vol/100;
   if(S.type==='radio')sendToRadioFrame({cmd:'vol',val:level});
-  else if(S.type==='soundcloud'){if(scWidget)try{scWidget.setVolume(S.vol);}catch(e){}}
+  else if(S.type==='soundcloud'){/* SC widget manages its own volume */}
   else vid.volume=level;
   const i=$('volBtn').querySelector('i');
   i.className=S.vol===0?'fas fa-volume-xmark':S.vol<50?'fas fa-volume-low':'fas fa-volume-high';
@@ -1633,11 +1380,11 @@ $('speedBtn').onclick=()=>{
 const doFs=()=>{const c=$('playerWrap');if(c.requestFullscreen)c.requestFullscreen();else if(c.webkitRequestFullscreen)c.webkitRequestFullscreen();};
 $('fsBtn').onclick=doFs;$('hdrFsBtn').onclick=doFs;
 $('prevBtn').onclick=()=>{
-  if(S.type==='soundcloud'&&scWidget){try{scWidget.prev();}catch(e){}return;}
+  if(S.type==='soundcloud'){return;}// SC widget has own prev/next
   if(idx>0)playItem(idx-1);
 };
 $('nextBtn').onclick=()=>{
-  if(S.type==='soundcloud'&&scWidget){try{scWidget.next();}catch(e){}return;}
+  if(S.type==='soundcloud'){return;}// SC widget has own next
   if(idx<playlist.length-1)playItem(idx+1);
 };
 
@@ -1664,7 +1411,7 @@ function playItem(i){
   else if(it.type==='html5')loadH5(it.url,it.title);
   else if(it.type==='radio'&&it.station)loadRadio(it.station);
   else if(it.type==='tv'&&it.channel)playTVChannel(it.channel);
-  else if(it.type==='soundcloud'&&it.track)loadSCTrack(it.track);
+  else if(it.type==='soundcloud'&&it.scUrl)scLoadQuery(it.scUrl);
   renderLists();closeDrawer();
 }
 window.playItem=playItem;
