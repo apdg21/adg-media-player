@@ -463,7 +463,7 @@ input[type=file]::file-selector-button{
   <button class="plt-btn" data-p="url"><i class="fas fa-link" style="color:var(--green)"></i> URL</button>
   <button class="plt-btn" data-p="local"><i class="fas fa-folder" style="color:var(--yellow)"></i> Local</button>
   <button class="plt-btn" data-p="radio"><i class="fas fa-radio" style="color:var(--green)"></i> Radio</button>
-  <button class="plt-btn" data-p="soundcloud"><i class="fab fa-soundcloud" style="color:var(--sc)"></i> SoundCloud</button>
+  <button class="plt-btn" data-p="soundcloud"><i class="fas fa-music" style="color:var(--sc)"></i> Music</button>
   <button class="plt-btn" data-p="tv"><i class="fas fa-tv" style="color:var(--tv)"></i> TV</button>
 </div>
 
@@ -566,7 +566,7 @@ input[type=file]::file-selector-button{
         <button class="tab-btn" data-tab="url"><i class="fas fa-link" style="color:var(--green);font-size:13px"></i> URL</button>
         <button class="tab-btn" data-tab="local"><i class="fas fa-folder" style="color:var(--yellow);font-size:13px"></i> Local</button>
         <button class="tab-btn" data-tab="radio"><i class="fas fa-radio" style="color:var(--green);font-size:13px"></i> Radio</button>
-        <button class="tab-btn" data-tab="soundcloud"><i class="fab fa-soundcloud" style="color:var(--sc);font-size:13px"></i> SoundCloud</button>
+        <button class="tab-btn" data-tab="soundcloud"><i class="fas fa-music" style="color:var(--sc);font-size:13px"></i> Music</button>
         <button class="tab-btn" data-tab="tv"><i class="fas fa-tv" style="color:var(--tv);font-size:13px"></i> TV</button>
       </div>
 
@@ -655,51 +655,36 @@ input[type=file]::file-selector-button{
         </div>
       </div>
 
-      <!-- ══ SoundCloud Tab ══ -->
+      <!-- ══ Music Tab (replaces broken SoundCloud embed) ══ -->
       <div class="tab-pane" id="tab-soundcloud">
         <div class="sc-notice">
-          <i class="fab fa-soundcloud" style="font-size:13px;margin-top:1px;flex-shrink:0;color:var(--sc)"></i>
-          <span>Paste any SoundCloud track, playlist, or artist URL — or tap a curated genre below. <strong>Works with screen off.</strong></span>
+          <i class="fas fa-music" style="font-size:13px;margin-top:1px;flex-shrink:0;color:var(--sc)"></i>
+          <span>Music radio stations — <strong>works with screen off.</strong> Search by genre or tap a category. Uses the same Radio engine that already works perfectly.</span>
         </div>
-
-        <!-- URL paste input -->
         <div class="sc-search-row">
-          <input class="inp" id="scUrlInp" placeholder="soundcloud.com/artist/track-name…" inputmode="url" autocomplete="off">
-          <button class="sc-search-btn" id="scUrlLoad"><i class="fas fa-play"></i> Load</button>
+          <input class="inp" id="musicSearchInp" placeholder="Search music stations…" autocomplete="off">
+          <button class="sc-search-btn" id="musicSearchBtn"><i class="fas fa-search"></i> Search</button>
         </div>
-
-        <!-- Curated genre playlists (real SC playlist/artist URLs) -->
-        <div style="font-size:11px;color:var(--text3);margin-bottom:6px;display:flex;align-items:center;gap:5px">
-          <i class="fas fa-layer-group" style="color:var(--sc)"></i> Curated Playlists
+        <div class="sc-genre-scroll" id="musicGenreScroll">
+          <button class="sc-chip active" data-genre="pop" data-label="Pop">🎵 Pop</button>
+          <button class="sc-chip" data-genre="opm" data-label="OPM">🇵🇭 OPM</button>
+          <button class="sc-chip" data-genre="hiphop" data-label="Hip-Hop">🎤 Hip-Hop</button>
+          <button class="sc-chip" data-genre="rnb" data-label="R&amp;B">🎙 R&amp;B</button>
+          <button class="sc-chip" data-genre="electronic" data-label="EDM">⚡ EDM</button>
+          <button class="sc-chip" data-genre="rock" data-label="Rock">🎸 Rock</button>
+          <button class="sc-chip" data-genre="jazz" data-label="Jazz">🎷 Jazz</button>
+          <button class="sc-chip" data-genre="lofi" data-label="Lo-Fi">☕ Lo-Fi</button>
+          <button class="sc-chip" data-genre="kpop" data-label="K-Pop">🇰🇷 K-Pop</button>
+          <button class="sc-chip" data-genre="reggae" data-label="Reggae">🌴 Reggae</button>
+          <button class="sc-chip" data-genre="classical" data-label="Classical">🎻 Classical</button>
+          <button class="sc-chip" data-genre="christian" data-label="Christian">✝ Christian</button>
         </div>
-        <div class="sc-genre-scroll" id="scGenreScroll">
-          <button class="sc-chip active" data-url="https://soundcloud.com/soundcloud-shine/sets/soundcloud-top-50">🔥 Top 50</button>
-          <button class="sc-chip" data-url="https://soundcloud.com/pinoytunesofficial">🇵🇭 OPM</button>
-          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/fresh-pressed-1">🎵 Fresh Pop</button>
-          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/hip-hop-central-1">🎤 Hip-Hop</button>
-          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/rb-soul">🎙 R&amp;B</button>
-          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/edm-fire">⚡ EDM</button>
-          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/rock-out">🎸 Rock</button>
-          <button class="sc-chip" data-url="https://soundcloud.com/chillhopmusic">☕ Chill</button>
-          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/k-pop-playlist">🇰🇷 K-Pop</button>
-          <button class="sc-chip" data-url="https://soundcloud.com/reggae-music-charts">🌴 Reggae</button>
-          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/jazz">🎷 Jazz</button>
-          <button class="sc-chip" data-url="https://soundcloud.com/soundcloud-shine/sets/classical-music">🎻 Classical</button>
+        <div class="radio-list" id="musicList">
+          <div class="radio-status"><div class="spinner" style="width:22px;height:22px;border-width:2px;border-top-color:var(--sc)"></div> Loading music stations…</div>
         </div>
-
-        <!-- SC embed player -->
-        <div class="sc-widget-wrap" id="scWidgetWrap">
-          <iframe id="scWidgetIframe"
-            src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/soundcloud-shine/sets/soundcloud-top-50&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=true&visual=false"
-            scrolling="no"
-            allow="autoplay"
-            style="height:300px;width:100%;border:none;display:block;border-radius:10px">
-          </iframe>
-        </div>
-
-        <div class="sc-bg-tip">
+        <div class="sc-bg-tip" style="margin-top:10px">
           <i class="fas fa-moon" style="flex-shrink:0"></i>
-          <span><strong>Screen off tip:</strong> Press play above, then lock your screen. Audio keeps going — control it from your notification bar.</span>
+          <span><strong>Screen off:</strong> Tap a station, then lock your phone. Music keeps playing — control from your notification bar.</span>
         </div>
       </div>
 
@@ -810,8 +795,8 @@ input[type=file]::file-selector-button{
     <span>Radio</span>
   </button>
   <button class="bnav-btn" id="bnSC">
-    <i class="fab fa-soundcloud" style="font-size:20px"></i>
-    <span>SoundCloud</span>
+    <i class="fas fa-music" style="font-size:20px"></i>
+    <span>Music</span>
   </button>
   <button class="bnav-btn" id="bnPlaylist">
     <div class="bnav-icon-wrap">
@@ -870,7 +855,7 @@ let scCurrentQuery='trending music';
 const ICONS={youtube:'fab fa-youtube',vimeo:'fab fa-vimeo',dailymotion:'fas fa-play',facebook:'fab fa-facebook',reel:'fab fa-facebook',html5:'fas fa-video',instagram:'fab fa-instagram',radio:'fas fa-radio',tv:'fas fa-tv',soundcloud:'fab fa-soundcloud'};
 const COLORS={youtube:'var(--red)',vimeo:'var(--accent3)',dailymotion:'var(--blue)',facebook:'var(--blue)',reel:'var(--pink)',html5:'var(--green)',instagram:'var(--pink)',radio:'var(--green)',tv:'var(--tv)',soundcloud:'var(--sc)'};
 const BCLASS={youtube:'b-yt',vimeo:'b-vi',dailymotion:'b-dm',facebook:'b-fb',reel:'b-rl',html5:'b-h5',instagram:'b-ig',radio:'b-rd',tv:'b-tv',soundcloud:'b-sc'};
-const LABELS={youtube:'YouTube',vimeo:'Vimeo',dailymotion:'Dailymotion',facebook:'Facebook',reel:'Reel',html5:'Direct',instagram:'Instagram',radio:'Radio',tv:'Live TV',soundcloud:'SoundCloud'};
+const LABELS={youtube:'YouTube',vimeo:'Vimeo',dailymotion:'Dailymotion',facebook:'Facebook',reel:'Reel',html5:'Direct',instagram:'Instagram',radio:'Radio',tv:'Live TV',soundcloud:'Music Radio'};
 
 /* ── LocalStorage ── */
 function savePlaylist(){
@@ -1031,50 +1016,74 @@ function loadH5(url,title){
   }
 }
 
-/* ══ SoundCloud Integration ══ */
-// SC embed widget only works with real track/playlist/artist URLs — not search URLs.
-// We embed curated SC playlists per genre, or any user-pasted SC URL.
 
-function destroySCWidget(){
-  const iframe=$('scWidgetIframe');
-  if(iframe) iframe.src='about:blank';
+/* ══ Music Radio Tab ══ */
+// SoundCloud embeds are broken industry-wide (404s from SC's own servers).
+// This tab uses the same proven radio engine as the Radio tab — works 100% with screen off.
+
+let musicStations=[], currentMusicGenre='pop';
+
+function destroySCWidget(){ /* no-op — SC removed */ }
+function scLoadUrl(){ /* no-op — SC removed */ }
+
+async function fetchMusicStations(genre, query=''){
+  const el=$('musicList');
+  el.innerHTML='<div class="radio-status"><div class="spinner" style="width:22px;height:22px;border-width:2px;border-top-color:var(--sc)"></div> Loading…</div>';
+  try{
+    let path;
+    if(query) path=`stations/search?name=${encodeURIComponent(query)}&limit=50&hidebroken=true&order=clickcount&reverse=true&tag=music`;
+    else path=`stations/search?tag=${encodeURIComponent(genre)}&limit=50&hidebroken=true&order=clickcount&reverse=true`;
+    musicStations=await fetchRadioFromMirror(path);
+    renderMusicList();
+  }catch(e){
+    el.innerHTML='<div class="radio-status"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i> Could not load stations.</div>';
+  }
 }
 
-function scLoadUrl(scPageUrl){
-  if(!scPageUrl)return;
-  let url=scPageUrl.trim();
-  if(!url.startsWith('http')) url='https://soundcloud.com/'+url.replace(/^\/+/,'');
-  scCurrentQuery=url;
-  const embedUrl='https://w.soundcloud.com/player/?url='
-    +encodeURIComponent(url)
-    +'&color=%23ff5500&auto_play=true&hide_related=false&show_comments=false'
-    +'&show_user=true&show_reposts=false&show_teaser=true&visual=false';
-  $('scWidgetIframe').src=embedUrl;
-  setTitle('SoundCloud');
-  setBadge('soundcloud');
-  S.type='soundcloud';
+function renderMusicList(){
+  const el=$('musicList');
+  if(!musicStations.length){el.innerHTML='<div class="radio-status"><i class="fas fa-search"></i> No stations found</div>';return;}
+  const codecOrder={MP3:0,AAC:1,OGG:2,OPUS:3};
+  const sorted=[...musicStations].sort((a,b)=>(codecOrder[(a.codec||'').toUpperCase()]??9)-(codecOrder[(b.codec||'').toUpperCase()]??9));
+  el.innerHTML=sorted.map(s=>{
+    const origIdx=musicStations.indexOf(s);
+    const isPlaying=currentRadio&&currentRadio.stationuuid===s.stationuuid;
+    const fav=s.favicon?`<img src="${escHtml(s.favicon)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-music\\'></i>'">`:'<i class="fas fa-music"></i>';
+    const country=s.country||'', tag=s.tags?s.tags.split(',')[0]:'';
+    const meta=[country,tag].filter(Boolean).join(' · ');
+    const bitrate=s.bitrate?`${s.bitrate}k`:'';
+    const codec=(s.codec||'').toUpperCase();
+    const codecColor=codec==='MP3'?'var(--green)':codec==='AAC'?'var(--accent3)':'var(--text3)';
+    return `<div class="radio-item${isPlaying?' playing':''}" onclick="loadRadio(musicStations[${origIdx}])">
+      <div class="radio-favicon" style="color:var(--sc)">${fav}</div>
+      <div class="radio-info"><div class="radio-name">${escHtml(s.name)}</div>${meta?`<div class="radio-meta">${escHtml(meta)}</div>`:''}</div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
+        ${bitrate?`<div class="radio-bitrate">${bitrate}</div>`:''}
+        ${codec?`<div class="radio-bitrate" style="color:${codecColor}">${codec}</div>`:''}
+      </div>
+      ${isPlaying?'<i class="fas fa-volume-high radio-playing-icon" style="color:var(--sc)"></i>':''}
+    </div>`;
+  }).join('');
 }
-window.scLoadUrl=scLoadUrl;
 
-// Curated genre chips
-$('scGenreScroll').querySelectorAll('.sc-chip').forEach(chip=>{
+// Music genre chips
+$('musicGenreScroll').querySelectorAll('.sc-chip').forEach(chip=>{
   chip.onclick=()=>{
-    QA('.sc-chip').forEach(c=>c.classList.remove('active'));
+    QA('#musicGenreScroll .sc-chip').forEach(c=>c.classList.remove('active'));
     chip.classList.add('active');
-    $('scUrlInp').value='';
-    scLoadUrl(chip.dataset.url);
+    $('musicSearchInp').value='';
+    currentMusicGenre=chip.dataset.genre;
+    fetchMusicStations(chip.dataset.genre);
   };
 });
 
-// URL paste load
-$('scUrlLoad').onclick=()=>{
-  const u=$('scUrlInp').value.trim();
-  if(!u){toast('Paste a SoundCloud URL first','warning');return;}
-  QA('.sc-chip').forEach(c=>c.classList.remove('active'));
-  scLoadUrl(u);
+$('musicSearchBtn').onclick=()=>{
+  const q=$('musicSearchInp').value.trim();
+  if(!q){toast('Enter a station name','warning');return;}
+  QA('#musicGenreScroll .sc-chip').forEach(c=>c.classList.remove('active'));
+  fetchMusicStations('',q);
 };
-$('scUrlInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('scUrlLoad').click();});
-
+$('musicSearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('musicSearchBtn').click();});
 
 
 /* ── TV: IPTV-org ── */
@@ -1499,6 +1508,7 @@ $('tabsBar').querySelectorAll('.tab-btn').forEach(btn=>{
     QA('.tab-pane').forEach(p=>p.classList.remove('active'));
     $('tab-'+btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab==='tv'&&!tvDataLoaded&&!tvDataLoading)loadTVData();
+    if(btn.dataset.tab==='soundcloud'&&!musicStations.length)fetchMusicStations('pop');
   };
 });
 $('pltScroll').querySelectorAll('.plt-btn').forEach(btn=>{
@@ -1529,6 +1539,7 @@ $('localAdd').onclick=()=>{Array.from($('localInp').files).forEach(f=>addToPlayl
 /* ── Init ── */
 loadPlaylist();
 fetchRadio();
+fetchMusicStations('pop'); // preload music tab
 </script>
 </body>
 </html>
