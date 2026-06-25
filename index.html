@@ -15,6 +15,7 @@
   --border:#ffffff14;--border2:#ffffff22;
   --red:#f87171;--blue:#60a5fa;--green:#34d399;--yellow:#fbbf24;--pink:#f472b6;
   --tv:#ff6b35;--tv2:#ff8c5a;
+  --sc:#ff5500;--sc2:#ff7733;
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -57,6 +58,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .player-wrap{position:relative;width:100%;background:#000;aspect-ratio:16/9}
 .player-wrap.portrait{aspect-ratio:9/16;max-width:min(320px,100%);margin:0 auto}
 .player-wrap.radio-mode{aspect-ratio:unset;height:160px;background:linear-gradient(135deg,var(--bg2),var(--bg3))}
+.player-wrap.sc-mode{aspect-ratio:unset;height:160px;background:linear-gradient(135deg,#1a0a00,#2a1000)}
 .player-wrap.tv-mode{aspect-ratio:16/9;background:#000}
 
 .player-placeholder{
@@ -90,7 +92,25 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .radio-live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
-/* TV Overlay display (shown when no stream yet) */
+/* SoundCloud display in player */
+#scDisplay{
+  position:absolute;inset:0;display:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  padding:16px;background:linear-gradient(135deg,#1a0800,#2a1400);
+}
+.sc-art{
+  width:64px;height:64px;border-radius:14px;background:var(--bg4);
+  border:1px solid #ff550033;display:flex;align-items:center;justify-content:center;
+  font-size:26px;color:var(--sc);flex-shrink:0;overflow:hidden;
+}
+.sc-art img{width:100%;height:100%;object-fit:cover;border-radius:14px}
+.sc-art.pulse i{animation:radio-pulse 1.5s ease-in-out infinite}
+.sc-track-name{font-size:14px;font-weight:700;color:var(--text1);text-align:center;line-height:1.3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-artist-name{font-size:12px;color:var(--sc2);text-align:center}
+.sc-playing-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;background:#ff550022;color:var(--sc);font-size:10px;font-weight:700;margin-top:2px}
+.sc-play-dot{width:6px;height:6px;border-radius:50%;background:var(--sc);animation:blink 1s ease-in-out infinite}
+
+/* TV Overlay display */
 #tvDisplay{
   position:absolute;inset:0;display:none;
   flex-direction:column;align-items:center;justify-content:center;gap:12px;
@@ -102,7 +122,6 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .tv-channel-meta{font-size:11px;color:var(--text3);text-align:center}
 .tv-live-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:#ff6b3522;color:var(--tv);font-size:10px;font-weight:700}
 .tv-live-dot{width:6px;height:6px;border-radius:50%;background:var(--tv);animation:blink 1s ease-in-out infinite}
-/* TV Info overlay on video */
 .tv-info-overlay{
   position:absolute;bottom:0;left:0;right:0;padding:10px 12px;
   background:linear-gradient(to top,rgba(0,0,0,.85),transparent);
@@ -139,6 +158,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .cb.play:active{background:var(--accent2)}
 .cb.play.radio-play{background:var(--green)}
 .cb.play.tv-play{background:var(--tv)}
+.cb.play.sc-play{background:var(--sc)}
 .time-txt{font-size:11px;color:var(--text3);padding:0 4px;white-space:nowrap}
 .speed-btn{padding:4px 8px;border-radius:6px;background:var(--bg4);color:var(--text2);font-size:11px;border:none;cursor:pointer;-webkit-appearance:none}
 .speed-btn:active{background:var(--accent);color:#fff}
@@ -160,6 +180,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .b-ig{background:#c32aa322;color:#f472b6}
 .b-rd{background:#34d39922;color:#34d399}
 .b-tv{background:#ff6b3522;color:#ff6b35}
+.b-sc{background:#ff550022;color:#ff5500}
 
 .input-card{background:var(--bg1);border-radius:14px;border:1px solid var(--border);overflow:hidden}
 .tabs-bar{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);scrollbar-width:none}
@@ -198,6 +219,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .btn-ig{background:#c32aa3;color:#fff}.btn-url{background:#34d399;color:#000}
 .btn-local{background:#fbbf24;color:#000}.btn-radio{background:#34d399;color:#000}
 .btn-tv{background:var(--tv);color:#fff}
+.btn-sc{background:var(--sc);color:#fff}
 .info-tip{font-size:11px;color:var(--text3);margin-top:6px;display:flex;align-items:center;gap:4px}
 input[type=file]{color:var(--text2);font-size:13px;width:100%}
 input[type=file]::file-selector-button{
@@ -243,7 +265,58 @@ input[type=file]::file-selector-button{
 .radio-status{padding:20px;text-align:center;color:var(--text3);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:8px}
 .radio-status i{font-size:22px;opacity:.5}
 
-/* ── TV Tab Styles ── */
+/* SoundCloud Tab Styles */
+.sc-search-row{display:flex;gap:8px;margin-bottom:10px}
+.sc-search-row .inp{flex:1}
+.sc-search-btn{
+  padding:11px 14px;border-radius:10px;background:var(--sc);color:#fff;
+  border:none;cursor:pointer;font-size:14px;font-weight:600;-webkit-appearance:none;
+  min-height:44px;white-space:nowrap;display:flex;align-items:center;gap:6px;flex-shrink:0;
+}
+.sc-search-btn:active{opacity:.85}
+.sc-genre-scroll{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none;padding-bottom:2px}
+.sc-genre-scroll::-webkit-scrollbar{display:none}
+.sc-chip{
+  padding:5px 12px;border-radius:16px;border:1px solid var(--border2);background:var(--bg3);
+  color:var(--text3);font-size:11px;cursor:pointer;white-space:nowrap;flex-shrink:0;-webkit-appearance:none;
+}
+.sc-chip.active{background:var(--sc);border-color:var(--sc);color:#fff;font-weight:600}
+.sc-chip:active{opacity:.8}
+.sc-notice{
+  padding:8px 12px;background:#ff550014;border:1px solid #ff550030;border-radius:8px;
+  font-size:11px;color:var(--sc2);display:flex;align-items:flex-start;gap:6px;margin-bottom:10px;line-height:1.5;
+}
+.sc-bg-tip{
+  margin-top:10px;padding:8px 12px;background:#34d39914;border:1px solid #34d39930;
+  border-radius:8px;font-size:11px;color:var(--green);display:flex;align-items:center;gap:6px;
+}
+.sc-widget-wrap{
+  width:100%;border-radius:10px;overflow:hidden;border:1px solid var(--border2);
+  background:var(--bg2);
+}
+.sc-widget-wrap iframe{width:100%;border:none;display:block;border-radius:10px}
+.sc-empty{padding:28px 16px;text-align:center;color:var(--text3);display:flex;flex-direction:column;align-items:center;gap:8px}
+.sc-empty i{font-size:28px;opacity:.35}
+.sc-empty-txt{font-size:13px}
+.sc-empty-sub{font-size:11px;opacity:.6}
+.sc-track-list{display:flex;flex-direction:column;gap:1px;max-height:320px;overflow-y:auto;border-radius:10px;border:1px solid var(--border);margin-top:10px}
+.sc-track-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;
+  background:var(--bg2);border-bottom:1px solid var(--border);transition:background .15s;
+}
+.sc-track-item:last-child{border-bottom:none}
+.sc-track-item:active,.sc-track-item:hover{background:var(--bg3)}
+.sc-track-item.playing{background:var(--bg3);border-left:3px solid var(--sc)}
+.sc-thumb{width:40px;height:40px;border-radius:8px;background:var(--bg4);border:1px solid #ff550022;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sc);flex-shrink:0;overflow:hidden}
+.sc-thumb img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+.sc-track-info{flex:1;min-width:0}
+.sc-track-title{font-size:13px;font-weight:600;color:var(--text1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-track-artist{font-size:11px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-dur{padding:2px 6px;border-radius:8px;background:var(--bg4);color:var(--text3);font-size:10px;flex-shrink:0}
+.sc-playing-eq{color:var(--sc);font-size:12px;flex-shrink:0;animation:radio-eq .6s ease-in-out infinite alternate}
+.sc-loading{padding:20px;text-align:center;color:var(--text3);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:8px}
+
+/* TV Tab Styles */
 .tv-toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .tv-search-row{display:flex;gap:8px;flex:1;min-width:200px}
 .tv-search-row .inp{flex:1}
@@ -262,8 +335,6 @@ input[type=file]::file-selector-button{
 }
 .tv-chip.active{background:var(--tv);border-color:var(--tv);color:#fff;font-weight:600}
 .tv-chip:active{opacity:.8}
-.tv-category-scroll{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none;padding-bottom:2px}
-.tv-category-scroll::-webkit-scrollbar{display:none}
 .tv-list{display:flex;flex-direction:column;gap:1px;max-height:380px;overflow-y:auto;border-radius:10px;border:1px solid var(--border)}
 .tv-item{
   display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;
@@ -296,8 +367,8 @@ input[type=file]::file-selector-button{
 }
 .bnav-btn{
   display:flex;flex-direction:column;align-items:center;gap:3px;
-  padding:4px 12px;background:transparent;border:none;color:var(--text3);
-  cursor:pointer;font-size:10px;-webkit-appearance:none;min-width:48px;
+  padding:4px 8px;background:transparent;border:none;color:var(--text3);
+  cursor:pointer;font-size:10px;-webkit-appearance:none;min-width:44px;
 }
 .bnav-btn i{font-size:18px}
 .bnav-btn.active{color:var(--accent2)}
@@ -392,6 +463,7 @@ input[type=file]::file-selector-button{
   <button class="plt-btn" data-p="url"><i class="fas fa-link" style="color:var(--green)"></i> URL</button>
   <button class="plt-btn" data-p="local"><i class="fas fa-folder" style="color:var(--yellow)"></i> Local</button>
   <button class="plt-btn" data-p="radio"><i class="fas fa-radio" style="color:var(--green)"></i> Radio</button>
+  <button class="plt-btn" data-p="soundcloud"><i class="fab fa-soundcloud" style="color:var(--sc)"></i> SoundCloud</button>
   <button class="plt-btn" data-p="tv"><i class="fas fa-tv" style="color:var(--tv)"></i> TV</button>
 </div>
 
@@ -421,7 +493,15 @@ input[type=file]::file-selector-button{
           <div class="radio-live-chip"><span class="radio-live-dot"></span> LIVE</div>
         </div>
 
-        <!-- TV channel display (shown briefly before stream starts) -->
+        <!-- SoundCloud display -->
+        <div id="scDisplay">
+          <div class="sc-art" id="scArt"><i class="fab fa-soundcloud"></i></div>
+          <div class="sc-track-name" id="scTrackName">No track selected</div>
+          <div class="sc-artist-name" id="scArtistName"></div>
+          <div class="sc-playing-chip"><span class="sc-play-dot"></span> SoundCloud</div>
+        </div>
+
+        <!-- TV channel display -->
         <div id="tvDisplay">
           <div class="tv-logo-wrap" id="tvLogoWrap"><i class="fas fa-tv" style="font-size:22px;color:var(--tv)"></i></div>
           <div class="tv-channel-name" id="tvChannelName">Select a channel</div>
@@ -429,7 +509,7 @@ input[type=file]::file-selector-button{
           <div class="tv-live-chip"><span class="tv-live-dot"></span> LIVE TV</div>
         </div>
 
-        <!-- TV info overlay on playing video -->
+        <!-- TV info overlay -->
         <div class="tv-info-overlay" id="tvInfoOverlay">
           <div class="tv-overlay-logo" id="tvOverlayLogo"><i class="fas fa-tv"></i></div>
           <div class="tv-overlay-name" id="tvOverlayName"></div>
@@ -486,9 +566,11 @@ input[type=file]::file-selector-button{
         <button class="tab-btn" data-tab="url"><i class="fas fa-link" style="color:var(--green);font-size:13px"></i> URL</button>
         <button class="tab-btn" data-tab="local"><i class="fas fa-folder" style="color:var(--yellow);font-size:13px"></i> Local</button>
         <button class="tab-btn" data-tab="radio"><i class="fas fa-radio" style="color:var(--green);font-size:13px"></i> Radio</button>
+        <button class="tab-btn" data-tab="soundcloud"><i class="fab fa-soundcloud" style="color:var(--sc);font-size:13px"></i> SoundCloud</button>
         <button class="tab-btn" data-tab="tv"><i class="fas fa-tv" style="color:var(--tv);font-size:13px"></i> TV</button>
       </div>
 
+      <!-- YouTube Tab -->
       <div class="tab-pane active" id="tab-youtube">
         <input class="inp" id="ytInp" placeholder="YouTube URL or video ID" inputmode="url" autocomplete="off">
         <div class="btn-row">
@@ -496,6 +578,7 @@ input[type=file]::file-selector-button{
           <button class="abtn" id="ytAdd" title="Add to playlist"><i class="fas fa-plus"></i></button>
         </div>
       </div>
+      <!-- Vimeo Tab -->
       <div class="tab-pane" id="tab-vimeo">
         <input class="inp" id="viInp" placeholder="Vimeo URL or video ID" inputmode="url" autocomplete="off">
         <div class="btn-row">
@@ -503,6 +586,7 @@ input[type=file]::file-selector-button{
           <button class="abtn" id="viAdd"><i class="fas fa-plus"></i></button>
         </div>
       </div>
+      <!-- Dailymotion Tab -->
       <div class="tab-pane" id="tab-dailymotion">
         <input class="inp" id="dmInp" placeholder="Dailymotion URL or video ID" inputmode="url" autocomplete="off">
         <div class="btn-row">
@@ -510,6 +594,7 @@ input[type=file]::file-selector-button{
           <button class="abtn" id="dmAdd"><i class="fas fa-plus"></i></button>
         </div>
       </div>
+      <!-- Facebook Tab -->
       <div class="tab-pane" id="tab-facebook">
         <input class="inp" id="fbInp" placeholder="Facebook video or Reel URL" inputmode="url" autocomplete="off">
         <div class="info-tip"><i class="fas fa-circle-info" style="font-size:11px"></i> If cut, tap "Open" in player to view on Facebook</div>
@@ -518,6 +603,7 @@ input[type=file]::file-selector-button{
           <button class="abtn" id="fbAdd"><i class="fas fa-plus"></i></button>
         </div>
       </div>
+      <!-- Instagram Tab -->
       <div class="tab-pane" id="tab-instagram">
         <input class="inp" id="igInp" placeholder="Instagram post or reel URL" inputmode="url" autocomplete="off">
         <div class="info-tip"><i class="fas fa-circle-info" style="font-size:11px"></i> Instagram embeds may require login</div>
@@ -526,6 +612,7 @@ input[type=file]::file-selector-button{
           <button class="abtn" id="igAdd"><i class="fas fa-plus"></i></button>
         </div>
       </div>
+      <!-- URL Tab -->
       <div class="tab-pane" id="tab-url">
         <input class="inp" id="urlInp" placeholder="Direct video URL (MP4, WebM…)" inputmode="url" autocomplete="off">
         <div class="btn-row">
@@ -533,6 +620,7 @@ input[type=file]::file-selector-button{
           <button class="abtn" id="urlAdd"><i class="fas fa-plus"></i></button>
         </div>
       </div>
+      <!-- Local Tab -->
       <div class="tab-pane" id="tab-local">
         <input type="file" class="inp" id="localInp" accept="video/*,audio/*" multiple>
         <div class="info-tip"><i class="fas fa-circle-info" style="font-size:11px"></i> Local files are not saved between sessions</div>
@@ -564,6 +652,52 @@ input[type=file]::file-selector-button{
         </div>
         <div class="radio-list" id="radioList">
           <div class="radio-status"><i class="fas fa-radio"></i> Loading stations…</div>
+        </div>
+      </div>
+
+      <!-- ══ SoundCloud Tab ══ -->
+      <div class="tab-pane" id="tab-soundcloud">
+        <div class="sc-notice">
+          <i class="fab fa-soundcloud" style="font-size:13px;margin-top:1px;flex-shrink:0;color:var(--sc)"></i>
+          <span>Search millions of tracks on SoundCloud. <strong>Works with screen off</strong> — audio keeps playing even when you lock your phone. Great for music, remixes, and podcasts.</span>
+        </div>
+        <div class="sc-search-row">
+          <input class="inp" id="scSearchInp" placeholder="Search songs, artists, remixes…" autocomplete="off">
+          <button class="sc-search-btn" id="scSearchBtn"><i class="fas fa-search"></i> Search</button>
+        </div>
+        <div class="sc-genre-scroll" id="scGenreScroll">
+          <button class="sc-chip active" data-q="trending music">🔥 Trending</button>
+          <button class="sc-chip" data-q="opm music">🇵🇭 OPM</button>
+          <button class="sc-chip" data-q="pop hits">🎵 Pop</button>
+          <button class="sc-chip" data-q="hip hop rap">🎤 Hip-Hop</button>
+          <button class="sc-chip" data-q="rnb soul">🎙 R&B</button>
+          <button class="sc-chip" data-q="electronic dance">⚡ EDM</button>
+          <button class="sc-chip" data-q="rock">🎸 Rock</button>
+          <button class="sc-chip" data-q="jazz lofi chill">☕ Chill</button>
+          <button class="sc-chip" data-q="classical instrumental">🎻 Classical</button>
+          <button class="sc-chip" data-q="kpop">🇰🇷 K-Pop</button>
+          <button class="sc-chip" data-q="reggae">🌴 Reggae</button>
+          <button class="sc-chip" data-q="podcast">🎙 Podcast</button>
+        </div>
+
+        <!-- SC Widget Player (shows when track selected) -->
+        <div class="sc-widget-wrap" id="scWidgetWrap" style="display:none">
+          <iframe id="scWidgetIframe" scrolling="no" allow="autoplay" style="height:166px"></iframe>
+        </div>
+
+        <div class="sc-bg-tip" id="scBgTip" style="display:none">
+          <i class="fas fa-moon" style="flex-shrink:0"></i>
+          <span><strong>Screen off tip:</strong> Start playing, then lock your screen. Audio continues in the notification bar — tap play/pause there to control it.</span>
+        </div>
+
+        <!-- Track search results list -->
+        <div id="scTrackList" class="sc-track-list" style="display:none"></div>
+
+        <!-- Empty state -->
+        <div class="sc-empty" id="scEmpty">
+          <i class="fab fa-soundcloud" style="color:var(--sc)"></i>
+          <div class="sc-empty-txt">Find music to play</div>
+          <div class="sc-empty-sub">Search above or tap a genre chip</div>
         </div>
       </div>
 
@@ -673,9 +807,9 @@ input[type=file]::file-selector-button{
     <i class="fas fa-radio"></i>
     <span>Radio</span>
   </button>
-  <button class="bnav-btn" id="bnTV">
-    <i class="fas fa-tv"></i>
-    <span>TV</span>
+  <button class="bnav-btn" id="bnSC">
+    <i class="fab fa-soundcloud" style="font-size:20px"></i>
+    <span>SoundCloud</span>
   </button>
   <button class="bnav-btn" id="bnPlaylist">
     <div class="bnav-icon-wrap">
@@ -708,6 +842,7 @@ input[type=file]::file-selector-button{
 
 <div class="toasts" id="toasts"></div>
 
+<script src="https://w.soundcloud.com/player/api.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const Q = s => document.querySelector(s);
@@ -728,10 +863,16 @@ let tvChannels=[],tvFiltered=[],currentTV=null,tvHlsInstance=null;
 let tvCountryFilter='',tvCategoryFilter='',tvSearchQuery='';
 let tvOverlayTimer=null;
 
-const ICONS={youtube:'fab fa-youtube',vimeo:'fab fa-vimeo',dailymotion:'fas fa-play',facebook:'fab fa-facebook',reel:'fab fa-facebook',html5:'fas fa-video',instagram:'fab fa-instagram',radio:'fas fa-radio',tv:'fas fa-tv'};
-const COLORS={youtube:'var(--red)',vimeo:'var(--accent3)',dailymotion:'var(--blue)',facebook:'var(--blue)',reel:'var(--pink)',html5:'var(--green)',instagram:'var(--pink)',radio:'var(--green)',tv:'var(--tv)'};
-const BCLASS={youtube:'b-yt',vimeo:'b-vi',dailymotion:'b-dm',facebook:'b-fb',reel:'b-rl',html5:'b-h5',instagram:'b-ig',radio:'b-rd',tv:'b-tv'};
-const LABELS={youtube:'YouTube',vimeo:'Vimeo',dailymotion:'Dailymotion',facebook:'Facebook',reel:'Reel',html5:'Direct',instagram:'Instagram',radio:'Radio',tv:'Live TV'};
+// SoundCloud state
+let scWidget=null;
+let scTracks=[];
+let currentScTrack=null;
+let scCurrentQuery='trending music';
+
+const ICONS={youtube:'fab fa-youtube',vimeo:'fab fa-vimeo',dailymotion:'fas fa-play',facebook:'fab fa-facebook',reel:'fab fa-facebook',html5:'fas fa-video',instagram:'fab fa-instagram',radio:'fas fa-radio',tv:'fas fa-tv',soundcloud:'fab fa-soundcloud'};
+const COLORS={youtube:'var(--red)',vimeo:'var(--accent3)',dailymotion:'var(--blue)',facebook:'var(--blue)',reel:'var(--pink)',html5:'var(--green)',instagram:'var(--pink)',radio:'var(--green)',tv:'var(--tv)',soundcloud:'var(--sc)'};
+const BCLASS={youtube:'b-yt',vimeo:'b-vi',dailymotion:'b-dm',facebook:'b-fb',reel:'b-rl',html5:'b-h5',instagram:'b-ig',radio:'b-rd',tv:'b-tv',soundcloud:'b-sc'};
+const LABELS={youtube:'YouTube',vimeo:'Vimeo',dailymotion:'Dailymotion',facebook:'Facebook',reel:'Reel',html5:'Direct',instagram:'Instagram',radio:'Radio',tv:'Live TV',soundcloud:'SoundCloud'};
 
 /* ── LocalStorage ── */
 function savePlaylist(){
@@ -773,10 +914,7 @@ function toast(msg,type='info'){
 function fmt(s){if(!s||isNaN(s))return'0:00';const m=Math.floor(s/60),sc=Math.floor(s%60);return`${m}:${sc.toString().padStart(2,'0')}`}
 function loading(show,txt='Loading…',isTv=false){
   const o=$('loadOverlay');show?o.classList.add('show'):o.classList.remove('show');
-  if(show){
-    $('loadTxt').textContent=txt;
-    $('loadSpinner').className='spinner'+(isTv?' tv-spin':'');
-  }
+  if(show){$('loadTxt').textContent=txt;$('loadSpinner').className='spinner'+(isTv?' tv-spin':'');}
 }
 function hidePlaceholder(){$('placeholder').style.display='none'}
 function showPlaceholder(){$('placeholder').style.display='flex'}
@@ -803,28 +941,28 @@ function extractYT(u){
   ];
   for(const p of ps){const m=u.match(p);if(m)return m[1];}return null;
 }
-  function extractVI(u){if(!u)return null;const m=u.match(/vimeo\.com\/(\d+)/);return m?m[1]:(/^\d+$/.test(u)?u:null);}
+function extractVI(u){if(!u)return null;const m=u.match(/vimeo\.com\/(\d+)/);return m?m[1]:(/^\d+$/.test(u)?u:null);}
 function extractDM(u){if(!u)return null;const m=u.match(/(?:dailymotion\.com\/video\/|dai\.ly\/)([a-zA-Z0-9]+)/);return m?m[1]:(/^[a-zA-Z0-9]+$/.test(u)&&u.length<12?u:null);}
 
-function destroyTvHls(){
-  if(tvHlsInstance){tvHlsInstance.destroy();tvHlsInstance=null;}
-}
+function destroyTvHls(){if(tvHlsInstance){tvHlsInstance.destroy();tvHlsInstance=null;}}
 function destroyHls(){if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}}
 
 function hideAll(){
   destroyRadioFrame();
   destroyTvHls();
+  destroySCWidget();
   clearTimeout(radioConnectTimer);
   clearTimeout(tvOverlayTimer);
   $('platformPlayer').style.display='none';
   $('html5Player').style.display='none';
   $('fbContainer').style.display='none';
   $('radioDisplay').style.display='none';
+  $('scDisplay').style.display='none';
   $('tvDisplay').style.display='none';
   $('tvInfoOverlay').classList.remove('show');
   $('ctrlWrap').style.display='none';
   $('seekRow').style.display='';
-  $('playBtn').classList.remove('radio-play','tv-play');
+  $('playBtn').classList.remove('radio-play','tv-play','sc-play');
   $('playerWrap').className='player-wrap';
   $('metaDur').style.display='none';
 }
@@ -881,293 +1019,450 @@ function loadH5(url,title){
   const v=$('html5Player');v.style.display='block';
   $('ctrlWrap').style.display='block';
   S.type='html5';S.id=url;setTitle(title||url.split('/').pop()||'Video');setBadge('html5');
-
   const isHLS=url.includes('.m3u8')||url.includes('/hls/');
   if(isHLS&&Hls.isSupported()){
     destroyHls();
     hlsInstance=new Hls({enableWorker:false,backBufferLength:30});
-    hlsInstance.loadSource(url);
-    hlsInstance.attachMedia(v);
+    hlsInstance.loadSource(url);hlsInstance.attachMedia(v);
     hlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>{loading(false);v.play().catch(()=>{});});
     hlsInstance.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal){loading(false);toast('Stream error','error');}});
-    // Treat as live if it's a stream
-    $('seekRow').style.display='none';
-    $('timeTxt').textContent='LIVE';
+    $('seekRow').style.display='none';$('timeTxt').textContent='LIVE';
   } else {
-    destroyHls();
-    v.src=url;v.load();
-    v.play().catch(()=>{});
+    destroyHls();v.src=url;v.load();v.play().catch(()=>{});
     setTimeout(()=>loading(false),600);
   }
 }
 
-/* ── TV: IPTV-org channel loader ── */
-// Uses the IPTV-org GitHub CDN for channel data and streams
-// Channel index: https://iptv-org.github.io/api/channels.json (metadata)
-// Streams:       https://iptv-org.github.io/api/streams.json  (stream URLs)
+/* ══ SoundCloud Integration ══ */
 
+// SC Widget API reference: https://developers.soundcloud.com/docs/api/html5-widget
+// Uses SoundCloud's official embed player — no API key needed
+// The widget handles playback natively as HTML5 audio = works with screen off
+
+function destroySCWidget(){
+  if(scWidget){
+    try{scWidget.pause();}catch(e){}
+    scWidget=null;
+  }
+  const wrap=$('scWidgetWrap');
+  wrap.style.display='none';
+  // Reset iframe src to kill audio
+  const iframe=$('scWidgetIframe');
+  iframe.src='about:blank';
+  currentScTrack=null;
+}
+
+function loadSCTrack(track){
+  if(!track||!track.permalink_url)return;
+  currentScTrack=track;
+
+  hideAll();hidePlaceholder();
+  $('playerWrap').className='player-wrap sc-mode';
+  $('scDisplay').style.display='flex';
+
+  // Update display
+  const art=$('scArt');
+  const artwork=track.artwork_url||(track.user&&track.user.avatar_url)||'';
+  art.innerHTML=artwork
+    ?`<img src="${escHtml(artwork.replace('-large','-t300x300'))}" onerror="this.parentNode.innerHTML='<i class=\\'fab fa-soundcloud\\'></i>'">`
+    :'<i class="fab fa-soundcloud"></i>';
+  art.classList.add('pulse');
+  $('scTrackName').textContent=track.title||'Unknown Track';
+  $('scArtistName').textContent=(track.user&&track.user.username)||'';
+
+  S.type='soundcloud';S.id=track.permalink_url;
+  setTitle((track.title||'Track')+' — '+(track.user&&track.user.username||''));
+  setBadge('soundcloud');
+
+  // Controls
+  $('ctrlWrap').style.display='block';
+  $('seekRow').style.display='none';
+  $('timeTxt').textContent='♫';
+  $('playBtn').classList.add('sc-play');
+  $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
+  S.playing=true;
+
+  loading(true,'Loading from SoundCloud…');
+
+  // Build SC Widget embed URL
+  const embedUrl='https://w.soundcloud.com/player/?url='
+    +encodeURIComponent(track.permalink_url)
+    +'&color=%23ff5500&auto_play=true&hide_related=false&show_comments=false'
+    +'&show_user=true&show_reposts=false&show_teaser=false&visual=false';
+
+  // Show widget in input card (hidden player that drives audio)
+  const wrap=$('scWidgetWrap');
+  const iframe=$('scWidgetIframe');
+  iframe.src=embedUrl;
+  wrap.style.display='block';
+  $('scBgTip').style.display='flex';
+
+  // Bind SC Widget API events
+  setTimeout(()=>{
+    try{
+      scWidget=SC.Widget(iframe);
+      scWidget.bind(SC.Widget.Events.READY,()=>{
+        loading(false);
+        scWidget.play();
+        scWidget.setVolume(S.vol);
+      });
+      scWidget.bind(SC.Widget.Events.PLAY,()=>{
+        S.playing=true;
+        $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
+      });
+      scWidget.bind(SC.Widget.Events.PAUSE,()=>{
+        S.playing=false;
+        $('playBtn').innerHTML='<i class="fas fa-play"></i>';
+      });
+      scWidget.bind(SC.Widget.Events.FINISH,()=>{
+        $('playBtn').innerHTML='<i class="fas fa-play"></i>';
+        S.playing=false;
+        onEnded();
+      });
+      scWidget.bind(SC.Widget.Events.ERROR,()=>{
+        loading(false);
+        toast('Track not available for streaming','error');
+      });
+    }catch(e){
+      loading(false);
+      toast('Could not load SoundCloud player','error');
+    }
+  },800);
+
+  renderSCList();
+}
+window.loadSCTrack=loadSCTrack;
+
+// Search SoundCloud via oEmbed approach — uses SC's widget search URL
+// SC doesn't have a public search API without key, so we use the widget
+// with a search URL which loads the search results playlist
+
+function scSearch(query){
+  if(!query)return;
+  scCurrentQuery=query;
+  $('scEmpty').style.display='none';
+  $('scTrackList').style.display='none';
+  $('scTrackList').innerHTML='<div class="sc-loading"><div class="spinner" style="border-top-color:var(--sc);width:24px;height:24px;border-width:2px"></div><span>Searching SoundCloud…</span></div>';
+  $('scTrackList').style.display='flex';
+  $('scTrackList').style.flexDirection='column';
+
+  // Use SC's public search endpoint (returns embed page we can parse)
+  // Better: use the SC /search widget URL — it streams directly
+  // We load a search-playlist embed in the widget area
+  const searchWidgetUrl='https://w.soundcloud.com/player/?url='
+    +encodeURIComponent('https://soundcloud.com/search/sounds?q='+encodeURIComponent(query))
+    +'&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false'
+    +'&show_user=true&show_reposts=false&show_teaser=false&visual=false';
+
+  // We also fetch track metadata from SC's resolve endpoint via embed
+  // Using noembed.com which proxies SC oEmbed for track info
+  // For the track list we use SC's public API via a known client_id approach
+  // OR we simply show the SC search widget directly
+  scTracks=[];
+
+  // Show search widget immediately — it has its own search results
+  const wrap=$('scWidgetWrap');
+  const iframe=$('scWidgetIframe');
+  iframe.src=searchWidgetUrl;
+  wrap.style.display='block';
+  $('scBgTip').style.display='flex';
+
+  // Bind widget to get track info
+  setTimeout(()=>{
+    try{
+      scWidget=SC.Widget(iframe);
+      scWidget.bind(SC.Widget.Events.READY,()=>{
+        $('scTrackList').style.display='none';
+        $('scEmpty').style.display='none';
+        loading(false);
+        // Get current track info from widget
+        scWidget.getCurrentSound(sound=>{
+          if(sound){
+            $('scTrackList').innerHTML='';
+            scTracks=[sound];
+          }
+        });
+        // Get all sounds in the playlist
+        scWidget.getSounds(sounds=>{
+          if(sounds&&sounds.length){
+            scTracks=sounds;
+            renderSCList();
+          }
+        });
+      });
+      scWidget.bind(SC.Widget.Events.PLAY,()=>{
+        S.playing=true;
+        $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
+        // Get current playing track info
+        scWidget.getCurrentSound(sound=>{
+          if(sound){
+            currentScTrack=sound;
+            updateSCDisplay(sound);
+          }
+        });
+      });
+      scWidget.bind(SC.Widget.Events.PAUSE,()=>{
+        S.playing=false;
+        $('playBtn').innerHTML='<i class="fas fa-play"></i>';
+      });
+      scWidget.bind(SC.Widget.Events.FINISH,()=>{
+        S.playing=false;
+        $('playBtn').innerHTML='<i class="fas fa-play"></i>';
+      });
+    }catch(e){
+      $('scTrackList').innerHTML='';
+      $('scEmpty').style.display='flex';
+      toast('SoundCloud search unavailable','error');
+    }
+  },1000);
+
+  // Update player display to show SC search is active
+  if(S.type!=='soundcloud'){
+    hideAll();hidePlaceholder();
+    $('playerWrap').className='player-wrap sc-mode';
+    $('scDisplay').style.display='flex';
+    $('scArt').innerHTML='<i class="fab fa-soundcloud"></i>';
+    $('scTrackName').textContent='Searching: '+query;
+    $('scArtistName').textContent='SoundCloud';
+    S.type='soundcloud';setBadge('soundcloud');
+    setTitle('SoundCloud — '+query);
+    $('ctrlWrap').style.display='block';
+    $('seekRow').style.display='none';
+    $('timeTxt').textContent='♫';
+    $('playBtn').classList.add('sc-play');
+    $('playBtn').innerHTML='<i class="fas fa-play"></i>';
+  }
+}
+window.scSearch=scSearch;
+
+function updateSCDisplay(sound){
+  if(!sound)return;
+  const artwork=sound.artwork_url||(sound.user&&sound.user.avatar_url)||'';
+  const art=$('scArt');
+  art.innerHTML=artwork
+    ?`<img src="${escHtml(artwork.replace('-large','-t300x300'))}" onerror="this.parentNode.innerHTML='<i class=\\'fab fa-soundcloud\\'></i>'">`
+    :'<i class="fab fa-soundcloud"></i>';
+  $('scTrackName').textContent=sound.title||'Playing…';
+  $('scArtistName').textContent=(sound.user&&sound.user.username)||'';
+  setTitle((sound.title||'Track')+' — '+(sound.user&&sound.user.username||''));
+  renderSCList();
+}
+
+function renderSCList(){
+  const el=$('scTrackList');
+  if(!scTracks.length){
+    el.style.display='none';
+    return;
+  }
+  el.style.display='flex';
+  el.style.flexDirection='column';
+  el.innerHTML=scTracks.map((t,i)=>{
+    const isPlaying=currentScTrack&&(currentScTrack.id===t.id||currentScTrack.title===t.title);
+    const artwork=t.artwork_url||(t.user&&t.user.avatar_url)||'';
+    const thumb=artwork
+      ?`<img src="${escHtml(artwork.replace('-large','-t67x67'))}" onerror="this.parentNode.innerHTML='<i class=\\'fab fa-soundcloud\\'></i>'">`
+      :'<i class="fab fa-soundcloud"></i>';
+    const dur=t.duration?fmt(t.duration/1000):'';
+    const artist=(t.user&&t.user.username)||'';
+    return `<div class="sc-track-item${isPlaying?' playing':''}" onclick="scPlayAtIndex(${i})">
+      <div class="sc-thumb">${thumb}</div>
+      <div class="sc-track-info">
+        <div class="sc-track-title">${escHtml(t.title||'Unknown')}</div>
+        ${artist?`<div class="sc-track-artist">${escHtml(artist)}</div>`:''}
+      </div>
+      ${dur?`<div class="sc-dur">${dur}</div>`:''}
+      ${isPlaying?`<i class="fas fa-volume-high sc-playing-eq"></i>`:''}
+    </div>`;
+  }).join('');
+}
+
+function scPlayAtIndex(i){
+  if(!scWidget)return;
+  try{
+    scWidget.skip(i);
+    scWidget.play();
+    if(scTracks[i]){
+      currentScTrack=scTracks[i];
+      updateSCDisplay(scTracks[i]);
+    }
+    // Make sure player is showing
+    if(S.type!=='soundcloud'||$('scDisplay').style.display==='none'){
+      hideAll();hidePlaceholder();
+      $('playerWrap').className='player-wrap sc-mode';
+      $('scDisplay').style.display='flex';
+      S.type='soundcloud';setBadge('soundcloud');
+      $('ctrlWrap').style.display='block';
+      $('seekRow').style.display='none';
+      $('timeTxt').textContent='♫';
+      $('playBtn').classList.add('sc-play');
+    }
+    $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
+    S.playing=true;
+  }catch(e){
+    toast('Could not skip to track','error');
+  }
+}
+window.scPlayAtIndex=scPlayAtIndex;
+
+// SC Genre chips
+$('scGenreScroll').querySelectorAll('.sc-chip').forEach(chip=>{
+  chip.onclick=()=>{
+    QA('.sc-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    $('scSearchInp').value='';
+    scSearch(chip.dataset.q);
+  };
+});
+
+$('scSearchBtn').onclick=()=>{
+  const q=$('scSearchInp').value.trim();
+  if(!q){toast('Enter a search term','warning');return;}
+  QA('.sc-chip').forEach(c=>c.classList.remove('active'));
+  scSearch(q);
+};
+$('scSearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('scSearchBtn').click();});
+
+/* ── TV: IPTV-org ── */
 const IPTV_CHANNELS_URL='https://iptv-org.github.io/api/channels.json';
 const IPTV_STREAMS_URL='https://iptv-org.github.io/api/streams.json';
-
-let tvChannelMap={};     // id -> channel metadata
-let tvStreamMap={};      // channel id -> array of stream urls (for retry)
-let tvDataLoaded=false;
-let tvDataLoading=false;
-let tvRetryMap={};       // channel id -> current retry index
+let tvChannelMap={},tvStreamMap={},tvDataLoaded=false,tvDataLoading=false,tvRetryMap={};
 
 async function loadTVData(){
   if(tvDataLoaded||tvDataLoading)return;
   tvDataLoading=true;
   $('tvList').innerHTML='<div class="tv-status"><div class="spinner tv-spin" style="width:24px;height:24px;border-width:2px"></div> Fetching channel index…</div>';
   try{
-    // Load channels and streams in parallel
-    const [chRes,stRes]=await Promise.all([
-      fetch(IPTV_CHANNELS_URL),
-      fetch(IPTV_STREAMS_URL)
-    ]);
-    const channels=await chRes.json();
-    const streams=await stRes.json();
-
-    // Build channel map
+    const [chRes,stRes]=await Promise.all([fetch(IPTV_CHANNELS_URL),fetch(IPTV_STREAMS_URL)]);
+    const channels=await chRes.json();const streams=await stRes.json();
     channels.forEach(ch=>{tvChannelMap[ch.id]=ch;});
-
-    // Build stream map: channel_id -> array of stream urls
     streams.forEach(st=>{
       if(st.channel&&st.url){
         if(!tvStreamMap[st.channel])tvStreamMap[st.channel]=[];
-        if(tvStreamMap[st.channel].length<5) // keep up to 5 fallbacks
-          tvStreamMap[st.channel].push(st.url);
+        if(tvStreamMap[st.channel].length<5)tvStreamMap[st.channel].push(st.url);
       }
     });
-
-    // Merge: only keep channels that have at least one stream
     tvChannels=channels.filter(ch=>tvStreamMap[ch.id]&&tvStreamMap[ch.id].length>0&&ch.id);
-    tvDataLoaded=true;
-    tvDataLoading=false;
-    applyTVFilters();
-    // Update count label
-    updateTVCount();
+    tvDataLoaded=true;tvDataLoading=false;
+    applyTVFilters();updateTVCount();
   }catch(e){
     tvDataLoading=false;
     $('tvList').innerHTML='<div class="tv-status"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i> Could not load channels. Check your connection.<br><br><button onclick="tvDataLoading=false;loadTVData()" style="padding:8px 16px;border-radius:8px;background:var(--tv);color:#fff;border:none;cursor:pointer;font-size:12px;margin-top:6px"><i class="fas fa-rotate-right"></i> Retry</button></div>';
   }
 }
-
-function updateTVCount(){
-  const el=$('tvCountLabel');
-  if(el&&tvDataLoaded)el.textContent=`${tvChannels.length.toLocaleString()} channels`;
-}
-
+function updateTVCount(){const el=$('tvCountLabel');if(el&&tvDataLoaded)el.textContent=`${tvChannels.length.toLocaleString()} channels`;}
 function applyTVFilters(){
   const q=tvSearchQuery.trim().toLowerCase();
   tvFiltered=tvChannels.filter(ch=>{
     if(tvCountryFilter&&(!ch.country||ch.country.toUpperCase()!==tvCountryFilter.toUpperCase()))return false;
-    if(tvCategoryFilter){
-      const cats=(ch.categories||[]).map(c=>c.toLowerCase());
-      if(!cats.some(c=>c.includes(tvCategoryFilter.toLowerCase())))return false;
-    }
-    if(q){
-      const name=(ch.name||'').toLowerCase();
-      const altNames=(ch.alt_names||[]).join(' ').toLowerCase();
-      if(!name.includes(q)&&!altNames.includes(q))return false;
-    }
+    if(tvCategoryFilter){const cats=(ch.categories||[]).map(c=>c.toLowerCase());if(!cats.some(c=>c.includes(tvCategoryFilter.toLowerCase())))return false;}
+    if(q){const name=(ch.name||'').toLowerCase();const alt=(ch.alt_names||[]).join(' ').toLowerCase();if(!name.includes(q)&&!alt.includes(q))return false;}
     return true;
   });
-  updateTVCount();
-  renderTVList();
+  updateTVCount();renderTVList();
 }
-
 function renderTVList(){
   const el=$('tvList');
-  if(!tvDataLoaded&&!tvDataLoading){
-    loadTVData();return;
-  }
-  if(tvFiltered.length===0){
-    el.innerHTML='<div class="tv-status"><i class="fas fa-search"></i> No channels found</div>';
-    return;
-  }
+  if(!tvDataLoaded&&!tvDataLoading){loadTVData();return;}
+  if(tvFiltered.length===0){el.innerHTML='<div class="tv-status"><i class="fas fa-search"></i> No channels found</div>';return;}
   const show=tvFiltered.slice(0,200);
-  // update results count
   const rc=$('tvResultCount');
   if(rc)rc.textContent=tvFiltered.length>200?`Showing 200 of ${tvFiltered.length.toLocaleString()}`:tvFiltered.length.toLocaleString()+' channels';
   el.innerHTML=show.map((ch,i)=>{
     const isPlaying=currentTV&&currentTV.id===ch.id;
-    const logo=ch.logo
-      ?`<img src="${escHtml(ch.logo)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-tv\\'></i>'">`
-      :'<i class="fas fa-tv"></i>';
-    const country=ch.country||'';
-    const cats=(ch.categories||[]).slice(0,2).join(', ');
-    const langs=(ch.languages||[]).map(l=>l.name||l.code||l).slice(0,1).join('');
+    const logo=ch.logo?`<img src="${escHtml(ch.logo)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-tv\\'></i>'">`:'<i class="fas fa-tv"></i>';
+    const country=ch.country||'',cats=(ch.categories||[]).slice(0,2).join(', '),langs=(ch.languages||[]).map(l=>l.name||l.code||l).slice(0,1).join('');
     const meta=[country,cats,langs].filter(Boolean).join(' · ');
     const streamCount=(tvStreamMap[ch.id]||[]).length;
     return `<div class="tv-item${isPlaying?' playing':''}" onclick="playTVChannel(tvFiltered[${i}])">
       <div class="tv-logo">${logo}</div>
-      <div class="tv-info">
-        <div class="tv-name">${escHtml(ch.name||'Unknown')}</div>
-        ${meta?`<div class="tv-meta">${escHtml(meta)}</div>`:''}
-      </div>
+      <div class="tv-info"><div class="tv-name">${escHtml(ch.name||'Unknown')}</div>${meta?`<div class="tv-meta">${escHtml(meta)}</div>`:''}</div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
         ${streamCount>1?`<div class="radio-bitrate" style="color:var(--green)">${streamCount} src</div>`:''}
-        ${isPlaying
-          ?`<i class="fas fa-signal-stream tv-playing-icon"></i>`
-          :`<button class="pl-del" style="color:var(--tv)" title="Add to playlist" onclick="event.stopPropagation();addTVToPlaylist(tvFiltered[${i}])"><i class="fas fa-plus"></i></button>`}
-      </div>
-    </div>`;
-  }).join('')+(tvFiltered.length>200?`<div class="tv-status" style="font-size:11px"><i class="fas fa-info-circle"></i> Showing 200 of ${tvFiltered.length.toLocaleString()} — refine your search to see more</div>`:'');
+        ${isPlaying?`<i class="fas fa-signal-stream tv-playing-icon"></i>`:`<button class="pl-del" style="color:var(--tv)" title="Add to playlist" onclick="event.stopPropagation();addTVToPlaylist(tvFiltered[${i}])"><i class="fas fa-plus"></i></button>`}
+      </div></div>`;
+  }).join('')+(tvFiltered.length>200?`<div class="tv-status" style="font-size:11px"><i class="fas fa-info-circle"></i> Showing 200 of ${tvFiltered.length.toLocaleString()} — refine your search</div>`:'');
 }
-
-function addTVToPlaylist(ch){
-  if(!ch)return;
-  addToPlaylist({type:'tv',channel:ch,title:(ch.name||'TV Channel')+' · LIVE'});
-}
+function addTVToPlaylist(ch){if(!ch)return;addToPlaylist({type:'tv',channel:ch,title:(ch.name||'TV Channel')+' · LIVE'});}
 window.addTVToPlaylist=addTVToPlaylist;
-
 function playTVChannel(ch){
   if(!ch)return;
   const streams=tvStreamMap[ch.id]||[];
   if(!streams.length){toast('No stream available for this channel','error');return;}
-
-  hideAll();hidePlaceholder();
-  currentTV=ch;
-  tvRetryMap[ch.id]=0; // reset retry index
-
+  hideAll();hidePlaceholder();currentTV=ch;tvRetryMap[ch.id]=0;
   showTVPreview(ch);
-
-  S.type='tv';S.id=ch.id;
-  setTitle((ch.name||'TV Channel')+' · LIVE');
-  setBadge('tv');
-
-  $('ctrlWrap').style.display='block';
-  $('seekRow').style.display='none';
-  $('timeTxt').textContent='LIVE';
-  $('playBtn').classList.add('tv-play');
-  $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
-  S.playing=true;
-
-  loading(true,'Tuning in…',true);
-  tryTVStream(ch,0);
-  renderTVList();
+  S.type='tv';S.id=ch.id;setTitle((ch.name||'TV Channel')+' · LIVE');setBadge('tv');
+  $('ctrlWrap').style.display='block';$('seekRow').style.display='none';$('timeTxt').textContent='LIVE';
+  $('playBtn').classList.add('tv-play');$('playBtn').innerHTML='<i class="fas fa-pause"></i>';S.playing=true;
+  loading(true,'Tuning in…',true);tryTVStream(ch,0);renderTVList();
 }
 window.playTVChannel=playTVChannel;
-
 function showTVPreview(ch){
-  $('tvDisplay').style.display='flex';
-  $('playerWrap').className='player-wrap tv-mode';
+  $('tvDisplay').style.display='flex';$('playerWrap').className='player-wrap tv-mode';
   const logoWrap=$('tvLogoWrap');
-  logoWrap.innerHTML=ch.logo
-    ?`<img src="${escHtml(ch.logo)}" onerror="this.innerHTML='<i class=\\'fas fa-tv\\' style=\\'font-size:22px;color:var(--tv)\\'></i>'">`
-    :'<i class="fas fa-tv" style="font-size:22px;color:var(--tv)"></i>';
+  logoWrap.innerHTML=ch.logo?`<img src="${escHtml(ch.logo)}" onerror="this.innerHTML='<i class=\\'fas fa-tv\\' style=\\'font-size:22px;color:var(--tv)\\'></i>'">`:'<i class="fas fa-tv" style="font-size:22px;color:var(--tv)"></i>';
   $('tvChannelName').textContent=ch.name||'Unknown Channel';
-  const cats=(ch.categories||[]).slice(0,2).join(' · ');
-  const country=ch.country||'';
+  const cats=(ch.categories||[]).slice(0,2).join(' · '),country=ch.country||'';
   $('tvChannelMeta').textContent=[country,cats].filter(Boolean).join(' · ');
 }
-
 function tryTVStream(ch,streamIdx){
   const streams=tvStreamMap[ch.id]||[];
   if(streamIdx>=streams.length){
-    loading(false);
-    $('html5Player').style.display='none';
-    showTVPreview(ch);
+    loading(false);$('html5Player').style.display='none';showTVPreview(ch);
     toast(`${ch.name||'Channel'} — all streams offline. Try again later.`,'error');
-    $('playBtn').innerHTML='<i class="fas fa-play"></i>';
-    S.playing=false;
-    return;
+    $('playBtn').innerHTML='<i class="fas fa-play"></i>';S.playing=false;return;
   }
   const streamUrl=streams[streamIdx];
-  if(streamIdx>0) toast(`Trying alternate stream ${streamIdx+1}/${streams.length}…`,'warning');
-
-  const v=$('html5Player');
-  destroyTvHls();
-
-  function onStreamReady(){
-    loading(false);
-    $('tvDisplay').style.display='none';
-    v.style.display='block';
-    v.play().catch(()=>{});
-    showTVOverlay(ch);
-    renderTVList();
-  }
-
-  function onStreamError(){
-    // Try next stream
-    tryTVStream(ch,streamIdx+1);
-  }
-
+  if(streamIdx>0)toast(`Trying alternate stream ${streamIdx+1}/${streams.length}…`,'warning');
+  const v=$('html5Player');destroyTvHls();
+  function onStreamReady(){loading(false);$('tvDisplay').style.display='none';v.style.display='block';v.play().catch(()=>{});showTVOverlay(ch);renderTVList();}
+  function onStreamError(){tryTVStream(ch,streamIdx+1);}
   const isHLS=streamUrl.includes('.m3u8')||streamUrl.includes('/hls/')||streamUrl.includes('m3u8');
-
   if(Hls.isSupported()&&isHLS){
-    tvHlsInstance=new Hls({
-      enableWorker:false,
-      lowLatencyMode:true,
-      backBufferLength:30,
-      maxBufferLength:20,
-    });
-    tvHlsInstance.loadSource(streamUrl);
-    tvHlsInstance.attachMedia(v);
+    tvHlsInstance=new Hls({enableWorker:false,lowLatencyMode:true,backBufferLength:30,maxBufferLength:20});
+    tvHlsInstance.loadSource(streamUrl);tvHlsInstance.attachMedia(v);
     tvHlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>onStreamReady());
-    tvHlsInstance.on(Hls.Events.ERROR,(e,data)=>{
-      if(data.fatal){
-        destroyTvHls();
-        onStreamError();
-      }
-    });
-    // Timeout: if no manifest in 10s, try next
+    tvHlsInstance.on(Hls.Events.ERROR,(e,data)=>{if(data.fatal){destroyTvHls();onStreamError();}});
     const t=setTimeout(()=>{destroyTvHls();onStreamError();},10000);
     tvHlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>clearTimeout(t));
   } else if(v.canPlayType('application/vnd.apple.mpegurl')){
-    // Native HLS (Safari/iOS)
     v.src=streamUrl;v.load();
     const onCp=()=>{v.removeEventListener('error',onErr);onStreamReady();};
     const onErr=()=>{v.removeEventListener('canplay',onCp);onStreamError();};
-    v.addEventListener('canplay',onCp,{once:true});
-    v.addEventListener('error',onErr,{once:true});
+    v.addEventListener('canplay',onCp,{once:true});v.addEventListener('error',onErr,{once:true});
   } else {
-    // Direct video attempt
     v.src=streamUrl;v.load();
     const onCp=()=>{v.removeEventListener('error',onErr);onStreamReady();};
     const onErr=()=>{v.removeEventListener('canplay',onCp);onStreamError();};
-    v.addEventListener('canplay',onCp,{once:true});
-    v.addEventListener('error',onErr,{once:true});
+    v.addEventListener('canplay',onCp,{once:true});v.addEventListener('error',onErr,{once:true});
   }
 }
-
 function showTVOverlay(ch){
   const overlay=$('tvInfoOverlay');
-  const oLogo=$('tvOverlayLogo');
-  oLogo.innerHTML=ch.logo
-    ?`<img src="${escHtml(ch.logo)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-tv\\'></i>'" style="width:100%;height:100%;object-fit:contain">`
-    :'<i class="fas fa-tv"></i>';
+  $('tvOverlayLogo').innerHTML=ch.logo?`<img src="${escHtml(ch.logo)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-tv\\'></i>'" style="width:100%;height:100%;object-fit:contain">`:'<i class="fas fa-tv"></i>';
   $('tvOverlayName').textContent=ch.name||'Live TV';
-  overlay.classList.add('show');
-  clearTimeout(tvOverlayTimer);
+  overlay.classList.add('show');clearTimeout(tvOverlayTimer);
   tvOverlayTimer=setTimeout(()=>overlay.classList.remove('show'),5000);
 }
 
-/* ── TV filters ── */
+/* TV filters */
 $('tvCountryScroll').querySelectorAll('.tv-chip').forEach(chip=>{
   chip.onclick=()=>{
     $('tvCountryScroll').querySelectorAll('.tv-chip').forEach(c=>c.classList.remove('active'));
-    chip.classList.add('active');
-    tvCountryFilter=chip.dataset.country||'';
+    chip.classList.add('active');tvCountryFilter=chip.dataset.country||'';
     if(tvDataLoaded)applyTVFilters();else loadTVData();
   };
 });
 $('tvCategoryScroll').querySelectorAll('.tv-chip').forEach(chip=>{
   chip.onclick=()=>{
     $('tvCategoryScroll').querySelectorAll('.tv-chip').forEach(c=>c.classList.remove('active'));
-    chip.classList.add('active');
-    tvCategoryFilter=chip.dataset.category||'';
+    chip.classList.add('active');tvCategoryFilter=chip.dataset.category||'';
     if(tvDataLoaded)applyTVFilters();else loadTVData();
   };
 });
-$('tvSearchBtn').onclick=()=>{
-  tvSearchQuery=$('tvSearchInp').value;
-  if(tvDataLoaded)applyTVFilters();else loadTVData();
-};
+$('tvSearchBtn').onclick=()=>{tvSearchQuery=$('tvSearchInp').value;if(tvDataLoaded)applyTVFilters();else loadTVData();};
 $('tvSearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('tvSearchBtn').click();});
 
-/* ── Radio: srcdoc iframe engine ── */
+/* ── Radio iframe engine ── */
 function buildRadioIframeSrc(streamUrl){
   const escaped=streamUrl.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
   return '<!DOCTYPE html><html><head><meta charset="UTF-8"><script>'
@@ -1188,9 +1483,7 @@ function buildRadioIframeSrc(streamUrl){
     +'});'
     +'<\/script><\/head><body style="margin:0"><\/body><\/html>';
 }
-function sendToRadioFrame(msg){
-  if(radioFrame&&radioFrame.contentWindow){try{radioFrame.contentWindow.postMessage(msg,'*');}catch(e){}}
-}
+function sendToRadioFrame(msg){if(radioFrame&&radioFrame.contentWindow){try{radioFrame.contentWindow.postMessage(msg,'*');}catch(e){}}}
 function destroyRadioFrame(){
   window.removeEventListener('message',radioMessageHandler);
   if(radioFrame){radioFrame.remove();radioFrame=null;radioFrameReady=false;}
@@ -1198,25 +1491,15 @@ function destroyRadioFrame(){
 function radioMessageHandler(e){
   if(!e.data||!e.data.evt)return;
   const ev=e.data.evt;
-  if(ev==='playing'){
-    clearTimeout(radioConnectTimer);loading(false);
-    $('playBtn').innerHTML='<i class="fas fa-pause"></i>';S.playing=true;
-  }else if(ev==='paused'){
-    $('playBtn').innerHTML='<i class="fas fa-play"></i>';S.playing=false;
-  }else if(ev==='error'||ev==='stalled'){
-    clearTimeout(radioConnectTimer);radioAttemptIdx++;tryNextRadioUrl();
-  }
+  if(ev==='playing'){clearTimeout(radioConnectTimer);loading(false);$('playBtn').innerHTML='<i class="fas fa-pause"></i>';S.playing=true;}
+  else if(ev==='paused'){$('playBtn').innerHTML='<i class="fas fa-play"></i>';S.playing=false;}
+  else if(ev==='error'||ev==='stalled'){clearTimeout(radioConnectTimer);radioAttemptIdx++;tryNextRadioUrl();}
 }
 function tryNextRadioUrl(){
-  if(radioAttemptIdx>=radioAttemptUrls.length){
-    loading(false);toast('Could not connect — try another station','error');
-    $('playBtn').innerHTML='<i class="fas fa-play"></i>';S.playing=false;return;
-  }
+  if(radioAttemptIdx>=radioAttemptUrls.length){loading(false);toast('Could not connect — try another station','error');$('playBtn').innerHTML='<i class="fas fa-play"></i>';S.playing=false;return;}
   const url=radioAttemptUrls[radioAttemptIdx];
-  if(radioFrame&&radioFrame.contentWindow){sendToRadioFrame({cmd:'src',url});}
-  else{launchRadioFrame(url);}
-  clearTimeout(radioConnectTimer);
-  radioConnectTimer=setTimeout(()=>{radioAttemptIdx++;tryNextRadioUrl();},8000);
+  if(radioFrame&&radioFrame.contentWindow)sendToRadioFrame({cmd:'src',url});else launchRadioFrame(url);
+  clearTimeout(radioConnectTimer);radioConnectTimer=setTimeout(()=>{radioAttemptIdx++;tryNextRadioUrl();},8000);
 }
 function launchRadioFrame(streamUrl){
   destroyRadioFrame();
@@ -1226,38 +1509,29 @@ function launchRadioFrame(streamUrl){
   radioFrame.sandbox='allow-scripts allow-same-origin';
   radioFrame.srcdoc=buildRadioIframeSrc(streamUrl);
   document.body.appendChild(radioFrame);
-  clearTimeout(radioConnectTimer);
-  radioConnectTimer=setTimeout(()=>{radioAttemptIdx++;tryNextRadioUrl();},8000);
+  clearTimeout(radioConnectTimer);radioConnectTimer=setTimeout(()=>{radioAttemptIdx++;tryNextRadioUrl();},8000);
 }
 function loadRadio(station){
-  hideAll();hidePlaceholder();
-  destroyRadioFrame();
-  currentRadio=station;
+  hideAll();hidePlaceholder();destroyRadioFrame();currentRadio=station;
   function toHttps(u){return u?u.replace(/^http:/,'https:'):'';}
-  const res=station.url_resolved||'';const raw=station.url||'';
+  const res=station.url_resolved||'',raw=station.url||'';
   radioAttemptUrls=[toHttps(res),toHttps(raw),res,raw].filter((u,i,a)=>u&&a.indexOf(u)===i);
   radioAttemptIdx=0;
-  $('radioDisplay').style.display='flex';
-  $('playerWrap').className='player-wrap radio-mode';
+  $('radioDisplay').style.display='flex';$('playerWrap').className='player-wrap radio-mode';
   const art=$('radioArt');
-  art.innerHTML=station.favicon?`<img src="${escHtml(station.favicon)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-radio\\'></i>'">` :'<i class="fas fa-radio"></i>';
+  art.innerHTML=station.favicon?`<img src="${escHtml(station.favicon)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-radio\\'></i>'">`:'<i class="fas fa-radio"></i>';
   art.classList.add('pulse');
   $('radioName').textContent=station.name||'Unknown Station';
-  const tags=station.tags?station.tags.split(',').slice(0,2).join(' · '):'';
-  const country=station.country||'';const bitrate=station.bitrate?`${station.bitrate}kbps`:'';
+  const tags=station.tags?station.tags.split(',').slice(0,2).join(' · '):'',country=station.country||'',bitrate=station.bitrate?`${station.bitrate}kbps`:'';
   $('radioMeta').textContent=[country,bitrate,tags].filter(Boolean).join(' · ');
-  S.type='radio';S.id=radioAttemptUrls[0]||'';
-  setTitle(station.name||'Radio Station');setBadge('radio');
-  $('ctrlWrap').style.display='block';$('seekRow').style.display='none';
-  $('timeTxt').textContent='LIVE';$('playBtn').classList.add('radio-play');
-  $('playBtn').innerHTML='<i class="fas fa-pause"></i>';S.playing=true;
-  loading(true,'Connecting…');
-  launchRadioFrame(radioAttemptUrls[0]);
-  renderRadioList();
+  S.type='radio';S.id=radioAttemptUrls[0]||'';setTitle(station.name||'Radio Station');setBadge('radio');
+  $('ctrlWrap').style.display='block';$('seekRow').style.display='none';$('timeTxt').textContent='LIVE';
+  $('playBtn').classList.add('radio-play');$('playBtn').innerHTML='<i class="fas fa-pause"></i>';S.playing=true;
+  loading(true,'Connecting…');launchRadioFrame(radioAttemptUrls[0]);renderRadioList();
 }
 window.loadRadio=loadRadio;
 
-/* ── Radio fetching ── */
+/* Radio fetching */
 const RADIO_MIRRORS=['de1.api.radio-browser.info','nl1.api.radio-browser.info','at1.api.radio-browser.info'];
 let radioMirror=RADIO_MIRRORS[0];
 async function fetchRadioFromMirror(path){
@@ -1272,18 +1546,15 @@ async function fetchRadio(query='',genre=''){
     if(query)path=`stations/search?name=${encodeURIComponent(query)}&limit=50&hidebroken=true&order=clickcount&reverse=true`;
     else if(genre)path=`stations/search?tag=${encodeURIComponent(genre)}&limit=50&hidebroken=true&order=clickcount&reverse=true`;
     else path=`stations/topclick/50?hidebroken=true`;
-    radioStations=await fetchRadioFromMirror(path);
-    renderRadioList();
-  }catch(e){
-    $('radioList').innerHTML='<div class="radio-status"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i> Could not load stations. Check your connection.</div>';
-  }
+    radioStations=await fetchRadioFromMirror(path);renderRadioList();
+  }catch(e){$('radioList').innerHTML='<div class="radio-status"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i> Could not load stations.</div>';}
 }
 function renderRadioList(){
   const el=$('radioList');
   if(!radioStations.length){el.innerHTML='<div class="radio-status"><i class="fas fa-search"></i> No stations found</div>';return;}
   const codecOrder={MP3:0,AAC:1,OGG:2,OPUS:3};
   const sorted=[...radioStations].sort((a,b)=>{const ca=codecOrder[(a.codec||'').toUpperCase()]??9,cb=codecOrder[(b.codec||'').toUpperCase()]??9;return ca-cb;});
-  el.innerHTML=sorted.map((s)=>{
+  el.innerHTML=sorted.map(s=>{
     const origIdx=radioStations.indexOf(s);
     const isPlaying=currentRadio&&currentRadio.stationuuid===s.stationuuid;
     const favicon=s.favicon?`<img src="${escHtml(s.favicon)}" onerror="this.parentNode.innerHTML='<i class=\\'fas fa-radio\\'></i>'">`:'<i class="fas fa-radio"></i>';
@@ -1303,7 +1574,6 @@ function renderRadioList(){
   }).join('');
 }
 
-/* ── Genre chips ── */
 $('genreScroll').querySelectorAll('.genre-chip').forEach(chip=>{
   chip.onclick=()=>{QA('.genre-chip').forEach(c=>c.classList.remove('active'));chip.classList.add('active');$('radioSearchInp').value='';fetchRadio('',chip.dataset.genre);};
 });
@@ -1313,11 +1583,11 @@ $('radioSearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('radioSe
 /* ── HTML5 video events ── */
 const vid=$('html5Player');
 vid.addEventListener('loadedmetadata',()=>{
-  if(S.type==='radio'||S.type==='tv')return;
+  if(S.type==='radio'||S.type==='tv'||S.type==='soundcloud')return;
   S.dur=vid.duration;$('metaDur').style.display='flex';$('durTxt').textContent=fmt(vid.duration);updateTime();
 });
 vid.addEventListener('timeupdate',()=>{
-  if(S.type==='radio'||S.type==='tv')return;
+  if(S.type==='radio'||S.type==='tv'||S.type==='soundcloud')return;
   S.cur=vid.currentTime;updateProg();updateTime();
 });
 vid.addEventListener('play',()=>{S.playing=true;$('playBtn').innerHTML='<i class="fas fa-pause"></i>';});
@@ -1338,29 +1608,41 @@ $('seekTrack').addEventListener('touchstart',seek,{passive:true});
 
 $('playBtn').onclick=()=>{
   if(S.type==='radio'){if(S.playing)sendToRadioFrame({cmd:'pause'});else sendToRadioFrame({cmd:'play'});return;}
+  if(S.type==='soundcloud'){
+    if(scWidget){try{S.playing?scWidget.pause():scWidget.play();}catch(e){}}
+    return;
+  }
   if(S.type==='tv'||S.type==='html5'){S.playing?vid.pause():vid.play();return;}
   toast('Use player controls for this platform','info');
 };
 $('volBtn').onclick=()=>{$('volWrap').classList.toggle('open');};
 $('volSlider').addEventListener('input',e=>{
   S.vol=+e.target.value;const level=S.vol/100;
-  if(S.type==='radio')sendToRadioFrame({cmd:'vol',val:level});else vid.volume=level;
+  if(S.type==='radio')sendToRadioFrame({cmd:'vol',val:level});
+  else if(S.type==='soundcloud'){if(scWidget)try{scWidget.setVolume(S.vol);}catch(e){}}
+  else vid.volume=level;
   const i=$('volBtn').querySelector('i');
   i.className=S.vol===0?'fas fa-volume-xmark':S.vol<50?'fas fa-volume-low':'fas fa-volume-high';
 });
 $('speedBtn').onclick=()=>{
-  if(S.type==='radio'||S.type==='tv')return;
+  if(S.type==='radio'||S.type==='tv'||S.type==='soundcloud')return;
   const speeds=[0.5,0.75,1,1.25,1.5,2];
   S.speed=speeds[(speeds.indexOf(S.speed)+1)%speeds.length];
   vid.playbackRate=S.speed;$('speedBtn').textContent=S.speed+'×';
 };
 const doFs=()=>{const c=$('playerWrap');if(c.requestFullscreen)c.requestFullscreen();else if(c.webkitRequestFullscreen)c.webkitRequestFullscreen();};
 $('fsBtn').onclick=doFs;$('hdrFsBtn').onclick=doFs;
-$('prevBtn').onclick=()=>{if(idx>0)playItem(idx-1);};
-$('nextBtn').onclick=()=>{if(idx<playlist.length-1)playItem(idx+1);};
+$('prevBtn').onclick=()=>{
+  if(S.type==='soundcloud'&&scWidget){try{scWidget.prev();}catch(e){}return;}
+  if(idx>0)playItem(idx-1);
+};
+$('nextBtn').onclick=()=>{
+  if(S.type==='soundcloud'&&scWidget){try{scWidget.next();}catch(e){}return;}
+  if(idx<playlist.length-1)playItem(idx+1);
+};
 
 function onEnded(){
-  if(S.type==='radio'||S.type==='tv')return;
+  if(S.type==='radio'||S.type==='tv'||S.type==='soundcloud')return;
   if(repeatMode==='one')playItem(idx);
   else if(repeatMode==='all')playItem(idx<playlist.length-1?idx+1:0);
   else if(idx<playlist.length-1)playItem(idx+1);
@@ -1369,8 +1651,7 @@ function onEnded(){
 /* ── Playlist ── */
 function addToPlaylist(item){
   playlist.push({...item,uid:Date.now()+Math.random()});
-  savePlaylist();renderLists();updateCounts();
-  toast('Added to playlist','success');
+  savePlaylist();renderLists();updateCounts();toast('Added to playlist','success');
 }
 function playItem(i){
   if(i<0||i>=playlist.length)return;
@@ -1383,6 +1664,7 @@ function playItem(i){
   else if(it.type==='html5')loadH5(it.url,it.title);
   else if(it.type==='radio'&&it.station)loadRadio(it.station);
   else if(it.type==='tv'&&it.channel)playTVChannel(it.channel);
+  else if(it.type==='soundcloud'&&it.track)loadSCTrack(it.track);
   renderLists();closeDrawer();
 }
 window.playItem=playItem;
@@ -1426,7 +1708,6 @@ function clearList(){
     updateSaveDot(false);renderLists();updateCounts();toast('Playlist cleared','info');
   }
 }
-
 $('deskShuffle').onclick=shuffle;$('deskRepeat').onclick=()=>toggleRepeat('deskRepeat');$('deskClear').onclick=clearList;
 $('mobShuffle').onclick=shuffle;$('mobRepeat').onclick=()=>toggleRepeat('mobRepeat');$('mobClear').onclick=clearList;
 
@@ -1450,10 +1731,10 @@ $('bnRadio').onclick=()=>{
   document.querySelector('.input-card').scrollIntoView({behavior:'smooth',block:'start'});
   Q('.tab-btn[data-tab="radio"]').click();
 };
-$('bnTV').onclick=()=>{
-  QA('.bnav-btn').forEach(b=>b.classList.remove('active'));$('bnTV').classList.add('active');
+$('bnSC').onclick=()=>{
+  QA('.bnav-btn').forEach(b=>b.classList.remove('active'));$('bnSC').classList.add('active');
   document.querySelector('.input-card').scrollIntoView({behavior:'smooth',block:'start'});
-  Q('.tab-btn[data-tab="tv"]').click();
+  Q('.tab-btn[data-tab="soundcloud"]').click();
 };
 
 /* ── Tab switching ── */
@@ -1462,7 +1743,6 @@ $('tabsBar').querySelectorAll('.tab-btn').forEach(btn=>{
     QA('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
     QA('.tab-pane').forEach(p=>p.classList.remove('active'));
     $('tab-'+btn.dataset.tab).classList.add('active');
-    // Lazy-load TV data when tab opens
     if(btn.dataset.tab==='tv'&&!tvDataLoaded&&!tvDataLoading)loadTVData();
   };
 });
@@ -1493,7 +1773,7 @@ $('localAdd').onclick=()=>{Array.from($('localInp').files).forEach(f=>addToPlayl
 
 /* ── Init ── */
 loadPlaylist();
-fetchRadio(); // preload top stations in background
+fetchRadio();
 </script>
 </body>
 </html>
