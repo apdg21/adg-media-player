@@ -15,6 +15,7 @@
   --border:#ffffff14;--border2:#ffffff22;
   --red:#f87171;--blue:#60a5fa;--green:#34d399;--yellow:#fbbf24;--pink:#f472b6;
   --tv:#ff6b35;--tv2:#ff8c5a;
+  --ph:#ff2d55;--ph2:#ff6b8a;
   --sc:#ff5500;--sc2:#ff7733;
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bottom:env(safe-area-inset-bottom,0px);
@@ -335,6 +336,12 @@ input[type=file]::file-selector-button{
 }
 .tv-chip.active{background:var(--tv);border-color:var(--tv);color:#fff;font-weight:600}
 .tv-chip:active{opacity:.8}
+.tv2-chip{
+  padding:5px 12px;border-radius:16px;border:1px solid var(--border2);background:var(--bg3);
+  color:var(--text3);font-size:11px;cursor:pointer;white-space:nowrap;flex-shrink:0;-webkit-appearance:none;
+}
+.tv2-chip.active{background:var(--ph);border-color:var(--ph);color:#fff;font-weight:600}
+.tv2-chip:active{opacity:.8}
 .tv-list{display:flex;flex-direction:column;gap:1px;max-height:380px;overflow-y:auto;border-radius:10px;border:1px solid var(--border)}
 .tv-item{
   display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;
@@ -462,9 +469,10 @@ input[type=file]::file-selector-button{
   <button class="plt-btn" data-p="instagram"><i class="fab fa-instagram" style="color:var(--pink)"></i> Instagram</button>
   <button class="plt-btn" data-p="url"><i class="fas fa-link" style="color:var(--green)"></i> URL</button>
   <button class="plt-btn" data-p="local"><i class="fas fa-folder" style="color:var(--yellow)"></i> Local</button>
-  <button class="plt-btn" data-p="radio"><i class="fas fa-radio" style="color:var(--green)"></i> Radio</button>
-  <button class="plt-btn" data-p="soundcloud"><i class="fas fa-music" style="color:var(--sc)"></i> Music</button>
-  <button class="plt-btn" data-p="tv"><i class="fas fa-tv" style="color:var(--tv)"></i> TV</button>
+  <button class="plt-btn" data-p="radio"><i class="fas fa-radio" style="color:var(--green)"></i> Radio 1</button>
+  <button class="plt-btn" data-p="soundcloud"><i class="fas fa-music" style="color:var(--sc)"></i> Radio 2</button>
+  <button class="plt-btn" data-p="tv"><i class="fas fa-tv" style="color:var(--tv)"></i> TV 1</button>
+  <button class="plt-btn" data-p="tv2"><i class="fas fa-tv" style="color:#ff2d55"></i> TV 2 🇵🇭</button>
 </div>
 
 <div class="page">
@@ -565,9 +573,10 @@ input[type=file]::file-selector-button{
         <button class="tab-btn" data-tab="instagram"><i class="fab fa-instagram" style="color:var(--pink);font-size:13px"></i> IG</button>
         <button class="tab-btn" data-tab="url"><i class="fas fa-link" style="color:var(--green);font-size:13px"></i> URL</button>
         <button class="tab-btn" data-tab="local"><i class="fas fa-folder" style="color:var(--yellow);font-size:13px"></i> Local</button>
-        <button class="tab-btn" data-tab="radio"><i class="fas fa-radio" style="color:var(--green);font-size:13px"></i> Radio</button>
-        <button class="tab-btn" data-tab="soundcloud"><i class="fas fa-music" style="color:var(--sc);font-size:13px"></i> Music</button>
-        <button class="tab-btn" data-tab="tv"><i class="fas fa-tv" style="color:var(--tv);font-size:13px"></i> TV</button>
+        <button class="tab-btn" data-tab="radio"><i class="fas fa-radio" style="color:var(--green);font-size:13px"></i> Radio 1</button>
+        <button class="tab-btn" data-tab="soundcloud"><i class="fas fa-music" style="color:var(--sc);font-size:13px"></i> Radio 2</button>
+        <button class="tab-btn" data-tab="tv"><i class="fas fa-tv" style="color:var(--tv);font-size:13px"></i> TV 1</button>
+        <button class="tab-btn" data-tab="tv2"><i class="fas fa-tv" style="color:#ff2d55;font-size:13px"></i> TV 2 🇵🇭</button>
       </div>
 
       <!-- YouTube Tab -->
@@ -760,6 +769,39 @@ input[type=file]::file-selector-button{
           <div class="tv-status"><div class="spinner tv-spin" style="width:24px;height:24px;border-width:2px"></div> Loading channels…</div>
         </div>
       </div>
+
+      <!-- ══ TV 2 — Philippine Channels ══ -->
+      <div class="tab-pane" id="tab-tv2">
+        <div class="tv-notice" style="background:#ff2d5514;border-color:#ff2d5530;color:#ff6b8a">
+          <i class="fas fa-circle-info" style="font-size:12px;margin-top:1px;flex-shrink:0"></i>
+          <span>🇵🇭 Philippine channels from <strong>IPTV-org</strong> — GMA, Kapamilya, TV5, PTV, A2Z and more. Streams may be geo-restricted. Tap any channel to try.</span>
+        </div>
+        <div class="tv-toolbar">
+          <div class="tv-search-row">
+            <input class="inp" id="tv2SearchInp" placeholder="Search PH channels…" autocomplete="off">
+            <button class="tv-search-btn" id="tv2SearchBtn" style="background:#ff2d55"><i class="fas fa-search"></i></button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px">
+            <i class="fas fa-tag" style="color:#ff2d55"></i> Category
+          </div>
+          <div style="font-size:11px;color:var(--text3)" id="tv2ResultCount"></div>
+        </div>
+        <div class="tv-filter-row" id="tv2CategoryScroll">
+          <button class="tv2-chip active" data-category="">📺 All</button>
+          <button class="tv2-chip" data-category="news">📰 News</button>
+          <button class="tv2-chip" data-category="entertainment">🎬 Entertainment</button>
+          <button class="tv2-chip" data-category="sports">⚽ Sports</button>
+          <button class="tv2-chip" data-category="kids">🧒 Kids</button>
+          <button class="tv2-chip" data-category="music">🎵 Music</button>
+          <button class="tv2-chip" data-category="religious">✝ Religious</button>
+          <button class="tv2-chip" data-category="documentary">🌿 Documentary</button>
+        </div>
+        <div class="tv-list" id="tv2List">
+          <div class="tv-status"><div class="spinner" style="width:24px;height:24px;border-width:2px;border-top-color:#ff2d55"></div> Loading PH channels…</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -792,11 +834,15 @@ input[type=file]::file-selector-button{
   </button>
   <button class="bnav-btn" id="bnRadio">
     <i class="fas fa-radio"></i>
-    <span>Radio</span>
+    <span>Radio 1</span>
   </button>
   <button class="bnav-btn" id="bnSC">
-    <i class="fas fa-music" style="font-size:20px"></i>
-    <span>Music</span>
+    <i class="fas fa-music"></i>
+    <span>Radio 2</span>
+  </button>
+  <button class="bnav-btn" id="bnTV2">
+    <i class="fas fa-tv" style="color:#ff2d55"></i>
+    <span>TV 🇵🇭</span>
   </button>
   <button class="bnav-btn" id="bnPlaylist">
     <div class="bnav-icon-wrap">
@@ -1500,6 +1546,11 @@ $('bnSC').onclick=()=>{
   document.querySelector('.input-card').scrollIntoView({behavior:'smooth',block:'start'});
   Q('.tab-btn[data-tab="soundcloud"]').click();
 };
+$('bnTV2').onclick=()=>{
+  QA('.bnav-btn').forEach(b=>b.classList.remove('active'));$('bnTV2').classList.add('active');
+  document.querySelector('.input-card').scrollIntoView({behavior:'smooth',block:'start'});
+  Q('.tab-btn[data-tab="tv2"]').click();
+};
 
 /* ── Tab switching ── */
 $('tabsBar').querySelectorAll('.tab-btn').forEach(btn=>{
@@ -1508,6 +1559,7 @@ $('tabsBar').querySelectorAll('.tab-btn').forEach(btn=>{
     QA('.tab-pane').forEach(p=>p.classList.remove('active'));
     $('tab-'+btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab==='tv'&&!tvDataLoaded&&!tvDataLoading)loadTVData();
+    if(btn.dataset.tab==='tv2'&&!tv2DataLoaded)loadTV2Data();
     if(btn.dataset.tab==='soundcloud'&&!musicStations.length)fetchMusicStations('pop');
   };
 });
@@ -1536,7 +1588,156 @@ $('localInp').onchange=e=>{const ok=e.target.files.length>0;$('localLoad').disab
 $('localLoad').onclick=()=>{const f=$('localInp').files[0];if(f)loadH5(URL.createObjectURL(f),f.name);};
 $('localAdd').onclick=()=>{Array.from($('localInp').files).forEach(f=>addToPlaylist({type:'html5',url:URL.createObjectURL(f),title:f.name}));};
 
-/* ── Init ── */
+/* ══ TV 2 — Philippine Channels ══ */
+// Uses the same IPTV-org data as TV1, but pre-filtered to PH country only.
+// Also includes a hardcoded list of known stable PH streams as fallback.
+
+let tv2Channels=[], tv2Filtered=[], tv2DataLoaded=false, tv2CategoryFilter='', tv2SearchQuery='';
+
+// Known stable Philippine channel streams (hardcoded fallbacks)
+// These come from the iptv-org verified streams for PH
+const PH_KNOWN_CHANNELS = [
+  {id:'GMA.ph',       name:'GMA',              logo:'https://upload.wikimedia.org/wikipedia/en/thumb/0/0f/GMA_Network_logo.svg/220px-GMA_Network_logo.svg.png',     country:'PH', categories:['entertainment'], streams:['https://gma-tv-vh.akamaihd.net/i/gma_1@627990/master.m3u8']},
+  {id:'GMANews.ph',   name:'GMA News TV',      logo:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/GMA_News_TV_logo_2023.svg/220px-GMA_News_TV_logo_2023.svg.png', country:'PH', categories:['news'], streams:['https://5be89e62c735a.streamlock.net/gntvlive/gntvlive/playlist.m3u8']},
+  {id:'Kapamilya.ph', name:'Kapamilya Channel', logo:'https://upload.wikimedia.org/wikipedia/en/thumb/0/08/Kapamilya_Channel_logo.png/220px-Kapamilya_Channel_logo.png', country:'PH', categories:['entertainment'], streams:['https://abs-cbnnews-vh.akamaihd.net/i/ABSCBNNews_1@189185/master.m3u8']},
+  {id:'TV5.ph',       name:'TV5',               logo:'https://upload.wikimedia.org/wikipedia/en/thumb/a/aa/TV5_Philippines_Logo_2021.svg/220px-TV5_Philippines_Logo_2021.svg.png', country:'PH', categories:['entertainment'], streams:['https://tv5live-target.cdn.multigeo.tv/bctv5live/smil:bctv5live.smil/playlist.m3u8']},
+  {id:'PTV.ph',       name:'PTV',               logo:'https://upload.wikimedia.org/wikipedia/en/thumb/f/f9/PTV_Logo.png/220px-PTV_Logo.png', country:'PH', categories:['news'], streams:['https://livestream.com/accounts/24897921/events/8285481']},
+  {id:'A2Z.ph',       name:'A2Z Channel 11',    logo:'https://upload.wikimedia.org/wikipedia/en/thumb/7/78/A2Z_Channel_logo.png/220px-A2Z_Channel_logo.png', country:'PH', categories:['entertainment'], streams:[]},
+  {id:'ALLTV.ph',     name:'All TV',            logo:'https://upload.wikimedia.org/wikipedia/en/thumb/b/bb/ALLTV_logo.png/220px-ALLTV_logo.png', country:'PH', categories:['entertainment'], streams:[]},
+  {id:'DZMM.ph',      name:'DZMM TeleRadyo',    logo:'https://upload.wikimedia.org/wikipedia/en/thumb/2/26/TeleRadyo_logo_2021.png/220px-TeleRadyo_logo_2021.png', country:'PH', categories:['news'], streams:[]},
+  {id:'CNN.ph',       name:'CNN Philippines',   logo:'https://upload.wikimedia.org/wikipedia/en/thumb/d/d1/CNN_Philippines_2020.svg/220px-CNN_Philippines_2020.svg.png', country:'PH', categories:['news'], streams:[]},
+  {id:'One.ph',       name:'One News',          logo:'https://upload.wikimedia.org/wikipedia/en/thumb/7/77/One_News_PH_logo_2022.png/220px-One_News_PH_logo_2022.png', country:'PH', categories:['news'], streams:[]},
+  {id:'INCTV.ph',     name:'INC TV',            logo:'https://upload.wikimedia.org/wikipedia/en/thumb/b/b5/INC-TV-logo.png/220px-INC-TV-logo.png', country:'PH', categories:['religious'], streams:[]},
+  {id:'MYX.ph',       name:'MYX',               logo:'https://upload.wikimedia.org/wikipedia/en/thumb/f/f3/MYX_logo.svg/220px-MYX_logo.svg.png', country:'PH', categories:['music'], streams:[]},
+  {id:'JeepneyTV.ph', name:'Jeepney TV',        logo:'https://upload.wikimedia.org/wikipedia/en/thumb/f/f5/Jeepney_TV_2023_logo.svg/220px-Jeepney_TV_2023_logo.svg.png', country:'PH', categories:['entertainment'], streams:[]},
+  {id:'DepEdTV.ph',   name:'DepEd TV',          logo:'https://upload.wikimedia.org/wikipedia/en/thumb/c/c6/DepEd_TV_logo.png/220px-DepEd_TV_logo.png', country:'PH', categories:['documentary'], streams:[]},
+];
+
+async function loadTV2Data(){
+  if(tv2DataLoaded)return;
+  $('tv2List').innerHTML='<div class="tv-status"><div class="spinner" style="width:24px;height:24px;border-width:2px;border-top-color:#ff2d55"></div> Loading PH channels…</div>';
+  try{
+    // Reuse the already-loaded iptv-org data if available, else load it
+    if(!tvDataLoaded){await loadTVData();}
+    // Filter PH channels from iptv-org data
+    const phFromIPTV = tvChannels.filter(ch=>ch.country&&ch.country.toUpperCase()==='PH');
+    // Merge with known channels, iptv-org takes priority for stream URLs
+    const merged = [...PH_KNOWN_CHANNELS];
+    phFromIPTV.forEach(ch=>{
+      const existing = merged.find(m=>m.id===ch.id||m.name.toLowerCase()===ch.name.toLowerCase());
+      if(existing){
+        // Add iptv-org streams to known channel
+        if(tvStreamMap[ch.id]) existing.streams=[...new Set([...existing.streams,...(tvStreamMap[ch.id]||[])])];
+      } else {
+        merged.push({...ch, streams: tvStreamMap[ch.id]||[]});
+      }
+    });
+    tv2Channels = merged.sort((a,b)=>{
+      // Sort: channels with streams first, then alphabetical
+      const aHas=a.streams&&a.streams.length>0?1:0;
+      const bHas=b.streams&&b.streams.length>0?1:0;
+      if(bHas!==aHas)return bHas-aHas;
+      return (a.name||'').localeCompare(b.name||'');
+    });
+    tv2DataLoaded=true;
+    applyTV2Filters();
+  }catch(e){
+    // Fallback to known channels only
+    tv2Channels=[...PH_KNOWN_CHANNELS];
+    tv2DataLoaded=true;
+    applyTV2Filters();
+  }
+}
+
+function applyTV2Filters(){
+  const q=tv2SearchQuery.trim().toLowerCase();
+  tv2Filtered=tv2Channels.filter(ch=>{
+    if(tv2CategoryFilter){
+      const cats=(ch.categories||[]).map(c=>c.toLowerCase());
+      if(!cats.some(c=>c.includes(tv2CategoryFilter)))return false;
+    }
+    if(q&&!(ch.name||'').toLowerCase().includes(q))return false;
+    return true;
+  });
+  renderTV2List();
+}
+
+function renderTV2List(){
+  const el=$('tv2List');
+  if(!tv2Filtered.length){el.innerHTML='<div class="tv-status"><i class="fas fa-search"></i> No channels found</div>';return;}
+  const rc=$('tv2ResultCount');
+  if(rc)rc.textContent=tv2Filtered.length+' channels';
+  el.innerHTML=tv2Filtered.map((ch,i)=>{
+    const isPlaying=currentTV&&currentTV.id===ch.id;
+    const hasStream=ch.streams&&ch.streams.length>0;
+    const logo=ch.logo
+      ?`<img src="${escHtml(ch.logo)}" onerror="this.parentNode.innerHTML='🇵🇭'" style="width:100%;height:100%;object-fit:contain;border-radius:6px">`
+      :'🇵🇭';
+    const cats=(ch.categories||[]).slice(0,1).join('');
+    return `<div class="tv-item${isPlaying?' playing':''}" style="${isPlaying?'border-left-color:#ff2d55':''}" onclick="playTV2Channel(tv2Filtered[${i}])">
+      <div class="tv-logo" style="border-color:${hasStream?'#ff2d5540':'var(--border2)'}">${logo}</div>
+      <div class="tv-info">
+        <div class="tv-name">${escHtml(ch.name||'Unknown')}</div>
+        <div class="tv-meta">${cats?escHtml(cats)+' · ':''}<span style="color:${hasStream?'var(--green)':'var(--text3)'}">${hasStream?'Stream available':'May be geo-locked'}</span></div>
+      </div>
+      ${isPlaying
+        ?`<i class="fas fa-signal-stream" style="color:#ff2d55;font-size:12px;animation:radio-eq .6s ease-in-out infinite alternate"></i>`
+        :`<button class="pl-del" style="color:#ff2d55" title="Add to playlist" onclick="event.stopPropagation();addTV2ToPlaylist(tv2Filtered[${i}])"><i class="fas fa-plus"></i></button>`}
+    </div>`;
+  }).join('');
+}
+
+function playTV2Channel(ch){
+  if(!ch)return;
+  const streams=ch.streams||[];
+  if(!streams.length){
+    toast(`${ch.name} — no direct stream available. Try GMA Now or streaming apps.`,'warning');
+    return;
+  }
+  // Reuse the TV1 stream player — it handles HLS perfectly
+  // Temporarily add to tvStreamMap so tryTVStream can find it
+  tvStreamMap[ch.id]=streams;
+  hideAll();hidePlaceholder();
+  currentTV=ch;
+  // Show preview using TV1's showTVPreview (same structure)
+  showTVPreview(ch);
+  S.type='tv';S.id=ch.id;
+  setTitle((ch.name||'PH Channel')+' · LIVE');
+  setBadge('tv');
+  $('ctrlWrap').style.display='block';
+  $('seekRow').style.display='none';
+  $('timeTxt').textContent='LIVE';
+  $('playBtn').classList.add('tv-play');
+  $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
+  S.playing=true;
+  loading(true,'Tuning in…',true);
+  tryTVStream(ch,0);
+  renderTV2List();
+}
+window.playTV2Channel=playTV2Channel;
+
+function addTV2ToPlaylist(ch){
+  if(!ch)return;
+  addToPlaylist({type:'tv',channel:ch,title:(ch.name||'PH Channel')+' · LIVE'});
+}
+window.addTV2ToPlaylist=addTV2ToPlaylist;
+
+// TV2 category chips
+$('tv2CategoryScroll').querySelectorAll('.tv2-chip').forEach(chip=>{
+  chip.onclick=()=>{
+    $('tv2CategoryScroll').querySelectorAll('.tv2-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    tv2CategoryFilter=chip.dataset.category||'';
+    if(tv2DataLoaded)applyTV2Filters();else loadTV2Data();
+  };
+});
+$('tv2SearchBtn').onclick=()=>{
+  tv2SearchQuery=$('tv2SearchInp').value;
+  if(tv2DataLoaded)applyTV2Filters();else loadTV2Data();
+};
+$('tv2SearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('tv2SearchBtn').click();});
+
+
 loadPlaylist();
 fetchRadio();
 fetchMusicStations('pop'); // preload music tab
