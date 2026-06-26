@@ -15,7 +15,6 @@
   --border:#ffffff14;--border2:#ffffff22;
   --red:#f87171;--blue:#60a5fa;--green:#34d399;--yellow:#fbbf24;--pink:#f472b6;
   --tv:#ff6b35;--tv2:#ff8c5a;
-  --ph:#ff2d55;--ph2:#ff6b8a;
   --sc:#ff5500;--sc2:#ff7733;
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bottom:env(safe-area-inset-bottom,0px);
@@ -182,6 +181,7 @@ body{background:var(--bg0);color:var(--text1);font-family:-apple-system,BlinkMac
 .b-rd{background:#34d39922;color:#34d399}
 .b-tv{background:#ff6b3522;color:#ff6b35}
 .b-sc{background:#ff550022;color:#ff5500}
+.b-tv2{background:#3b82f622;color:#60a5fa}
 
 .input-card{background:var(--bg1);border-radius:14px;border:1px solid var(--border);overflow:hidden}
 .tabs-bar{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);scrollbar-width:none}
@@ -336,12 +336,6 @@ input[type=file]::file-selector-button{
 }
 .tv-chip.active{background:var(--tv);border-color:var(--tv);color:#fff;font-weight:600}
 .tv-chip:active{opacity:.8}
-.tv2-chip{
-  padding:5px 12px;border-radius:16px;border:1px solid var(--border2);background:var(--bg3);
-  color:var(--text3);font-size:11px;cursor:pointer;white-space:nowrap;flex-shrink:0;-webkit-appearance:none;
-}
-.tv2-chip.active{background:var(--ph);border-color:var(--ph);color:#fff;font-weight:600}
-.tv2-chip:active{opacity:.8}
 .tv-list{display:flex;flex-direction:column;gap:1px;max-height:380px;overflow-y:auto;border-radius:10px;border:1px solid var(--border)}
 .tv-item{
   display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;
@@ -363,6 +357,12 @@ input[type=file]::file-selector-button{
 .tv-notice{
   padding:8px 12px;background:#ff6b3514;border:1px solid #ff6b3530;border-radius:8px;
   font-size:11px;color:var(--tv2);display:flex;align-items:flex-start;gap:6px;margin-bottom:10px;line-height:1.5;
+}
+
+/* TV2 (PH Official Channels) Tab Styles */
+.tv2-notice{
+  padding:8px 12px;background:#3b82f614;border:1px solid #3b82f630;border-radius:8px;
+  font-size:11px;color:#93c5fd;display:flex;align-items:flex-start;gap:6px;margin-bottom:10px;line-height:1.5;
 }
 
 .bottom-nav{
@@ -469,10 +469,10 @@ input[type=file]::file-selector-button{
   <button class="plt-btn" data-p="instagram"><i class="fab fa-instagram" style="color:var(--pink)"></i> Instagram</button>
   <button class="plt-btn" data-p="url"><i class="fas fa-link" style="color:var(--green)"></i> URL</button>
   <button class="plt-btn" data-p="local"><i class="fas fa-folder" style="color:var(--yellow)"></i> Local</button>
-  <button class="plt-btn" data-p="radio"><i class="fas fa-radio" style="color:var(--green)"></i> Radio 1</button>
-  <button class="plt-btn" data-p="soundcloud"><i class="fas fa-music" style="color:var(--sc)"></i> Radio 2</button>
-  <button class="plt-btn" data-p="tv"><i class="fas fa-tv" style="color:var(--tv)"></i> TV 1</button>
-  <button class="plt-btn" data-p="tv2"><i class="fas fa-tv" style="color:#ff2d55"></i> TV 2 🇵🇭</button>
+  <button class="plt-btn" data-p="radio"><i class="fas fa-radio" style="color:var(--green)"></i> Radio1</button>
+  <button class="plt-btn" data-p="soundcloud"><i class="fas fa-music" style="color:var(--sc)"></i> Radio2</button>
+  <button class="plt-btn" data-p="tv"><i class="fas fa-tv" style="color:var(--tv)"></i> TV1</button>
+  <button class="plt-btn" data-p="tv2"><i class="fas fa-satellite-dish" style="color:var(--accent3)"></i> TV2 PH</button>
 </div>
 
 <div class="page">
@@ -573,10 +573,10 @@ input[type=file]::file-selector-button{
         <button class="tab-btn" data-tab="instagram"><i class="fab fa-instagram" style="color:var(--pink);font-size:13px"></i> IG</button>
         <button class="tab-btn" data-tab="url"><i class="fas fa-link" style="color:var(--green);font-size:13px"></i> URL</button>
         <button class="tab-btn" data-tab="local"><i class="fas fa-folder" style="color:var(--yellow);font-size:13px"></i> Local</button>
-        <button class="tab-btn" data-tab="radio"><i class="fas fa-radio" style="color:var(--green);font-size:13px"></i> Radio 1</button>
-        <button class="tab-btn" data-tab="soundcloud"><i class="fas fa-music" style="color:var(--sc);font-size:13px"></i> Radio 2</button>
-        <button class="tab-btn" data-tab="tv"><i class="fas fa-tv" style="color:var(--tv);font-size:13px"></i> TV 1</button>
-        <button class="tab-btn" data-tab="tv2"><i class="fas fa-tv" style="color:#ff2d55;font-size:13px"></i> TV 2 🇵🇭</button>
+        <button class="tab-btn" data-tab="radio"><i class="fas fa-radio" style="color:var(--green);font-size:13px"></i> Radio1</button>
+        <button class="tab-btn" data-tab="soundcloud"><i class="fas fa-music" style="color:var(--sc);font-size:13px"></i> Radio2</button>
+        <button class="tab-btn" data-tab="tv"><i class="fas fa-tv" style="color:var(--tv);font-size:13px"></i> TV1</button>
+        <button class="tab-btn" data-tab="tv2"><i class="fas fa-satellite-dish" style="color:var(--accent3);font-size:13px"></i> TV2 PH</button>
       </div>
 
       <!-- YouTube Tab -->
@@ -770,37 +770,20 @@ input[type=file]::file-selector-button{
         </div>
       </div>
 
-      <!-- ══ TV 2 — Philippine Channels ══ -->
+      <!-- TV2 Tab (Philippines Official Channels via YouTube Live) -->
       <div class="tab-pane" id="tab-tv2">
-        <div class="tv-notice" style="background:#ff2d5514;border-color:#ff2d5530;color:#ff6b8a">
+        <div class="tv2-notice">
           <i class="fas fa-circle-info" style="font-size:12px;margin-top:1px;flex-shrink:0"></i>
-          <span>🇵🇭 Philippine channels from <strong>IPTV-org</strong> — GMA, Kapamilya, TV5, PTV, A2Z and more. Streams may be geo-restricted. Tap any channel to try.</span>
+          <span>Official Philippine network channels — <strong>GMA, ABS-CBN, TV5 &amp; PTV</strong> — streamed straight from their own verified YouTube Live channels. If a channel shows "offline", it just isn't currently broadcasting live.</span>
         </div>
-        <div class="tv-toolbar">
-          <div class="tv-search-row">
-            <input class="inp" id="tv2SearchInp" placeholder="Search PH channels…" autocomplete="off">
-            <button class="tv-search-btn" id="tv2SearchBtn" style="background:#ff2d55"><i class="fas fa-search"></i></button>
-          </div>
+        <div class="tv-filter-row" id="tv2NetScroll">
+          <button class="tv-chip active" data-network="">📺 All</button>
+          <button class="tv-chip" data-network="GMA">🟡 GMA</button>
+          <button class="tv-chip" data-network="ABS-CBN">🔵 ABS-CBN</button>
+          <button class="tv-chip" data-network="TV5">🔴 TV5</button>
+          <button class="tv-chip" data-network="Government">🟢 Gov't</button>
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <div style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px">
-            <i class="fas fa-tag" style="color:#ff2d55"></i> Category
-          </div>
-          <div style="font-size:11px;color:var(--text3)" id="tv2ResultCount"></div>
-        </div>
-        <div class="tv-filter-row" id="tv2CategoryScroll">
-          <button class="tv2-chip active" data-category="">📺 All</button>
-          <button class="tv2-chip" data-category="news">📰 News</button>
-          <button class="tv2-chip" data-category="entertainment">🎬 Entertainment</button>
-          <button class="tv2-chip" data-category="sports">⚽ Sports</button>
-          <button class="tv2-chip" data-category="kids">🧒 Kids</button>
-          <button class="tv2-chip" data-category="music">🎵 Music</button>
-          <button class="tv2-chip" data-category="religious">✝ Religious</button>
-          <button class="tv2-chip" data-category="documentary">🌿 Documentary</button>
-        </div>
-        <div class="tv-list" id="tv2List">
-          <div class="tv-status"><div class="spinner" style="width:24px;height:24px;border-width:2px;border-top-color:#ff2d55"></div> Loading PH channels…</div>
-        </div>
+        <div class="tv-list" id="tv2List"></div>
       </div>
     </div>
   </div>
@@ -834,15 +817,11 @@ input[type=file]::file-selector-button{
   </button>
   <button class="bnav-btn" id="bnRadio">
     <i class="fas fa-radio"></i>
-    <span>Radio 1</span>
+    <span>Radio1</span>
   </button>
   <button class="bnav-btn" id="bnSC">
-    <i class="fas fa-music"></i>
-    <span>Radio 2</span>
-  </button>
-  <button class="bnav-btn" id="bnTV2">
-    <i class="fas fa-tv" style="color:#ff2d55"></i>
-    <span>TV 🇵🇭</span>
+    <i class="fas fa-music" style="font-size:20px"></i>
+    <span>Radio2</span>
   </button>
   <button class="bnav-btn" id="bnPlaylist">
     <div class="bnav-icon-wrap">
@@ -898,10 +877,13 @@ let tvOverlayTimer=null;
 // SoundCloud state
 let scCurrentQuery='trending music';
 
-const ICONS={youtube:'fab fa-youtube',vimeo:'fab fa-vimeo',dailymotion:'fas fa-play',facebook:'fab fa-facebook',reel:'fab fa-facebook',html5:'fas fa-video',instagram:'fab fa-instagram',radio:'fas fa-radio',tv:'fas fa-tv',soundcloud:'fab fa-soundcloud'};
-const COLORS={youtube:'var(--red)',vimeo:'var(--accent3)',dailymotion:'var(--blue)',facebook:'var(--blue)',reel:'var(--pink)',html5:'var(--green)',instagram:'var(--pink)',radio:'var(--green)',tv:'var(--tv)',soundcloud:'var(--sc)'};
-const BCLASS={youtube:'b-yt',vimeo:'b-vi',dailymotion:'b-dm',facebook:'b-fb',reel:'b-rl',html5:'b-h5',instagram:'b-ig',radio:'b-rd',tv:'b-tv',soundcloud:'b-sc'};
-const LABELS={youtube:'YouTube',vimeo:'Vimeo',dailymotion:'Dailymotion',facebook:'Facebook',reel:'Reel',html5:'Direct',instagram:'Instagram',radio:'Radio',tv:'Live TV',soundcloud:'Music Radio'};
+// TV2 (Philippines Official Channels) state
+let currentTV2=null,currentTV2Filter='';
+
+const ICONS={youtube:'fab fa-youtube',vimeo:'fab fa-vimeo',dailymotion:'fas fa-play',facebook:'fab fa-facebook',reel:'fab fa-facebook',html5:'fas fa-video',instagram:'fab fa-instagram',radio:'fas fa-radio',tv:'fas fa-tv',soundcloud:'fab fa-soundcloud',tv2:'fas fa-satellite-dish'};
+const COLORS={youtube:'var(--red)',vimeo:'var(--accent3)',dailymotion:'var(--blue)',facebook:'var(--blue)',reel:'var(--pink)',html5:'var(--green)',instagram:'var(--pink)',radio:'var(--green)',tv:'var(--tv)',soundcloud:'var(--sc)',tv2:'var(--accent3)'};
+const BCLASS={youtube:'b-yt',vimeo:'b-vi',dailymotion:'b-dm',facebook:'b-fb',reel:'b-rl',html5:'b-h5',instagram:'b-ig',radio:'b-rd',tv:'b-tv',soundcloud:'b-sc',tv2:'b-tv2'};
+const LABELS={youtube:'YouTube',vimeo:'Vimeo',dailymotion:'Dailymotion',facebook:'Facebook',reel:'Reel',html5:'Direct',instagram:'Instagram',radio:'Radio1',tv:'TV1',soundcloud:'Radio2',tv2:'TV2 (PH)'};
 
 /* ── LocalStorage ── */
 function savePlaylist(){
@@ -1272,6 +1254,64 @@ $('tvCategoryScroll').querySelectorAll('.tv-chip').forEach(chip=>{
 $('tvSearchBtn').onclick=()=>{tvSearchQuery=$('tvSearchInp').value;if(tvDataLoaded)applyTVFilters();else loadTVData();};
 $('tvSearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('tvSearchBtn').click();});
 
+/* ── TV2: Philippines Official Channels (via YouTube Live embed) ──
+   These are the verified, official YouTube channels of each network.
+   Using YouTube's own live_stream embed means playback is fully authorized
+   by the broadcasters themselves — this is a different mechanism/source
+   than the IPTV-org stream list used by TV1. */
+const PH_CHANNELS=[
+  {id:'UCqYw-CTd1dU2yGI71sEyqNw',name:'GMA News',network:'GMA',cat:'News'},
+  {id:'UCKL5hAuzgFQsyrsQKgU0Qng',name:'GMA Network',network:'GMA',cat:'Entertainment'},
+  {id:'UCE2606prvXQc_noEqKxVJXA',name:'ABS-CBN News',network:'ABS-CBN',cat:'News'},
+  {id:'UCaLzUKBv5iIAHKYP8hL2zFw',name:'Kapamilya Online Live',network:'ABS-CBN',cat:'Entertainment · 24/7'},
+  {id:'UCstEtN0pgOmCf02EdXsGChw',name:'ABS-CBN Entertainment',network:'ABS-CBN',cat:'Entertainment'},
+  {id:'UCGEbMwiX774cseKvJqF9R2g',name:'News5 Everywhere',network:'TV5',cat:'News'},
+  {id:'UCzEAC4xGrhpShopTYgBhGJA',name:'ONE News PH',network:'TV5',cat:'News'},
+  {id:'UC5RvV_LtR1dxPCVFGw6dxXA',name:'PTV News',network:'Government',cat:'News'},
+  {id:'UCJCUbMaY593_4SN1QPG7NFQ',name:'PTV Philippines',network:'Government',cat:'General'}
+];
+const NET_COLORS={GMA:'var(--yellow)','ABS-CBN':'var(--accent3)',TV5:'var(--red)',Government:'var(--green)'};
+
+function renderTV2List(){
+  const el=$('tv2List');
+  const list=currentTV2Filter?PH_CHANNELS.filter(c=>c.network===currentTV2Filter):PH_CHANNELS;
+  if(!list.length){el.innerHTML='<div class="tv-status"><i class="fas fa-search"></i> No channels in this category</div>';return;}
+  el.innerHTML=list.map(c=>{
+    const origIdx=PH_CHANNELS.indexOf(c);
+    const isPlaying=currentTV2&&currentTV2.id===c.id;
+    const netColor=NET_COLORS[c.network]||'var(--accent3)';
+    return `<div class="tv-item${isPlaying?' playing':''}" onclick="playTV2Channel(PH_CHANNELS[${origIdx}])">
+      <div class="tv-logo" style="color:${netColor};font-weight:700;font-size:10px">${escHtml(c.network)}</div>
+      <div class="tv-info"><div class="tv-name">${escHtml(c.name)}</div><div class="tv-meta">${escHtml(c.network)} · ${escHtml(c.cat)}</div></div>
+      ${isPlaying?'<i class="fas fa-signal-stream tv-playing-icon"></i>':`<button class="pl-del" style="color:${netColor}" title="Add to playlist" onclick="event.stopPropagation();addTV2ToPlaylist(PH_CHANNELS[${origIdx}])"><i class="fas fa-plus"></i></button>`}
+    </div>`;
+  }).join('');
+}
+function playTV2Channel(ch){
+  if(!ch)return;
+  hideAll();hidePlaceholder();loading(true,'Connecting to '+(ch.name||'channel')+'…');
+  currentTV2=ch;
+  const p=$('platformPlayer');p.style.display='block';
+  p.src=`https://www.youtube.com/embed/live_stream?channel=${ch.id}&autoplay=1`;
+  S.type='tv2';S.id=ch.id;setTitle((ch.name||'PH Channel')+' · LIVE');setBadge('tv2');
+  setTimeout(()=>loading(false),1500);
+  renderTV2List();
+}
+window.playTV2Channel=playTV2Channel;
+function addTV2ToPlaylist(ch){
+  if(!ch)return;
+  addToPlaylist({type:'tv2',channelId:ch.id,channelName:ch.name,channelNetwork:ch.network,channelCat:ch.cat,title:(ch.name||'PH Channel')+' · LIVE'});
+}
+window.addTV2ToPlaylist=addTV2ToPlaylist;
+$('tv2NetScroll').querySelectorAll('.tv-chip').forEach(chip=>{
+  chip.onclick=()=>{
+    QA('#tv2NetScroll .tv-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    currentTV2Filter=chip.dataset.network||'';
+    renderTV2List();
+  };
+});
+
 /* ── Radio iframe engine ── */
 function buildRadioIframeSrc(streamUrl){
   const escaped=streamUrl.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
@@ -1474,6 +1514,7 @@ function playItem(i){
   else if(it.type==='html5')loadH5(it.url,it.title);
   else if(it.type==='radio'&&it.station)loadRadio(it.station);
   else if(it.type==='tv'&&it.channel)playTVChannel(it.channel);
+  else if(it.type==='tv2'&&it.channelId)playTV2Channel({id:it.channelId,name:it.channelName,network:it.channelNetwork,cat:it.channelCat});
   else if(it.type==='soundcloud'&&it.scUrl)scLoadUrl(it.scUrl);
   renderLists();closeDrawer();
 }
@@ -1546,11 +1587,6 @@ $('bnSC').onclick=()=>{
   document.querySelector('.input-card').scrollIntoView({behavior:'smooth',block:'start'});
   Q('.tab-btn[data-tab="soundcloud"]').click();
 };
-$('bnTV2').onclick=()=>{
-  QA('.bnav-btn').forEach(b=>b.classList.remove('active'));$('bnTV2').classList.add('active');
-  document.querySelector('.input-card').scrollIntoView({behavior:'smooth',block:'start'});
-  Q('.tab-btn[data-tab="tv2"]').click();
-};
 
 /* ── Tab switching ── */
 $('tabsBar').querySelectorAll('.tab-btn').forEach(btn=>{
@@ -1559,7 +1595,6 @@ $('tabsBar').querySelectorAll('.tab-btn').forEach(btn=>{
     QA('.tab-pane').forEach(p=>p.classList.remove('active'));
     $('tab-'+btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab==='tv'&&!tvDataLoaded&&!tvDataLoading)loadTVData();
-    if(btn.dataset.tab==='tv2'&&!tv2DataLoaded)loadTV2Data();
     if(btn.dataset.tab==='soundcloud'&&!musicStations.length)fetchMusicStations('pop');
   };
 });
@@ -1588,159 +1623,11 @@ $('localInp').onchange=e=>{const ok=e.target.files.length>0;$('localLoad').disab
 $('localLoad').onclick=()=>{const f=$('localInp').files[0];if(f)loadH5(URL.createObjectURL(f),f.name);};
 $('localAdd').onclick=()=>{Array.from($('localInp').files).forEach(f=>addToPlaylist({type:'html5',url:URL.createObjectURL(f),title:f.name}));};
 
-/* ══ TV 2 — Philippine Channels ══ */
-// Uses the same IPTV-org data as TV1, but pre-filtered to PH country only.
-// Also includes a hardcoded list of known stable PH streams as fallback.
-
-let tv2Channels=[], tv2Filtered=[], tv2DataLoaded=false, tv2CategoryFilter='', tv2SearchQuery='';
-
-// Known stable Philippine channel streams (hardcoded fallbacks)
-// These come from the iptv-org verified streams for PH
-const PH_KNOWN_CHANNELS = [
-  {id:'GMA.ph',       name:'GMA',              logo:'https://upload.wikimedia.org/wikipedia/en/thumb/0/0f/GMA_Network_logo.svg/220px-GMA_Network_logo.svg.png',     country:'PH', categories:['entertainment'], streams:['https://gma-tv-vh.akamaihd.net/i/gma_1@627990/master.m3u8']},
-  {id:'GMANews.ph',   name:'GMA News TV',      logo:'https://upload.wikimedia.org/wikipedia/en/thumb/5/56/GMA_News_TV_logo_2023.svg/220px-GMA_News_TV_logo_2023.svg.png', country:'PH', categories:['news'], streams:['https://5be89e62c735a.streamlock.net/gntvlive/gntvlive/playlist.m3u8']},
-  {id:'Kapamilya.ph', name:'Kapamilya Channel', logo:'https://upload.wikimedia.org/wikipedia/en/thumb/0/08/Kapamilya_Channel_logo.png/220px-Kapamilya_Channel_logo.png', country:'PH', categories:['entertainment'], streams:['https://abs-cbnnews-vh.akamaihd.net/i/ABSCBNNews_1@189185/master.m3u8']},
-  {id:'TV5.ph',       name:'TV5',               logo:'https://upload.wikimedia.org/wikipedia/en/thumb/a/aa/TV5_Philippines_Logo_2021.svg/220px-TV5_Philippines_Logo_2021.svg.png', country:'PH', categories:['entertainment'], streams:['https://tv5live-target.cdn.multigeo.tv/bctv5live/smil:bctv5live.smil/playlist.m3u8']},
-  {id:'PTV.ph',       name:'PTV',               logo:'https://upload.wikimedia.org/wikipedia/en/thumb/f/f9/PTV_Logo.png/220px-PTV_Logo.png', country:'PH', categories:['news'], streams:['https://livestream.com/accounts/24897921/events/8285481']},
-  {id:'A2Z.ph',       name:'A2Z Channel 11',    logo:'https://upload.wikimedia.org/wikipedia/en/thumb/7/78/A2Z_Channel_logo.png/220px-A2Z_Channel_logo.png', country:'PH', categories:['entertainment'], streams:[]},
-  {id:'ALLTV.ph',     name:'All TV',            logo:'https://upload.wikimedia.org/wikipedia/en/thumb/b/bb/ALLTV_logo.png/220px-ALLTV_logo.png', country:'PH', categories:['entertainment'], streams:[]},
-  {id:'DZMM.ph',      name:'DZMM TeleRadyo',    logo:'https://upload.wikimedia.org/wikipedia/en/thumb/2/26/TeleRadyo_logo_2021.png/220px-TeleRadyo_logo_2021.png', country:'PH', categories:['news'], streams:[]},
-  {id:'CNN.ph',       name:'CNN Philippines',   logo:'https://upload.wikimedia.org/wikipedia/en/thumb/d/d1/CNN_Philippines_2020.svg/220px-CNN_Philippines_2020.svg.png', country:'PH', categories:['news'], streams:[]},
-  {id:'One.ph',       name:'One News',          logo:'https://upload.wikimedia.org/wikipedia/en/thumb/7/77/One_News_PH_logo_2022.png/220px-One_News_PH_logo_2022.png', country:'PH', categories:['news'], streams:[]},
-  {id:'INCTV.ph',     name:'INC TV',            logo:'https://upload.wikimedia.org/wikipedia/en/thumb/b/b5/INC-TV-logo.png/220px-INC-TV-logo.png', country:'PH', categories:['religious'], streams:[]},
-  {id:'MYX.ph',       name:'MYX',               logo:'https://upload.wikimedia.org/wikipedia/en/thumb/f/f3/MYX_logo.svg/220px-MYX_logo.svg.png', country:'PH', categories:['music'], streams:[]},
-  {id:'JeepneyTV.ph', name:'Jeepney TV',        logo:'https://upload.wikimedia.org/wikipedia/en/thumb/f/f5/Jeepney_TV_2023_logo.svg/220px-Jeepney_TV_2023_logo.svg.png', country:'PH', categories:['entertainment'], streams:[]},
-  {id:'DepEdTV.ph',   name:'DepEd TV',          logo:'https://upload.wikimedia.org/wikipedia/en/thumb/c/c6/DepEd_TV_logo.png/220px-DepEd_TV_logo.png', country:'PH', categories:['documentary'], streams:[]},
-];
-
-async function loadTV2Data(){
-  if(tv2DataLoaded)return;
-  $('tv2List').innerHTML='<div class="tv-status"><div class="spinner" style="width:24px;height:24px;border-width:2px;border-top-color:#ff2d55"></div> Loading PH channels…</div>';
-  try{
-    // Reuse the already-loaded iptv-org data if available, else load it
-    if(!tvDataLoaded){await loadTVData();}
-    // Filter PH channels from iptv-org data
-    const phFromIPTV = tvChannels.filter(ch=>ch.country&&ch.country.toUpperCase()==='PH');
-    // Merge with known channels, iptv-org takes priority for stream URLs
-    const merged = [...PH_KNOWN_CHANNELS];
-    phFromIPTV.forEach(ch=>{
-      const existing = merged.find(m=>m.id===ch.id||m.name.toLowerCase()===ch.name.toLowerCase());
-      if(existing){
-        // Add iptv-org streams to known channel
-        if(tvStreamMap[ch.id]) existing.streams=[...new Set([...existing.streams,...(tvStreamMap[ch.id]||[])])];
-      } else {
-        merged.push({...ch, streams: tvStreamMap[ch.id]||[]});
-      }
-    });
-    tv2Channels = merged.sort((a,b)=>{
-      // Sort: channels with streams first, then alphabetical
-      const aHas=a.streams&&a.streams.length>0?1:0;
-      const bHas=b.streams&&b.streams.length>0?1:0;
-      if(bHas!==aHas)return bHas-aHas;
-      return (a.name||'').localeCompare(b.name||'');
-    });
-    tv2DataLoaded=true;
-    applyTV2Filters();
-  }catch(e){
-    // Fallback to known channels only
-    tv2Channels=[...PH_KNOWN_CHANNELS];
-    tv2DataLoaded=true;
-    applyTV2Filters();
-  }
-}
-
-function applyTV2Filters(){
-  const q=tv2SearchQuery.trim().toLowerCase();
-  tv2Filtered=tv2Channels.filter(ch=>{
-    if(tv2CategoryFilter){
-      const cats=(ch.categories||[]).map(c=>c.toLowerCase());
-      if(!cats.some(c=>c.includes(tv2CategoryFilter)))return false;
-    }
-    if(q&&!(ch.name||'').toLowerCase().includes(q))return false;
-    return true;
-  });
-  renderTV2List();
-}
-
-function renderTV2List(){
-  const el=$('tv2List');
-  if(!tv2Filtered.length){el.innerHTML='<div class="tv-status"><i class="fas fa-search"></i> No channels found</div>';return;}
-  const rc=$('tv2ResultCount');
-  if(rc)rc.textContent=tv2Filtered.length+' channels';
-  el.innerHTML=tv2Filtered.map((ch,i)=>{
-    const isPlaying=currentTV&&currentTV.id===ch.id;
-    const hasStream=ch.streams&&ch.streams.length>0;
-    const logo=ch.logo
-      ?`<img src="${escHtml(ch.logo)}" onerror="this.parentNode.innerHTML='🇵🇭'" style="width:100%;height:100%;object-fit:contain;border-radius:6px">`
-      :'🇵🇭';
-    const cats=(ch.categories||[]).slice(0,1).join('');
-    return `<div class="tv-item${isPlaying?' playing':''}" style="${isPlaying?'border-left-color:#ff2d55':''}" onclick="playTV2Channel(tv2Filtered[${i}])">
-      <div class="tv-logo" style="border-color:${hasStream?'#ff2d5540':'var(--border2)'}">${logo}</div>
-      <div class="tv-info">
-        <div class="tv-name">${escHtml(ch.name||'Unknown')}</div>
-        <div class="tv-meta">${cats?escHtml(cats)+' · ':''}<span style="color:${hasStream?'var(--green)':'var(--text3)'}">${hasStream?'Stream available':'May be geo-locked'}</span></div>
-      </div>
-      ${isPlaying
-        ?`<i class="fas fa-signal-stream" style="color:#ff2d55;font-size:12px;animation:radio-eq .6s ease-in-out infinite alternate"></i>`
-        :`<button class="pl-del" style="color:#ff2d55" title="Add to playlist" onclick="event.stopPropagation();addTV2ToPlaylist(tv2Filtered[${i}])"><i class="fas fa-plus"></i></button>`}
-    </div>`;
-  }).join('');
-}
-
-function playTV2Channel(ch){
-  if(!ch)return;
-  const streams=ch.streams||[];
-  if(!streams.length){
-    toast(`${ch.name} — no direct stream available. Try GMA Now or streaming apps.`,'warning');
-    return;
-  }
-  // Reuse the TV1 stream player — it handles HLS perfectly
-  // Temporarily add to tvStreamMap so tryTVStream can find it
-  tvStreamMap[ch.id]=streams;
-  hideAll();hidePlaceholder();
-  currentTV=ch;
-  // Show preview using TV1's showTVPreview (same structure)
-  showTVPreview(ch);
-  S.type='tv';S.id=ch.id;
-  setTitle((ch.name||'PH Channel')+' · LIVE');
-  setBadge('tv');
-  $('ctrlWrap').style.display='block';
-  $('seekRow').style.display='none';
-  $('timeTxt').textContent='LIVE';
-  $('playBtn').classList.add('tv-play');
-  $('playBtn').innerHTML='<i class="fas fa-pause"></i>';
-  S.playing=true;
-  loading(true,'Tuning in…',true);
-  tryTVStream(ch,0);
-  renderTV2List();
-}
-window.playTV2Channel=playTV2Channel;
-
-function addTV2ToPlaylist(ch){
-  if(!ch)return;
-  addToPlaylist({type:'tv',channel:ch,title:(ch.name||'PH Channel')+' · LIVE'});
-}
-window.addTV2ToPlaylist=addTV2ToPlaylist;
-
-// TV2 category chips
-$('tv2CategoryScroll').querySelectorAll('.tv2-chip').forEach(chip=>{
-  chip.onclick=()=>{
-    $('tv2CategoryScroll').querySelectorAll('.tv2-chip').forEach(c=>c.classList.remove('active'));
-    chip.classList.add('active');
-    tv2CategoryFilter=chip.dataset.category||'';
-    if(tv2DataLoaded)applyTV2Filters();else loadTV2Data();
-  };
-});
-$('tv2SearchBtn').onclick=()=>{
-  tv2SearchQuery=$('tv2SearchInp').value;
-  if(tv2DataLoaded)applyTV2Filters();else loadTV2Data();
-};
-$('tv2SearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('tv2SearchBtn').click();});
-
-
+/* ── Init ── */
 loadPlaylist();
 fetchRadio();
 fetchMusicStations('pop'); // preload music tab
+renderTV2List(); // preload TV2 (static curated list, no fetch needed)
 </script>
 </body>
 </html>
