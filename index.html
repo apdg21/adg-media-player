@@ -365,6 +365,29 @@ input[type=file]::file-selector-button{
   font-size:11px;color:#93c5fd;display:flex;align-items:flex-start;gap:6px;margin-bottom:10px;line-height:1.5;
 }
 
+/* YouTube Search Styles */
+.yt-search-row{display:flex;gap:8px;margin-bottom:8px}
+.yt-search-row .inp{flex:1}
+.yt-search-btn{
+  padding:11px 14px;border-radius:10px;background:#ff0000;color:#fff;
+  border:none;cursor:pointer;font-size:14px;font-weight:600;-webkit-appearance:none;
+  min-height:44px;white-space:nowrap;display:flex;align-items:center;gap:6px;flex-shrink:0;
+}
+.yt-search-btn:active{opacity:.85}
+.yt-search-results{display:flex;flex-direction:column;gap:1px;max-height:340px;overflow-y:auto;border-radius:10px;border:1px solid var(--border);margin-bottom:10px}
+.yt-search-results:empty{display:none;border:none;margin-bottom:0}
+.yt-result-item{display:flex;align-items:center;gap:8px;padding:7px 8px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.yt-result-item:last-child{border-bottom:none}
+.yt-result-item:hover{background:var(--bg3)}
+.yt-result-click{display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer}
+.yt-result-thumb{width:64px;height:36px;border-radius:6px;object-fit:cover;background:var(--bg4);flex-shrink:0}
+.yt-result-info{flex:1;min-width:0}
+.yt-result-title{font-size:12px;font-weight:600;color:var(--text1);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3}
+.yt-result-channel{font-size:11px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yt-divider{display:flex;align-items:center;gap:8px;margin:2px 0 10px;font-size:11px;color:var(--text3)}
+.yt-divider::before,.yt-divider::after{content:'';flex:1;height:1px;background:var(--border2)}
+.yt-quota-msg{color:var(--yellow)}
+
 .bottom-nav{
   position:fixed;bottom:0;left:0;right:0;
   background:var(--bg1);border-top:1px solid var(--border);
@@ -581,6 +604,13 @@ input[type=file]::file-selector-button{
 
       <!-- YouTube Tab -->
       <div class="tab-pane active" id="tab-youtube">
+        <div class="yt-search-row">
+          <input class="inp" id="ytSearchInp" placeholder="Search YouTube…" autocomplete="off">
+          <button class="yt-search-btn" id="ytSearchBtn"><i class="fas fa-search"></i></button>
+        </div>
+        <div class="info-tip" style="margin-bottom:10px"><i class="fas fa-circle-info" style="font-size:11px"></i> Limited to ~100 searches/day shared by everyone — if it stops working, just paste a link below</div>
+        <div class="yt-search-results" id="ytSearchResults"></div>
+        <div class="yt-divider"><span>or paste a link</span></div>
         <input class="inp" id="ytInp" placeholder="YouTube URL or video ID" inputmode="url" autocomplete="off">
         <div class="btn-row">
           <button class="lbtn btn-yt" id="ytLoad"><i class="fab fa-youtube"></i> Load</button>
@@ -952,6 +982,62 @@ function extractYT(u){
   ];
   for(const p of ps){const m=u.match(p);if(m)return m[1];}return null;
 }
+
+/* ── YouTube Search (via Cloudflare Worker — keeps the API key off the client) ── */
+// Replace with your deployed Worker URL after following the deploy steps,
+// e.g. 'https://adg-yt-search.<your-subdomain>.workers.dev'
+const YT_SEARCH_WORKER_URL = 'https://adg-yt-search.dolfean214.workers.dev/';
+let ytSearchResultsData=[];
+
+async function searchYouTube(query){
+  const resEl=$('ytSearchResults');
+  resEl.innerHTML='<div class="radio-status"><div class="spinner" style="width:22px;height:22px;border-width:2px;border-top-color:#ff0000"></div> Searching…</div>';
+  try{
+    const r=await fetch(`${YT_SEARCH_WORKER_URL}/search?q=${encodeURIComponent(query)}`);
+    let data={};
+    try{data=await r.json();}catch(e){}
+    if(!r.ok){
+      if(data.error==='quotaExceeded'){
+        resEl.innerHTML='<div class="radio-status yt-quota-msg"><i class="fas fa-triangle-exclamation"></i> Daily search limit reached.<br>Paste a YouTube link or video ID below instead.</div>';
+        $('ytInp').focus();
+      }else{
+        resEl.innerHTML='<div class="radio-status"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i> Search failed. Try again, or paste a link below.</div>';
+      }
+      return;
+    }
+    renderYTResults(data.results||[]);
+  }catch(e){
+    resEl.innerHTML='<div class="radio-status"><i class="fas fa-exclamation-circle" style="color:var(--red)"></i> Could not reach search. Paste a link below instead.</div>';
+  }
+}
+function renderYTResults(results){
+  ytSearchResultsData=results;
+  const el=$('ytSearchResults');
+  if(!results.length){el.innerHTML='<div class="radio-status"><i class="fas fa-search"></i> No results</div>';return;}
+  el.innerHTML=results.map((r,i)=>`
+    <div class="yt-result-item">
+      <div class="yt-result-click" onclick="loadYT(ytSearchResultsData[${i}].id)">
+        <img class="yt-result-thumb" src="${escHtml(r.thumb||'')}" onerror="this.style.display='none'">
+        <div class="yt-result-info">
+          <div class="yt-result-title">${escHtml(r.title||'Untitled')}</div>
+          <div class="yt-result-channel">${escHtml(r.channel||'')}</div>
+        </div>
+      </div>
+      <button class="pl-del" title="Add to playlist" onclick="addYTResultToPlaylist(${i})"><i class="fas fa-plus"></i></button>
+    </div>`).join('');
+}
+function addYTResultToPlaylist(i){
+  const r=ytSearchResultsData[i];
+  if(!r)return;
+  addToPlaylist({type:'youtube',videoId:r.id,title:r.title||('YouTube: '+r.id)});
+}
+window.addYTResultToPlaylist=addYTResultToPlaylist;
+$('ytSearchBtn').onclick=()=>{
+  const q=$('ytSearchInp').value.trim();
+  if(!q){toast('Type something to search','warning');return;}
+  searchYouTube(q);
+};
+$('ytSearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('ytSearchBtn').click();});
 function extractVI(u){if(!u)return null;const m=u.match(/vimeo\.com\/(\d+)/);return m?m[1]:(/^\d+$/.test(u)?u:null);}
 function extractDM(u){if(!u)return null;const m=u.match(/(?:dailymotion\.com\/video\/|dai\.ly\/)([a-zA-Z0-9]+)/);return m?m[1]:(/^[a-zA-Z0-9]+$/.test(u)&&u.length<12?u:null);}
 
