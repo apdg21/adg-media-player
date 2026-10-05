@@ -1039,11 +1039,7 @@ $('ytSearchBtn').onclick=()=>{
 };
 $('ytSearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('ytSearchBtn').click();});
 function extractVI(u){if(!u)return null;const m=u.match(/vimeo\.com\/(\d+)/);return m?m[1]:(/^\d+$/.test(u)?u:null);}
-function extractDM(u){
-  if(!u)return null;
-  const m=u.match(/(?:dailymotion\.com\/(?:video\/|embed\/video\/)|dai\.ly\/)([a-zA-Z0-9]+)/);
-  return m?m[1]:(/^[a-zA-Z0-9]+$/.test(u)&&u.length<12?u:null);
-}
+function extractDM(u){if(!u)return null;const m=u.match(/(?:dailymotion\.com\/video\/|dai\.ly\/)([a-zA-Z0-9]+)/);return m?m[1]:(/^[a-zA-Z0-9]+$/.test(u)&&u.length<12?u:null);}
 
 function destroyTvHls(){if(tvHlsInstance){tvHlsInstance.destroy();tvHlsInstance=null;}}
 function destroyHls(){if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}}
@@ -1085,25 +1081,11 @@ function loadVI(id){
   setTimeout(()=>loading(false),1200);
 }
 function loadDM(id){
-  const cleanId = extractDM(id) || id;
-  if(!cleanId){toast('Invalid Dailymotion URL','error');return;}
   hideAll();hidePlaceholder();loading(true,'Loading Dailymotion…');
   const p=$('platformPlayer');p.style.display='block';
-  p.removeAttribute('referrerpolicy');
-  // Use proxy iframe to avoid domain-level blocking
-  // Host proxy.html on a fresh domain/subdomain, then:
-  const proxyUrl = 'https://adg-media-player.dolfean214.workers.dev/proxy.html?video=' + encodeURIComponent(cleanId);
-  const origin = encodeURIComponent(window.location.origin);
-  const embedUrl = `https://www.dailymotion.com/embed/video/${cleanId}?autoplay=1&mute=1&origin=${origin}`;
-  p.src = embedUrl;
-  p.onerror = () => { p.src = proxyUrl; };
-  S.type='dailymotion';S.id=cleanId;setTitle('Dailymotion Video');setBadge('dailymotion');
+  p.src=`https://www.dailymotion.com/embed/video/${id}?autoplay=1&mute=0`;
+  S.type='dailymotion';S.id=id;setTitle('Dailymotion Video');setBadge('dailymotion');
   setTimeout(()=>loading(false),1200);
-}
-
-// Proxy page content — host on a fresh domain
-function getDMProxyHTML(){
-  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{margin:0;padding:0;overflow:hidden}html,body{height:100%;background:#000}</style></head><body><iframe id="dm" style="width:100%;height:100%;border:none" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe><script>const params=new URLSearchParams(location.search);const vid=params.get("video");if(vid){const p=document.getElementById("dm");const o=encodeURIComponent(location.origin);p.src="https://www.dailymotion.com/embed/video/"+vid+"?autoplay=1&mute=1&origin="+o;}</script></body></html>';
 }
 function loadFB(url){
   hideAll();hidePlaceholder();loading(true,'Loading Facebook…');
