@@ -1085,11 +1085,21 @@ function loadVI(id){
   setTimeout(()=>loading(false),1200);
 }
 function loadDM(id){
-  const cleanId = extractDM(id) || id;        // Extract ID from URL or use raw ID
+  const cleanId = extractDM(id) || id;
+  if(!cleanId){toast('Invalid Dailymotion URL','error');return;}
   hideAll();hidePlaceholder();loading(true,'Loading Dailymotion…');
   const p=$('platformPlayer');p.style.display='block';
-  const origin = encodeURIComponent(window.location.origin); // <-- new
-  p.src=`https://www.dailymotion.com/embed/video/${cleanId}?autoplay=1&mute=1&origin=${origin}`; // <-- updated
+  // Set referrer policy for cross-origin compatibility
+  p.setAttribute('referrerpolicy','no-referrer-when-downgrade');
+  // Primary embed method with origin parameter
+  const origin = encodeURIComponent(window.location.origin);
+  const embedUrl = `https://www.dailymotion.com/embed/video/${cleanId}?autoplay=1&mute=1&origin=${origin}&api=1&sdkv=2.0`;
+  // Fallback: Try standard embed first, fallback to player.dailymotion.com
+  p.src = embedUrl;
+  // If first embed fails, try alternative URL format
+  p.onerror = () => {
+    p.src = `https://player.dailymotion.com/embed/video/${cleanId}?autoplay=1&mute=1&origin=${origin}`;
+  };
   S.type='dailymotion';S.id=cleanId;setTitle('Dailymotion Video');setBadge('dailymotion');
   setTimeout(()=>loading(false),1200);
 }
