@@ -1092,7 +1092,7 @@ function loadDM(id){
   p.removeAttribute('referrerpolicy');
   // Use proxy iframe to avoid domain-level blocking
   // Host proxy.html on a fresh domain/subdomain, then:
-  const proxyUrl = 'https://YOUR-PROXY-DOMAIN/proxy.html?video=' + encodeURIComponent(cleanId);
+  const proxyUrl = 'https://adg-media-player.dolfean214.workers.dev/proxy.html?video=' + encodeURIComponent(cleanId);
   const origin = encodeURIComponent(window.location.origin);
   const embedUrl = `https://www.dailymotion.com/embed/video/${cleanId}?autoplay=1&mute=1&origin=${origin}`;
   p.src = embedUrl;
