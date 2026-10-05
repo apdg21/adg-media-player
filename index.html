@@ -1089,21 +1089,23 @@ function loadDM(id){
   if(!cleanId){toast('Invalid Dailymotion URL','error');return;}
   hideAll();hidePlaceholder();loading(true,'Loading Dailymotion…');
   const p=$('platformPlayer');p.style.display='block';
-  // Set referrer policy for cross-origin compatibility
-  p.setAttribute('referrerpolicy','no-referrer-when-downgrade');
-  // Primary embed method with origin parameter
+  p.removeAttribute('referrerpolicy');
+  // Use proxy iframe to avoid domain-level blocking
+  // Host proxy.html on a fresh domain/subdomain, then:
+  const proxyUrl = 'https://YOUR-PROXY-DOMAIN/proxy.html?video=' + encodeURIComponent(cleanId);
   const origin = encodeURIComponent(window.location.origin);
-  const embedUrl = `https://www.dailymotion.com/embed/video/${cleanId}?autoplay=1&mute=1&origin=${origin}&api=1&sdkv=2.0`;
-  // Fallback: Try standard embed first, fallback to player.dailymotion.com
+  const embedUrl = `https://www.dailymotion.com/embed/video/${cleanId}?autoplay=1&mute=1&origin=${origin}`;
   p.src = embedUrl;
-  // If first embed fails, try alternative URL format
-  p.onerror = () => {
-    p.src = `https://player.dailymotion.com/embed/video/${cleanId}?autoplay=1&mute=1&origin=${origin}`;
-  };
+  p.onerror = () => { p.src = proxyUrl; };
   S.type='dailymotion';S.id=cleanId;setTitle('Dailymotion Video');setBadge('dailymotion');
   setTimeout(()=>loading(false),1200);
 }
-  function loadFB(url){
+
+// Proxy page content — host on a fresh domain
+function getDMProxyHTML(){
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{margin:0;padding:0;overflow:hidden}html,body{height:100%;background:#000}</style></head><body><iframe id="dm" style="width:100%;height:100%;border:none" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe><script>const params=new URLSearchParams(location.search);const vid=params.get("video");if(vid){const p=document.getElementById("dm");const o=encodeURIComponent(location.origin);p.src="https://www.dailymotion.com/embed/video/"+vid+"?autoplay=1&mute=1&origin="+o;}</script></body></html>';
+}
+function loadFB(url){
   hideAll();hidePlaceholder();loading(true,'Loading Facebook…');
   const isReel=url.toLowerCase().includes('reel');
   const fc=$('fbContainer');fc.style.display='flex';
