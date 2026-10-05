@@ -1085,14 +1085,15 @@ function loadVI(id){
   setTimeout(()=>loading(false),1200);
 }
 function loadDM(id){
-  const cleanId = extractDM(id) || id;
+  const cleanId = extractDM(id) || id;        // Extract ID from URL or use raw ID
   hideAll();hidePlaceholder();loading(true,'Loading Dailymotion…');
   const p=$('platformPlayer');p.style.display='block';
-  p.src=`https://www.dailymotion.com/embed/video/${cleanId}?autoplay=1&mute=1`;
+  const origin = encodeURIComponent(window.location.origin); // <-- new
+  p.src=`https://www.dailymotion.com/embed/video/${cleanId}?autoplay=1&mute=1&origin=${origin}`; // <-- updated
   S.type='dailymotion';S.id=cleanId;setTitle('Dailymotion Video');setBadge('dailymotion');
   setTimeout(()=>loading(false),1200);
 }
-function loadFB(url){
+  function loadFB(url){
   hideAll();hidePlaceholder();loading(true,'Loading Facebook…');
   const isReel=url.toLowerCase().includes('reel');
   const fc=$('fbContainer');fc.style.display='flex';
