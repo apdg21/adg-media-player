@@ -1039,7 +1039,11 @@ $('ytSearchBtn').onclick=()=>{
 };
 $('ytSearchInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('ytSearchBtn').click();});
 function extractVI(u){if(!u)return null;const m=u.match(/vimeo\.com\/(\d+)/);return m?m[1]:(/^\d+$/.test(u)?u:null);}
-function extractDM(u){if(!u)return null;const m=u.match(/(?:dailymotion\.com\/video\/|dai\.ly\/)([a-zA-Z0-9]+)/);return m?m[1]:(/^[a-zA-Z0-9]+$/.test(u)&&u.length<12?u:null);}
+function extractDM(u){
+  if(!u)return null;
+  const m=u.match(/(?:dailymotion\.com\/(?:video\/|embed\/video\/)|dai\.ly\/)([a-zA-Z0-9]+)/);
+  return m?m[1]:(/^[a-zA-Z0-9]+$/.test(u)&&u.length<12?u:null);
+}
 
 function destroyTvHls(){if(tvHlsInstance){tvHlsInstance.destroy();tvHlsInstance=null;}}
 function destroyHls(){if(hlsInstance){hlsInstance.destroy();hlsInstance=null;}}
@@ -1081,10 +1085,11 @@ function loadVI(id){
   setTimeout(()=>loading(false),1200);
 }
 function loadDM(id){
+  const cleanId = extractDM(id) || id;
   hideAll();hidePlaceholder();loading(true,'Loading Dailymotion…');
   const p=$('platformPlayer');p.style.display='block';
-  p.src=`https://www.dailymotion.com/embed/video/${id}?autoplay=1&mute=0`;
-  S.type='dailymotion';S.id=id;setTitle('Dailymotion Video');setBadge('dailymotion');
+  p.src=`https://www.dailymotion.com/embed/video/${cleanId}?autoplay=1&mute=1`;
+  S.type='dailymotion';S.id=cleanId;setTitle('Dailymotion Video');setBadge('dailymotion');
   setTimeout(()=>loading(false),1200);
 }
 function loadFB(url){
