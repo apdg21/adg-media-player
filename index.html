@@ -1083,7 +1083,7 @@ function loadVI(id){
 function loadDM(id){
   hideAll();hidePlaceholder();loading(true,'Loading Dailymotion…');
   const p=$('platformPlayer');p.style.display='block';
-  p.src=`https://www.dailymotion.com/embed/video/${id}?autoplay=1&mute=0`;
+  p.src=`https://geo.dailymotion.com/player/xpiw2.html?video=${id}&autoplay=1&mute=0`;
   S.type='dailymotion';S.id=id;setTitle('Dailymotion Video');setBadge('dailymotion');
   setTimeout(()=>loading(false),1200);
 }
